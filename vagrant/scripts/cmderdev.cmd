@@ -1,4 +1,4 @@
-call c:\tools\cmder\vendor\init.baat
+call c:\tools\cmder\vendor\init.bat
 
 cd /d c:\Users\Vagrant
 
@@ -9,3 +9,5 @@ cd cmderdev
 git remote add upstream  https://github.com/cmderdev/cmder
 
 git pull upstream master
+
+copy C:\Tools\Cmder\Cmder.exe .\
