@@ -12,12 +12,11 @@ TAKEOWN /F c:\\Users\\vagrant\\cmderdev /R /D y /s localhost /u vagrant /p vagra
 cd cmderdev
 git remote add upstream  https://github.com/cmderdev/cmder
 git pull upstream master
-copy C:\\Tools\\Cmder\\Cmder.exe .\\
-cd scripts
+# copy C:\\Tools\\Cmder\\Cmder.exe .\\
 
-# cmd.exe "/K" '"C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary\\Build\\vcvars64.bat" && powershell -noexit -command "& ''build.ps1 -verbose -compile''"'
-
-./build -verbose
+cmd.exe "/K" '"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary\\Build\\vcvars64.bat" && powershell -command "& ''c:\\Users\\Vagrant\\cmderdev\\scripts\\build.ps1'' -verbose -compile" && exit'
+copy c:\\Users\\Vagrant\\cmderdev\\launcher\\x64\\release\\cmder.exe c:\\Users\\Vagrant\\cmderdev
+dir
 SCRIPT
 
 Vagrant.configure("2") do |config|
@@ -27,6 +26,7 @@ Vagrant.configure("2") do |config|
 
     cmderdev.vm.provider :virtualbox do |v|
       # v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+      v.gui = true
       v.customize ["modifyvm", :id, "--name", "cmderdev"]
       v.customize ["modifyvm", :id, "--graphicscontroller", "vboxsvga"]
       v.customize ["modifyvm", :id, "--memory", 8192]
