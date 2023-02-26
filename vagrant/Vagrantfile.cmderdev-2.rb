@@ -13,12 +13,8 @@ cd cmderdev
 git remote add upstream  https://github.com/cmderdev/cmder
 git pull upstream master
 
-# cmd.exe "/K" '"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary\\Build\\vcvars64.bat" && powershell -command "& ''c:\\Users\\Vagrant\\cmderdev\\scripts\\build.ps1'' -verbose -compile" && exit'
-# copy c:\\Users\\Vagrant\\cmderdev\\launcher\\x64\\release\\cmder.exe c:\\Users\\Vagrant\\cmderdev
-# cmd.exe "/K" '"C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary\\Build\\vcvars64.bat" && powershell -noexit -command "& ''build.ps1 -verbose -compile''"'
-
-./build -verbose
-copy C:\\Tools\\Cmder\\Cmder.exe .\\
+cmd.exe "/K" '"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary\\Build\\vcvars64.bat" && powershell -command "& ''c:\\Users\\Vagrant\\cmderdev\\scripts\\build.ps1'' -verbose -compile" && exit'
+copy c:\\Users\\Vagrant\\cmderdev\\launcher\\x64\\release\\cmder.exe c:\\Users\\Vagrant\\cmderdev
 SCRIPT
 
 Vagrant.configure("2") do |config|
@@ -56,6 +52,18 @@ Vagrant.configure("2") do |config|
     end
   end
 
+  config.vm.define "cmderdev-10-pro" do |cmderdev|
+    cmderdev.vm.hostname = 'cmderdev-10-pro'
+    cmderdev.vm.box = "cmderdev_win10_pro"
+
+    cmderdev.vm.provider :virtualbox do |v|
+      # v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+      v.customize ["modifyvm", :id, "--name", "cmderdev-pro"]
+      v.customize ["modifyvm", :id, "--graphicscontroller", "vboxsvga"]
+      v.customize ["modifyvm", :id, "--memory", 8192]
+      v.customize ["modifyvm", :id, "--clipboard", "bidirectional"]
+    end
+  end
   config.vm.define "cmderdev-10-pro-scaled" do |cmderdev|
     cmderdev.vm.hostname = 'cmderdev-10-pro'
     cmderdev.vm.box = "cmderdev_win10_pro"
