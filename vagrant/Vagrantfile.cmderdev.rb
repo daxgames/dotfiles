@@ -11,26 +11,41 @@ git clone https://github.com/cmderdev/cmder cmderdev
 cd cmderdev
 git remote add upstream  https://github.com/cmderdev/cmder
 git pull upstream master
-# copy C:\\Tools\\Cmder\\Cmder.exe .\\
 
 cmd.exe "/K" '"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary\\Build\\vcvars64.bat" && powershell -command "& ''c:\\Users\\Vagrant\\cmderdev\\scripts\\build.ps1'' -verbose -compile" && exit'
 copy c:\\Users\\Vagrant\\cmderdev\\launcher\\x64\\release\\cmder.exe c:\\Users\\Vagrant\\cmderdev
-dir
 SCRIPT
 
 Vagrant.configure("2") do |config|
-  config.vm.define "cmderdev-10" do |cmderdev|
-    cmderdev.vm.hostname = 'cmderdev-10'
-    cmderdev.vm.box = "cmderdev_win10"
+  config.vm.define "cmderdev-10" do |win10|
+    win10.vm.hostname = "cmderdev-10"
+    win10.vm.box = "cmderdev-10"
 
-    cmderdev.vm.provider :virtualbox do |v|
+    # win10.vm.network :private_network, ip: "192.168.56.101"
+
+    win10.vm.provider :virtualbox do |v|
       # v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
-      v.gui = true
-      v.customize ["modifyvm", :id, "--name", "cmderdev"]
+      v.customize ["modifyvm", :id, "--name", "win10"]
       v.customize ["modifyvm", :id, "--graphicscontroller", "vboxsvga"]
       v.customize ["modifyvm", :id, "--memory", 8192]
       v.customize ["modifyvm", :id, "--clipboard", "bidirectional"]
-      v.customize ["setextradata", :id, "GUI/ScaleFactor", "1.75"]
+      #v.customize ["setextradata", :id, "GUI/ScaleFactor", "1.75"]
+    end
+  end
+
+  config.vm.define "cmderdev-11" do |win11|
+    win11.vm.hostname = "cmderdev-11"
+    win11.vm.box = "cmderdev-11"
+
+    # win11.vm.network :private_network, ip: "192.168.56.111"
+
+    win11.vm.provider :virtualbox do |v|
+      # v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+      v.customize ["modifyvm", :id, "--name", "win11"]
+      v.customize ["modifyvm", :id, "--graphicscontroller", "vboxsvga"]
+      v.customize ["modifyvm", :id, "--memory", 8192]
+      v.customize ["modifyvm", :id, "--clipboard", "bidirectional"]
+      #v.customize ["setextradata", :id, "GUI/ScaleFactor", "1.75"]
     end
   end
 
