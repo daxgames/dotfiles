@@ -15,7 +15,7 @@ set rtp+=~/.vim/vundles/ "Submodules
 call vundle#rc()
 
 " let Vundle manage Vundle (required)
-Bundle "daxgames/vundle"
+Bundle "gmarik/vundle"
 
 " YADR's vundles are split up by category into smaller files
 " This reduces churn and makes it easier to fork. See
