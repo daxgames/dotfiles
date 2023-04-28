@@ -128,9 +128,11 @@ def install_homebrew
       run %{bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"}
     else
       puts "Running Homebrew 'install.sh' on Linux..."
-      run %{sudo mkdir -p /home/linuxbrew}
-      run %{sudo chmod 777 /home/linuxbrew}
-      
+      if ! File.exists?('/home/linuxbrew')
+        run %{sudo mkdir -p /home/linuxbrew}
+        run %{sudo chmod 777 /home/linuxbrew}
+      end
+
       run %{yes | bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"}
 
       puts "Configuring 'brew shellenv' on Linux..."
