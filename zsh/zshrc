@@ -1,4 +1,4 @@
-source $HOME/.yadr/zsh/theme.zsh
+# source $HOME/.yadr/zsh/theme.zsh
 
 source $HOME/.zprezto/runcoms/zshrc
 
