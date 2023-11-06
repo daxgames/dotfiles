@@ -1,4 +1,4 @@
-require 'rake'
+uequire 'rake'
 require 'fileutils'
 require File.join(File.dirname(__FILE__), 'bin', 'yadr', 'vundle')
 
@@ -117,7 +117,11 @@ task :default => 'install'
 private
 def run(cmd)
   puts "[Running] #{cmd}"
-  `#{cmd}` unless ENV['DEBUG']
+  if RUBY_PLATFORM.downcase.include?("x86_64-cygwin")
+    system(cmd) unless ENV['DEBUG']
+  else
+    `#{cmd}` unless ENV['DEBUG']
+  end
 end
 
 def number_of_cores
