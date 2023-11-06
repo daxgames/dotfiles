@@ -259,7 +259,11 @@ def install_prezto
   puts
   puts "Installing Prezto (ZSH Enhancements)..."
 
-  run %{ ln -nfs "$HOME/.yadr/zsh/prezto" "${ZDOTDIR:-$HOME}/.zprezto" }
+  if RUBY_PLATFORM.downcase.include?("x86_64-cygwin")
+    run %{ mklink /d "${ZDOTDIR:-$HOME}/.zprezto" "$HOME/.yadr/zsh/prezto" }
+  else
+    run %{ ln -nfs "$HOME/.yadr/zsh/prezto" "${ZDOTDIR:-$HOME}/.zprezto" }
+  end
 
   # The prezto runcoms are only going to be installed if zprezto has never been installed
   install_files(Dir.glob('zsh/prezto-override/zshrc'), :symlink)
@@ -316,7 +320,15 @@ def install_files(files, method = :symlink)
     end
 
     if method == :symlink
-      run %{ ln -nfs "#{source}" "#{target}" }
+      if RUBY_PLATFORM.downcase.include?("x86_64-cygwin")
+        if Dir.exist?(target)
+          run %{ mklink /d "#{target}" "#{source}" }
+        else
+          run %{ mklink "#{target}" "#{source}" }
+        end
+      else
+        run %{ ln -nfs "#{source}" "#{target}" }
+      end
     else
       run %{ cp -f "#{source}" "#{target}" }
     end
