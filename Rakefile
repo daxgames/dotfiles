@@ -264,7 +264,7 @@ def install_prezto
   puts "Installing Prezto (ZSH Enhancements)..."
 
   if RUBY_PLATFORM.downcase.include?("x86_64-cygwin")
-    run %{ cmd /c "mklink /d "%USERPROFILE%/.zprezto" "$HOME/.yadr/zsh/prezto"" }
+    run %{ cmd /c "mklink /d "%USERPROFILE%\.zprezto" "%USERPROFILE%\.yadr\zsh\prezto"" }
   else
     run %{ ln -nfs "$HOME/.yadr/zsh/prezto" "${ZDOTDIR:-$HOME}/.zprezto" }
   end
@@ -313,6 +313,11 @@ def install_files(files, method = :symlink)
     file = f.split('/').last
     source = "#{ENV["PWD"]}/#{f}"
     target = "#{ENV["HOME"]}/.#{file}"
+
+    if RUBY_PLATFORM.downcase.include?("x86_64-cygwin")
+      source=`cygpath -d "#{source}"`
+      target=`cygpath -d "#{target}"`
+    end
 
     puts "======================#{file}=============================="
     puts "Source: #{source}"
