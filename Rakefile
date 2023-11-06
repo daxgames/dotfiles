@@ -1,4 +1,4 @@
-uequire 'rake'
+require 'rake'
 require 'fileutils'
 require File.join(File.dirname(__FILE__), 'bin', 'yadr', 'vundle')
 
