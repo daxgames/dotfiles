@@ -12,7 +12,8 @@ if [ ! -d "$HOME/.yadr" ]; then
         PLATFORM_VERSION=$(lsb_release -ir)
 
         if [ "${PLATFORM_FAMILY}" = "ubuntu" ] ; then
-            sudo apt install -y rake zsh
+            sudo apt install -y rake zsh pip
+            pip install pynvim
         fi
     elif [ "${PLATFORM}" = "Darwin" ] ; then
         PLATFORM_FAMILY=$(echo ${PLATFORM} | tr [A-Z] [a-z])
