@@ -17,7 +17,7 @@ task :install => [:submodule_init, :submodules] do
     install_zsh
     install_python_modules
   end
-  
+
   # this has all the runcoms from this directory.
   install_files(Dir.glob('git/*')) if want_to_install?('git configs (color, aliases)')
   install_files(Dir.glob('ruby/*')) if want_to_install?('rubygems config (faster/no docs)')
