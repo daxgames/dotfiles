@@ -20,17 +20,17 @@ if [ ! -d "$HOME/.yadr" ]; then
             PLATFORM_FAMILY=rhel
         fi
 
-        if [ "${PLATFORM_FAMILY}" = "ubuntu" ] ; then
-            sudo apt install -y rake zsh pip
-        elif [ "${PLATFORM_FAMILY}" = "rhel" ] ; then
-            sudo yum install -y rake zsh pip
+        if [ ! $(command -v rake) ] ; then
+            if [ "${PLATFORM_FAMILY}" = "ubuntu" ] ; then
+                sudo apt install -y rake
+            elif [ "${PLATFORM_FAMILY}" = "rhel" ] ; then
+                sudo yum install -y rake
+            fi
         fi
-
-        pip install pynvim
     elif [ "${PLATFORM}" = "Darwin" ] ; then
         PLATFORM_FAMILY=$(echo ${PLATFORM} | tr [A-Z] [a-z])
     fi
-    env | grep PLATFORM_
+
     rake install
 else
     echo "YADR is already installed"
