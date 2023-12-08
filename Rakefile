@@ -11,12 +11,12 @@ task :install => [:submodule_init, :submodules] do
   puts "======================================================"
   puts
 
-  # install_homebrew
-  install_homebrew if RUBY_PLATFORM.downcase.include?("darwin")
-  if RUBY_PLATFORM.downcase.include?("linux")
-    install_zsh
-    install_python_modules
-  end
+  install_homebrew
+  # install_homebrew if RUBY_PLATFORM.downcase.include?("darwin")
+  # if RUBY_PLATFORM.downcase.include?("linux")
+  #   install_zsh
+  #   install_python_modules
+  # end
 
   # this has all the runcoms from this directory.
   install_files(Dir.glob('git/*')) if want_to_install?('git configs (color, aliases)')
@@ -121,36 +121,36 @@ def linux_variant
   return r
 end
 
-def install_zsh
-  run %{which zsh}
-  unless $?.success?
-    puts "======================================================"
-    puts "Installing Zsh...If it's already"
-    puts "installed, this will do nothing."
-    puts "======================================================"
-    if ENV['PLATFORM_FAMILY'] == 'ubuntu'
-      run %{ apt install -y zsh }
-    elsif ENV['PLATFORM_FAMILY'] == 'rhel'
-      run %{ yum install -y zsh }
-    end
-  end
-end
-
-def install_python_modules
-  run %{which pip}
-  unless $?.success?
-    puts "======================================================"
-    puts "Installing Python Pip...If it's already"
-    puts "installed, this will do nothing."
-    puts "======================================================"
-    if ENV['PLATFORM_FAMILY'] == 'ubuntu'
-      run %{ apt install -y pip }
-    elsif ENV['PLATFORM_FAMILY'] == 'rhel'
-      run %{ yum install -y pip }
-    end
-  end
-  run %{ pip install pynvim }
-end
+# def install_zsh
+#   run %{which zsh}
+#   unless $?.success?
+#     puts "======================================================"
+#     puts "Installing Zsh...If it's already"
+#     puts "installed, this will do nothing."
+#     puts "======================================================"
+#     if ENV['PLATFORM_FAMILY'] == 'ubuntu'
+#       run %{ apt install -y zsh }
+#     elsif ENV['PLATFORM_FAMILY'] == 'rhel'
+#       run %{ yum install -y zsh }
+#     end
+#   end
+# end
+#
+# def install_python_modules
+#   run %{which pip}
+#   unless $?.success?
+#     puts "======================================================"
+#     puts "Installing Python Pip...If it's already"
+#     puts "installed, this will do nothing."
+#     puts "======================================================"
+#     if ENV['PLATFORM_FAMILY'] == 'ubuntu'
+#       run %{ apt install -y pip }
+#     elsif ENV['PLATFORM_FAMILY'] == 'rhel'
+#       run %{ yum install -y pip }
+#     end
+#   end
+#   run %{ pip install pynvim }
+# end
 
 def install_homebrew
   run %{which brew}
