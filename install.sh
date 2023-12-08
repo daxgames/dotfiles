@@ -2,7 +2,17 @@
 
 if [ ! -d "$HOME/.yadr" ]; then
     echo "Installing YADR for the first time"
-    git clone -b main --depth=1 https://github.com/daxgames/dotfiles.git "$HOME/.yadr"
+
+    git_repo=$(echo ${__YADR_REPO_URL:-https://github.com/daxgames/dotfiles.git})
+    git_branch=$(echo ${__YADR_REPO_BRANCH:-main})
+    # git_repo=$(git ls-remote --get-url 2>/dev/null)
+    # git_branch=$(git branch --show-current 2>/dev/null)
+
+    [ -n "${DEBUG}" ] && env | grep "__YADR_"
+    echo "git_repo: ${git_repo}"
+    echo "git_branch: ${git_branch}"
+
+    git clone -b ${git_branch} --depth=1 ${git_repo} "$HOME/.yadr"
     cd "$HOME/.yadr"
     [ "$1" = "ask" ] && export ASK="true"
 
@@ -20,17 +30,17 @@ if [ ! -d "$HOME/.yadr" ]; then
             PLATFORM_FAMILY=rhel
         fi
 
-        if [ "${PLATFORM_FAMILY}" = "ubuntu" ] ; then
-            sudo apt install -y rake zsh pip
-        elif [ "${PLATFORM_FAMILY}" = "rhel" ] ; then
-            sudo yum install -y rake zsh pip
+        if [ ! $(command -v rake) ] ; then
+            if [ "${PLATFORM_FAMILY}" = "ubuntu" ] ; then
+                sudo apt install -y rake
+            elif [ "${PLATFORM_FAMILY}" = "rhel" ] ; then
+                sudo yum install -y rake
+            fi
         fi
-
-        pip install pynvim
     elif [ "${PLATFORM}" = "Darwin" ] ; then
         PLATFORM_FAMILY=$(echo ${PLATFORM} | tr [A-Z] [a-z])
     fi
-    env | grep PLATFORM_
+
     rake install
 else
     echo "YADR is already installed"

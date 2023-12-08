@@ -11,21 +11,31 @@ task :install => [:submodule_init, :submodules] do
   puts
 
   install_homebrew if RUBY_PLATFORM.downcase.include?("darwin")
+
+  install_zsh if want_to_install?('zsh (shell, enhancements))')
+
+  install_python_modules
+
   install_rvm_binstubs
 
   # this has all the runcoms from this directory.
+  install_bash if want_to_install?('bash configs (color, aliases)')
+
   install_files(Dir.glob('git/*')) if want_to_install?('git configs (color, aliases)')
   install_files(Dir.glob('irb/*')) if want_to_install?('irb/pry configs (more colorful)')
   install_files(Dir.glob('ruby/*')) if want_to_install?('rubygems config (faster/no docs)')
   install_files(Dir.glob('ctags/*')) if want_to_install?('ctags config (better js/ruby support)')
   install_files(Dir.glob('tmux/*')) if want_to_install?('tmux config')
   install_files(Dir.glob('vimify/*')) if want_to_install?('vimification of command line tools')
+
   if want_to_install?('vim configuration (highly recommended)')
     install_files(Dir.glob('{vim,vimrc}'))
     Rake::Task["install_vundle"].execute
   end
 
-  Rake::Task["install_prezto"].execute
+  if want_to_install?('zsh enhancments (prezto, color, aliases)')
+    Rake::Task["install_prezto"].execute
+  end
 
   install_fonts
 
@@ -38,7 +48,9 @@ end
 
 task :install_prezto do
   if want_to_install?('zsh enhancements & prezto')
-    install_prezto
+    if RUBY_PLATFORM.downcase.include?("darwin") || ENV['_YADR_PREFERRED_SHELL'] != 'bash'
+      install_prezto
+    end
   end
 end
 
@@ -155,6 +167,39 @@ def install_rvm_binstubs
   puts
 end
 
+def install_zsh
+  run %{which zsh}
+  unless $?.success?
+    puts "======================================================"
+    puts "Installing Zsh...If it's already"
+    puts "installed, this will do nothing."
+    puts "======================================================"
+    if ENV['PLATFORM_FAMILY'] == 'ubuntu'
+      run %{ apt install -y zsh }
+    elsif ENV['PLATFORM_FAMILY'] == 'rhel'
+      run %{ yum install -y zsh }
+    else
+      run %{brew install zsh} if RUBY_PLATFORM.downcase.include?("darwin")
+    end
+  end
+end
+
+def install_python_modules
+  run %{which pip}
+  unless $?.success?
+    puts "======================================================"
+    puts "Installing Python Pip...If it's already"
+    puts "installed, this will do nothing."
+    puts "======================================================"
+    if ENV['PLATFORM_FAMILY'] == 'ubuntu'
+      run %{ apt install -y pip }
+    elsif ENV['PLATFORM_FAMILY'] == 'rhel'
+      run %{ yum install -y pip }
+    end
+  end
+  run %{ pip install pynvim }
+end
+
 def install_homebrew
   run %{which brew}
   unless $?.success?
@@ -176,7 +221,7 @@ def install_homebrew
   puts "======================================================"
   puts "Installing Homebrew packages...There may be some warnings."
   puts "======================================================"
-  run %{brew install zsh ctags git hub tmux reattach-to-user-namespace the_silver_searcher ghi}
+  run %{brew install ctags git hub tmux reattach-to-user-namespace the_silver_searcher ghi}
   run %{brew install macvim}
   puts
   puts
@@ -259,6 +304,33 @@ def ask(message, values)
   values[selection]
 end
 
+def install_bash
+  if ENV['_YADR_PREFERRED_SHELL'] == 'bash'
+    puts
+    puts "Installing Bash Enhancements..."
+
+    puts
+    puts "Creating directories for your customizations..."
+    run %{ mkdir -p $HOME/.bash.before }
+    run %{ mkdir -p $HOME/.bash.after }
+
+    if ! File.exist?("#{ENV['HOME']}/.bash-git-prompt")
+      puts
+      puts "Configuring Git aware prompt..."
+      run %{ git clone "https://github.com/daxgames/bash-git-prompt.git" "#{ENV['HOME']}/.bash-git-prompt" }
+    end
+
+    # Preserve pre-existing ~/.bashrc
+    if ! File.exist?( File.join(ENV['HOME'], '.bash.after', '001_bashrc.sh'))
+      puts
+      puts "Preserving existing '~/.bashrc' filw..."
+      FileUtils.mv(File.join(ENV['HOME'], '.bashrc'), File.join(ENV['HOME'], '.bash.after', '001_bashrc.sh'))
+    end
+
+    install_files(Dir.glob('bash/bashrc'), :symlink)
+  end
+end
+
 def install_prezto
   puts
   puts "Installing Prezto (ZSH Enhancements)..."
@@ -300,10 +372,17 @@ def install_prezto
 end
 
 def want_to_install? (section)
-  if ENV["ASK"]=="true"
+  install_type = section.split(' ')[0].upcase()
+  install_env = ENV["__YADR_INSTALL_#{install_type}"] || ''
+
+  if ! install_env.to_s.empty?
+    install_env == 'y'
+  elsif ENV["ASK"]=="true" && $stdout.isatty
     puts "Would you like to install configuration files for: #{section}? [y]es, [n]o"
-    STDIN.gets.chomp == 'y'
+    ENV["__YADR_INSTALL_#{install_type}"] = STDIN.gets.chomp
+    ENV["__YADR_INSTALL_#{install_type}"] == 'y'
   else
+    ENV["__YADR_INSTALL_#{install_type}"] = 'y'
     true
   end
 end
