@@ -12,20 +12,16 @@ task :install => [:submodule_init, :submodules] do
   puts
 
   install_homebrew
-  # install_homebrew if RUBY_PLATFORM.downcase.include?("darwin")
-  # if RUBY_PLATFORM.downcase.include?("linux")
-  #   install_zsh
-  #   install_python_modules
-  # end
-
+  
+  install_rvm_binstubs
   # this has all the runcoms from this directory.
   install_files(Dir.glob('git/*')) if want_to_install?('git configs (color, aliases)')
+  install_files(Dir.glob('irb/*')) if want_to_install?('irb/pry configs (more colorful)')
   install_files(Dir.glob('ruby/*')) if want_to_install?('rubygems config (faster/no docs)')
   install_files(Dir.glob('ctags/*')) if want_to_install?('ctags config (better js/ruby support)')
   install_files(Dir.glob('tmux/*')) if want_to_install?('tmux config')
   install_files(Dir.glob('vimify/*')) if want_to_install?('vimification of command line tools')
   install_files(Dir.glob('{vim,vimrc}'))
-  install_files(Dir.glob('zsh/zshrc'))
 
   run %{ ln -nfs ~/.yadr/nvim ~/.config/nvim }
 
@@ -41,6 +37,8 @@ task :install => [:submodule_init, :submodules] do
   if $is_macos
     run %{ ~/.yadr/iTerm2/bootstrap-iterm2.sh }
   end
+  
+  run_bundle_config
 
   success_msg("installed")
 end
@@ -121,36 +119,27 @@ def linux_variant
   return r
 end
 
-# def install_zsh
-#   run %{which zsh}
-#   unless $?.success?
-#     puts "======================================================"
-#     puts "Installing Zsh...If it's already"
-#     puts "installed, this will do nothing."
-#     puts "======================================================"
-#     if ENV['PLATFORM_FAMILY'] == 'ubuntu'
-#       run %{ apt install -y zsh }
-#     elsif ENV['PLATFORM_FAMILY'] == 'rhel'
-#       run %{ yum install -y zsh }
-#     end
-#   end
-# end
-#
-# def install_python_modules
-#   run %{which pip}
-#   unless $?.success?
-#     puts "======================================================"
-#     puts "Installing Python Pip...If it's already"
-#     puts "installed, this will do nothing."
-#     puts "======================================================"
-#     if ENV['PLATFORM_FAMILY'] == 'ubuntu'
-#       run %{ apt install -y pip }
-#     elsif ENV['PLATFORM_FAMILY'] == 'rhel'
-#       run %{ yum install -y pip }
-#     end
-#   end
-#   run %{ pip install pynvim }
-# end
+def run_bundle_config
+  return unless system("which bundle")
+
+  bundler_jobs = number_of_cores - 1
+  puts "======================================================"
+  puts "Configuring Bundlers for parallel gem installation"
+  puts "======================================================"
+  run %{ bundle config --global jobs #{bundler_jobs} }
+  puts
+end
+
+def install_rvm_binstubs
+  puts "======================================================"
+  puts "Installing RVM Bundler support. Never have to type"
+  puts "bundle exec again! Please use bundle --binstubs and RVM"
+  puts "will automatically use those bins after cd'ing into dir."
+  puts "======================================================"
+  run %{ chmod +x $rvm_path/hooks/after_cd_bundler }
+  puts
+end
+
 
 def install_homebrew
   run %{which brew}
@@ -211,9 +200,9 @@ def install_homebrew
   puts "======================================================"
   if ENV['CI'] then
     # A minimal Brewfile to speed up CI Builds
-    run %{brew bundle install --file=test/Brewfile_ci}
+    run %{brew bundle install --verbose --file=test/Brewfile_ci}
   else
-    run %{brew bundle install}
+    run %{brew bundle install --verbose}
   end
   # run %{pip3 install tmuxp}
   run %{pip3 install --user neovim} # For NeoVim plugins
@@ -230,6 +219,59 @@ def install_fonts
   run %{ cp -f $HOME/.yadr/fonts/* $HOME/Library/Fonts } if $is_macos
   run %{ mkdir -p ~/.fonts && cp ~/.yadr/fonts/* ~/.fonts && fc-cache -vf ~/.fonts } if !$is_macos
   puts
+end
+
+def install_term_theme
+  puts "======================================================"
+  puts "Installing iTerm2 solarized theme."
+  puts "======================================================"
+  run %{ /usr/libexec/PlistBuddy -c "Add :'Custom Color Presets':'Solarized Light' dict" ~/Library/Preferences/com.googlecode.iterm2.plist }
+  run %{ /usr/libexec/PlistBuddy -c "Merge 'iTerm2/Solarized Light.itermcolors' :'Custom Color Presets':'Solarized Light'" ~/Library/Preferences/com.googlecode.iterm2.plist }
+  run %{ /usr/libexec/PlistBuddy -c "Add :'Custom Color Presets':'Solarized Dark' dict" ~/Library/Preferences/com.googlecode.iterm2.plist }
+  run %{ /usr/libexec/PlistBuddy -c "Merge 'iTerm2/Solarized Dark.itermcolors' :'Custom Color Presets':'Solarized Dark'" ~/Library/Preferences/com.googlecode.iterm2.plist }
+
+  # If iTerm2 is not installed or has never run, we can't autoinstall the profile since the plist is not there
+  if !File.exist?(File.join(ENV['HOME'], '/Library/Preferences/com.googlecode.iterm2.plist'))
+    puts "======================================================"
+    puts "To make sure your profile is using the solarized theme"
+    puts "Please check your settings under:"
+    puts "Preferences> Profiles> [your profile]> Colors> Load Preset.."
+    puts "======================================================"
+    return
+  end
+
+  # Ask the user which theme he wants to install
+  message = "Which theme would you like to apply to your iTerm2 profile?"
+  color_scheme = ask message, iTerm_available_themes
+
+  return if color_scheme == 'None'
+
+  color_scheme_file = File.join('iTerm2', "#{color_scheme}.itermcolors")
+
+  # Ask the user on which profile he wants to install the theme
+  profiles = iTerm_profile_list
+  message = "I've found #{profiles.size} #{profiles.size>1 ? 'profiles': 'profile'} on your iTerm2 configuration, which one would you like to apply the Solarized theme to?"
+  profiles << 'All'
+  selected = ask message, profiles
+
+  if selected == 'All'
+    (profiles.size-1).times { |idx| apply_theme_to_iterm_profile_idx idx, color_scheme_file }
+  else
+    apply_theme_to_iterm_profile_idx profiles.index(selected), color_scheme_file
+  end
+end
+
+def iTerm_available_themes
+   Dir['iTerm2/*.itermcolors'].map { |value| File.basename(value, '.itermcolors')} << 'None'
+end
+
+def iTerm_profile_list
+  profiles=Array.new
+  begin
+    profiles <<  %x{ /usr/libexec/PlistBuddy -c "Print :'New Bookmarks':#{profiles.size}:Name" ~/Library/Preferences/com.googlecode.iterm2.plist 2>/dev/null}
+  end while $?.exitstatus==0
+  profiles.pop
+  profiles
 end
 
 def ask(message, values)
@@ -254,16 +296,17 @@ def install_prezto
   run %{ ln -nfs "$HOME/.yadr/zsh/prezto" "${ZDOTDIR:-$HOME}/.zprezto" }
 
   # The prezto runcoms are only going to be installed if zprezto has never been installed
+  install_files(Dir.glob('zsh/prezto-override/zshrc'), :symlink)
   install_files(Dir.glob('zsh/prezto/runcoms/zlogin'), :symlink)
   install_files(Dir.glob('zsh/prezto/runcoms/zlogout'), :symlink)
-  install_files(Dir.glob('zsh/prezto/runcoms/zpreztorc'), :symlink)
+  install_files(Dir.glob('zsh/prezto-override/zpreztorc'), :symlink)
   install_files(Dir.glob('zsh/prezto/runcoms/zprofile'), :symlink)
   install_files(Dir.glob('zsh/prezto/runcoms/zshenv'), :symlink)
 
-  puts
-  puts "Overriding prezto ~/.zpreztorc with YADR's zpreztorc to enable additional modules..."
-  run %{ ln -nfs "$HOME/.yadr/zsh/prezto-override/zpreztorc" "${ZDOTDIR:-$HOME}/.zpreztorc" }
-  run %{ ln -s ~/.zprezto/modules/prompt/external/powerlevel9k/powerlevel9k.zsh-theme ~/.zprezto/modules/prompt/functions/prompt_powerlevel9k_setup }
+  # puts
+  # puts "Overriding prezto ~/.zpreztorc with YADR's zpreztorc to enable additional modules..."
+  # run %{ ln -nfs "$HOME/.yadr/zsh/prezto-override/zpreztorc" "${ZDOTDIR:-$HOME}/.zpreztorc" }
+  # run %{ ln -s ~/.zprezto/modules/prompt/external/powerlevel9k/powerlevel9k.zsh-theme ~/.zprezto/modules/prompt/functions/prompt_powerlevel9k_setup }
 
   puts
   puts "Creating directories for your customizations"
@@ -329,14 +372,23 @@ def install_files(files, method = :symlink)
   end
 end
 
+def apply_theme_to_iterm_profile_idx(index, color_scheme_path)
+  values = Array.new
+  16.times { |i| values << "Ansi #{i} Color" }
+  values << ['Background Color', 'Bold Color', 'Cursor Color', 'Cursor Text Color', 'Foreground Color', 'Selected Text Color', 'Selection Color']
+  values.flatten.each { |entry| run %{ /usr/libexec/PlistBuddy -c "Delete :'New Bookmarks':#{index}:'#{entry}'" ~/Library/Preferences/com.googlecode.iterm2.plist } }
+
+  run %{ /usr/libexec/PlistBuddy -c "Merge '#{color_scheme_path}' :'New Bookmarks':#{index}" ~/Library/Preferences/com.googlecode.iterm2.plist }
+  run %{ defaults read com.googlecode.iterm2 }
+end
 def success_msg(action)
-  puts ""
-  puts "   _     _           _         "
-  puts "  | |   | |         | |        "
-  puts "  | |___| |_____  __| | ____   "
-  puts "  |_____  (____ |/ _  |/ ___)  "
-  puts "   _____| / ___ ( (_| | |      "
-  puts "  (_______\_____|\____|_|      "
-  puts ""
+  puts %q{
+   _     _           _
+  | |   | |         | |
+  | |___| |_____  __| | ____
+  |_____  (____ |/ _  |/ ___)
+   _____| / ___ ( (_| | |
+  (_______\_____|\____|_|
+  }
   puts "YADR has been #{action}. Please restart your terminal and vim."
 end

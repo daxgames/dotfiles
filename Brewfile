@@ -1,5 +1,9 @@
 tap 'cantino/mcfly'
-tap 'homebrew/cask'
+
+if OS.mac?
+    tap 'homebrew/cask'
+end
+
 tap 'homebrew/cask-fonts'
 tap 'homebrew/bundle'
 tap 'homebrew/core'
@@ -8,20 +12,20 @@ if OS.linux?
    tap 'gromgit/fuse'
 end
 
-cask 'firefox'
-cask 'font-fira-code'
-cask 'google-chrome'
-cask 'inkscape'
 if OS.mac?
+    cask 'firefox'
+    cask 'font-fira-code'
+    cask 'google-chrome'
+    cask 'inkscape'
     cask 'iterm2'
     cask 'karabiner-elements'
     cask 'steam'
     cask 'osxfuse'
     brew 'reattach-to-user-namespace'
     brew 'ntfs-3g'
+    cask 'qlmarkdown'
+    cask 'vlc'
 end
-cask 'qlmarkdown'
-cask 'vlc'
 
 brew 'automake'
 brew 'bat'
