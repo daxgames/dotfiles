@@ -2,7 +2,7 @@
 
 if [ ! -d "$HOME/.yadr" ]; then
     echo "Installing daxgames's YADR for the first time"
-    git clone -b nvim_2023 --depth=1 https://github.com/daxgames/dotfiles.git "$HOME/.yadr"
+    git clone -b nvim_2023_fix --depth=1 https://github.com/daxgames/dotfiles.git "$HOME/.yadr"
     cd "$HOME/.yadr"
     [ "$1" = "ask" ] && export ASK="true"
 

@@ -12,8 +12,9 @@ task :install => [:submodule_init, :submodules] do
   puts
 
   install_homebrew
-  
+
   install_rvm_binstubs
+
   # this has all the runcoms from this directory.
   install_files(Dir.glob('git/*')) if want_to_install?('git configs (color, aliases)')
   install_files(Dir.glob('irb/*')) if want_to_install?('irb/pry configs (more colorful)')
@@ -37,7 +38,7 @@ task :install => [:submodule_init, :submodules] do
   if $is_macos
     run %{ ~/.yadr/iTerm2/bootstrap-iterm2.sh }
   end
-  
+
   run_bundle_config
 
   success_msg("installed")
@@ -304,9 +305,9 @@ def install_prezto
   install_files(Dir.glob('zsh/prezto/runcoms/zshenv'), :symlink)
 
   # puts
-  # puts "Overriding prezto ~/.zpreztorc with YADR's zpreztorc to enable additional modules..."
-  # run %{ ln -nfs "$HOME/.yadr/zsh/prezto-override/zpreztorc" "${ZDOTDIR:-$HOME}/.zpreztorc" }
-  # run %{ ln -s ~/.zprezto/modules/prompt/external/powerlevel9k/powerlevel9k.zsh-theme ~/.zprezto/modules/prompt/functions/prompt_powerlevel9k_setup }
+  puts "Overriding prezto ~/.zpreztorc with YADR's zpreztorc to enable additional modules..."
+  run %{ ln -nfs "$HOME/.yadr/zsh/prezto-override/zpreztorc" "${ZDOTDIR:-$HOME}/.zpreztorc" }
+  run %{ ln -s ~/.zprezto/modules/prompt/external/powerlevel9k/powerlevel9k.zsh-theme ~/.zprezto/modules/prompt/functions/prompt_powerlevel9k_setup }
 
   puts
   puts "Creating directories for your customizations"
