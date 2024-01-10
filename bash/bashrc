@@ -1,0 +1,1 @@
+for config_file in $(find $HOME/.yadr/bash/ -name '*.sh') ; do source $config_file ; done

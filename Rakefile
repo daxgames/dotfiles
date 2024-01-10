@@ -12,7 +12,7 @@ task :install => [:submodule_init, :submodules] do
 
   install_homebrew if RUBY_PLATFORM.downcase.include?("darwin")
   if RUBY_PLATFORM.downcase.include?("linux")
-    install_zsh
+    install_zsh if want_to_install?('zsh (shell, enhancements))')
     install_python_modules
   end
 
