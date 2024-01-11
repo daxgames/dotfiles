@@ -1,27 +1,21 @@
 #!/bin/sh
 
-if [ -n "${PREFERRED_SHELL}" -a "${PREFERRED_SHELL}" = "bash" ] ; then
-    export install_zsh=n
-
-    [ ! -d ~/.bash-git-prompt ] && git clone https://github.com/magicmonty/bash-git-prompt.git ~/.bash-git-prompt
-    [ ! -d ~/.bashrc.before ] && mkdir ~/.bashrc.before
-    [ ! -d ~/.bashrc.after ] && mkdir ~/.bashrc.after
-
-    test -h "~/.bashrc"
-    is_symlink=$?
-    
-    if [ ${is_symlink} -gt 0 -a ! -e "~/.bashrc.after/001_bashrc.sh" ] ; then
-	[ ! -f ~/.bashrc.bak ]] && cp ~/.bashrc ~/.bashrc.bak
-        echo mv ~/.bashrc ~/.bashrc.after/001_bashrc.sh
-        echo ln -sf ~/.yadr/bash/bashrc ~/.bashrc
-    fi
-fi
-
 if [ ! -d "$HOME/.yadr" ]; then
     echo "Installing YADR for the first time"
     git clone -b main --depth=1 https://github.com/daxgames/dotfiles.git "$HOME/.yadr"
     cd "$HOME/.yadr"
     [ "$1" = "ask" ] && export ASK="true"
+
+    export install_zsh=n
+    
+    [ ! -d ~/.bash-git-prompt ] && git clone https://github.com/magicmonty/bash-git-prompt.git ~/.git-bash-prompt
+    [ ! -d ~/.bashrc.before ] && mkdir ~/.bashrc.before
+    [ ! -d ~/.bashrc.after ] && mkdir ~/.bashrc.after
+    if [ ! -L "~/.bashrc" && ! -f "~/.bashrc.after/001_bashrc.sh" ] ; then
+      mv ~/.bashrc/ ~/.bashrc.after/001_bashrc.sh
+    elif [ ! -L "~/.bashrc" ] ; the
+      ln -sf ~/.yadr/bash/bashrc ~/.bashrc
+    fi
 
     OS=$(uname)
     if [ "${PLATFORM}" = "Linux" ] ; then
