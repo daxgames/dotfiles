@@ -9,7 +9,9 @@ if [ -n "${PREFERRED_SHELL}" -a "${PREFERRED_SHELL}" = "bash" ] ; then
 
     test -h "~/.bashrc"
     is_symlink=$?
+    
     if [ ${is_symlink} -gt 0 -a ! -e "~/.bashrc.after/001_bashrc.sh" ] ; then
+	[ ! -f ~/.bashrc.bak ]] && cp ~/.bashrc ~/.bashrc.bak
         echo mv ~/.bashrc ~/.bashrc.after/001_bashrc.sh
         echo ln -sf ~/.yadr/bash/bashrc ~/.bashrc
     fi
