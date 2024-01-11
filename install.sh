@@ -5,7 +5,7 @@
 if [ -n "${PREFERRED_SHELL}" -a "${PREFERRED_SHELL}" = "bash" ] ; then
     export install_zsh=n
 
-    [ ! -d ~/.bash-git-prompt ] && git clone https://github.com/magicmonty/bash-git-prompt.git ~/.bash-git-prompt
+    [ ! -d ~/.bash-git-prompt ] && git clone https://github.com/daxgames/bash-git-prompt.git ~/.bash-git-prompt
     [ ! -d ~/.bashrc.before ] && mkdir ~/.bashrc.before
     [ ! -d ~/.bashrc.after ] && mkdir ~/.bashrc.after
 
