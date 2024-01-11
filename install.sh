@@ -1,5 +1,19 @@
 #!/bin/sh
 
+if [ -n "${PREFERRED_SHELL}" -a "${PREFERRED_SHELL}" = "bash" ] ; then
+    export install_zsh=n
+
+    [ ! -d ~/.bash-git-prompt ] && git clone https://github.com/magicmonty/bash-git-prompt.git ~/.git-bash-prompt
+    [ ! -d ~/.bashrc.before ] && mkdir ~/.bashrc.before
+    [ ! -d ~/.bashrc.after ] && mkdir ~/.bashrc.after
+
+    if [ ! -L "~/.bashrc" && ! -f "~/.bashrc.after/001_bashrc.sh" ] ; then
+        mv ~/.bashrc/ ~/.bashrc.after/001_bashrc.sh
+    elif [ ! -L "~/.bashrc" ] ; the
+        ln -sf ~/.yadr/bash/bashrc ~/.bashrc
+    fi
+fi
+
 if [ ! -d "$HOME/.yadr" ]; then
     echo "Installing YADR for the first time"
     git clone -b main --depth=1 https://github.com/daxgames/dotfiles.git "$HOME/.yadr"
