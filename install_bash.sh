@@ -14,7 +14,7 @@ if [ ! -d "$HOME/.yadr" ]; then
     if [ ! -L "~/.bashrc" && ! -f "~/.bashrc.after/001_bashrc.sh" ] ; then
       mv ~/.bashrc/ ~/.bashrc.after/001_bashrc.sh
     elif [ ! -L "~/.bashrc" ] ; the
-      ln -sf ~/.yadr/bash/basrc ~/.bashrc
+      ln -sf ~/.yadr/bash/bashrc ~/.bashrc
     fi
 
     OS=$(uname)
