@@ -12,7 +12,10 @@ task :install => [:submodule_init, :submodules] do
 
   install_homebrew if RUBY_PLATFORM.downcase.include?("darwin")
   if RUBY_PLATFORM.downcase.include?("linux")
-    install_zsh if want_to_install?('zsh (shell, enhancements))')
+    if want_to_install?('zsh (shell, enhancements))') || ENV['PREFERRED_SHELL'] == 'zsh'
+      install_zsh
+    end
+
     install_python_modules
   end
 
@@ -43,7 +46,9 @@ end
 
 task :install_prezto do
   if want_to_install?('zsh enhancements & prezto')
-    install_prezto
+    if RUBY_PLATFORM.downcase.include?("darwin") || ENV['PREFERRED_SHELL'] == 'zsh'
+      install_prezto
+    end
   end
 end
 

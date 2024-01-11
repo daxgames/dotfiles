@@ -1,5 +1,7 @@
 #!/bin/sh
 
+[ -d ~/.bashrc.before -a -d ~/.bashrc.after ] && export PREFERRED_SHELL=bash
+
 if [ -n "${PREFERRED_SHELL}" -a "${PREFERRED_SHELL}" = "bash" ] ; then
     export install_zsh=n
 
@@ -7,13 +9,13 @@ if [ -n "${PREFERRED_SHELL}" -a "${PREFERRED_SHELL}" = "bash" ] ; then
     [ ! -d ~/.bashrc.before ] && mkdir ~/.bashrc.before
     [ ! -d ~/.bashrc.after ] && mkdir ~/.bashrc.after
 
-    test -h "~/.bashrc"
+    test -h "$HOME/.bashrc"
     is_symlink=$?
-    
-    if [ ${is_symlink} -gt 0 -a ! -e "~/.bashrc.after/001_bashrc.sh" ] ; then
-	[ ! -f ~/.bashrc.bak ]] && cp ~/.bashrc ~/.bashrc.bak
-        echo mv ~/.bashrc ~/.bashrc.after/001_bashrc.sh
-        echo ln -sf ~/.yadr/bash/bashrc ~/.bashrc
+    echo "is_symlink: ${is_symlink}"
+    if [ ${is_symlink} -gt 0 ] && [ ! -f "$HOME/.bashrc.after/001_bashrc.sh" ] ; then
+	      [ ! -f ~/.bashrc.bak ] && cp ~/.bashrc ~/.bashrc.bak
+        mv ~/.bashrc ~/.bashrc.after/001_bashrc.sh
+        ln -sf ~/.yadr/bash/bashrc ~/.bashrc
     fi
 fi
 
