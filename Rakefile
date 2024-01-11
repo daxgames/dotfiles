@@ -336,7 +336,7 @@ def install_prezto
 end
 
 def want_to_install? (section)
-  if ENV["ASK"]=="true"
+  if ! ENV["install_#{section.split(' ')[0]}"].nil? && ENV["ASK"]=="true" && $stdout.isatty
     puts "Would you like to install configuration files for: #{section}? [y]es, [n]o"
     STDIN.gets.chomp == 'y'
   else
