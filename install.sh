@@ -9,7 +9,7 @@ if [ -n "${PREFERRED_SHELL}" -a "${PREFERRED_SHELL}" = "bash" ] ; then
 
     if [ ! -L "~/.bashrc" && ! -f "~/.bashrc.after/001_bashrc.sh" ] ; then
         mv ~/.bashrc/ ~/.bashrc.after/001_bashrc.sh
-    elif [ ! -L "~/.bashrc" ] ; the
+    elif [ ! -L "~/.bashrc" ] ; then
         ln -sf ~/.yadr/bash/bashrc ~/.bashrc
     fi
 fi
