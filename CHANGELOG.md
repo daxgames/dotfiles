@@ -1,4 +1,26 @@
-2015-10-27
+2024-01-15
+==================
+* Enhanced Linux Support
+  * RedHat and Debian based distros are supported.
+  * `install.sh` installs Ruby and rake are installed using native package managers ([yum|dnf]/apt-get)..
+* Limited `bash` Shell Support.
+  * Aliases, Git config, Git Prompt, IRB/Pry, Tmux Config, Vim are included.
+  * `~/.yadr/bash/*.sh` are sourced from this repo.
+  * `~/.bash.before/` and `~/.bash.after` folders are created and `*.sh` sourced for user customization..
+  * Pre-existing `~/.bashrc` is moved to `~/.bash.after/001_bashrc.sh`
+  * `~/.bashrc` is symlinked to `~/.yadr/bash/001_bashrc`
+* Configurable using ENV variables for customized unattendend installation.
+  * `__YADR_INSTALL_BASH=[y|n]` - Install `bash` configs (color, aliases).
+  * `__YADR_INSTALL_CTAGS=[y|n]` - Install `ctags` config (better js/ruby support).
+  * `__YADR_INSTALL_GIT=[y|n]` - Install `git` configs (color, aliases).
+  * `__YADR_INSTALL_IRB=[y|n]` - Install `irb` configs (more colorful).
+  * `__YADR_INSTALL_PREZTO=[y|n]` - Install `prezto` & zsh enhancements.
+  * `__YADR_INSTALL_RUBY=[y|n]` - Install `ruby` config (faster/no docs).
+  * `__YADR_INSTALL_TMUX=[y|n]` - Install `tmux` config.
+  * `__YADR_INSTALL_VIMIFICATION=[y|n]` - Install `vimification` of command line tools.
+  * `__YADR_INSTALL_ZSH=[y|n]` - Install `zsh` support in Linux.
+
+2024-01-15
 ==================
   * Support for running zeus commands for rspec (`zl` and `zr`)
   * Ctrl-x and Ctrl-z to navigate the quickfix list
