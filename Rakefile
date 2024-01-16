@@ -139,11 +139,11 @@ end
 def save_config
   if ENV['__YADR_SAVE_CONFIG'] == 'y'
     if File.exist?("#{ENV['HOME']}/.bash.before")
-      run %{env | grep '__YADR_' | sed 's/^__YADR_/export __YADR_/' | sort > "#{ENV['HOME']}/.bash.before/yadr_config.sh"}
+      run %{ env | grep '__YADR_' | sed 's/^__YADR_/export __YADR_/' | sort > "#{ENV['HOME']}/.bash.before/yadr_config.sh" }
     end
 
     if File.exist?("#{ENV['HOME']}/.zsh.before")
-      run %{env | 'grep __YADR_' | sed 's/^__YADR_/export __YADR_/' | sort > "#{ENV['HOME']}/.zsh.before/yadr_config.zsh"}
+      run %{ env | grep '__YADR_' | sed 's/^__YADR_/export __YADR_/' | sort > "#{ENV['HOME']}/.zsh.before/yadr_config.zsh" }
     end
   end
 end
