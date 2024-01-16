@@ -195,7 +195,7 @@ def install_python_modules
     if ENV['PLATFORM_FAMILY'] == 'debian'
       run %{ apt install -y pip }
     elsif ENV['PLATFORM_FAMILY'] == 'rhel'
-      if ENV['PLATFORM_VERSION'].to_i <= 7
+      if ENV['PLATFORM_VERSION'].to_i < 8
         run %{ yum install -y python3-pip }
       else
         run %{ dnf install -y python3-pip }
