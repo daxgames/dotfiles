@@ -8,7 +8,7 @@ if [ ! -d "$HOME/.yadr" ]; then
 
     if [ -z "${__YADR_DEBUG}" ] ; then
       git_repo=$(git ls-remote --get-url 2>/dev/null)
-      git_branch=dev-new
+      git_branch=$(git branch --show-current)
     fi
 
     [ -n "${DEBUG}" ] && env | grep "__YADR_"
