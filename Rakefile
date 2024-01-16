@@ -143,6 +143,7 @@ def save_config
     elsif File.exist?("#{ENV['HOME']}/.zsh.before")
       run %{env | sort > "#{ENV['HOME']}/.zsh.before/yadr_config.zsh"}
     end
+  end
 end
 
 def number_of_cores
