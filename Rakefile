@@ -11,23 +11,24 @@ task :install => [:submodule_init, :submodules] do
   puts
 
   install_homebrew if RUBY_PLATFORM.downcase.include?("darwin")
-  if RUBY_PLATFORM.downcase.include?("linux")
-    if want_to_install?('zsh (shell, enhancements))') || ENV['PREFERRED_SHELL'] == 'zsh'
-      install_zsh
-    end
 
-    install_python_modules
+  install_bash if want_to_install?('bash configs (color, aliases)')
+  if RUBY_PLATFORM.downcase.include?("linux")
+    install_zsh if want_to_install?('zsh (shell, enhancements))')
   end
+
+  install_python_modules
 
   install_rvm_binstubs
 
   # this has all the runcoms from this directory.
   install_files(Dir.glob('git/*')) if want_to_install?('git configs (color, aliases)')
-  install_files(Dir.glob('irb/*')) if want_to_install?('irb/pry configs (more colorful)')
+  install_files(Dir.glob('irb/*')) if want_to_install?('irb pry configs (more colorful)')
   install_files(Dir.glob('ruby/*')) if want_to_install?('rubygems config (faster/no docs)')
   install_files(Dir.glob('ctags/*')) if want_to_install?('ctags config (better js/ruby support)')
   install_files(Dir.glob('tmux/*')) if want_to_install?('tmux config')
   install_files(Dir.glob('vimify/*')) if want_to_install?('vimification of command line tools')
+
   if want_to_install?('vim configuration (highly recommended)')
     install_files(Dir.glob('{vim,vimrc}'))
     Rake::Task["install_vundle"].execute
@@ -45,8 +46,8 @@ task :install => [:submodule_init, :submodules] do
 end
 
 task :install_prezto do
-  if want_to_install?('zsh enhancements & prezto')
-    if RUBY_PLATFORM.downcase.include?("darwin") || ENV['PREFERRED_SHELL'] == 'zsh'
+  if want_to_install?('prezto & zsh enhancements')
+    if RUBY_PLATFORM.downcase.include?("darwin") || ENV['__YADR_INSTALL_ZSH'] == 'y'
       install_prezto
     end
   end
@@ -123,11 +124,10 @@ end
 
 task :default => 'install'
 
-
 private
 def run(cmd)
   puts "[Running] #{cmd}"
-  if RUBY_PLATFORM.downcase.include?("x86_64-cygwin")
+  if RUBY_PLATFORM.downcase.include?("cygwin")
     system(cmd) unless ENV['DEBUG']
   else
     `#{cmd}` unless ENV['DEBUG']
@@ -172,10 +172,15 @@ def install_zsh
     puts "Installing Zsh...If it's already"
     puts "installed, this will do nothing."
     puts "======================================================"
-    if ENV['PLATFORM_FAMILY'] == 'ubuntu'
+
+    if ENV['PLATFORM_FAMILY'] == 'debian'
       run %{ apt install -y zsh }
     elsif ENV['PLATFORM_FAMILY'] == 'rhel'
-      run %{ yum install -y zsh }
+      if ENV['PLATFORM_VERSION'].to_i < 8
+        run %{ yum install -y zsh }
+      else
+        run %{ dnf install -y zsh }
+      end
     end
   end
 end
@@ -187,13 +192,22 @@ def install_python_modules
     puts "Installing Python Pip...If it's already"
     puts "installed, this will do nothing."
     puts "======================================================"
-    if ENV['PLATFORM_FAMILY'] == 'ubuntu'
+    if ENV['PLATFORM_FAMILY'] == 'debian'
       run %{ apt install -y pip }
     elsif ENV['PLATFORM_FAMILY'] == 'rhel'
-      run %{ yum install -y pip }
+      if ENV['PLATFORM_VERSION'].to_i < 8
+        run %{ yum install -y python3-pip }
+      else
+        run %{ dnf install -y python3-pip }
+      end
     end
   end
-  run %{ pip install pynvim }
+
+  if ENV['PLATFORM_FAMILY'] == 'debian'
+    run %{ pip install pynvim }
+  elsif ENV['PLATFORM_FAMILY'] == 'rhel'
+    run %{ pip3 install pynvim }
+  end
 end
 
 def install_homebrew
@@ -300,11 +314,36 @@ def ask(message, values)
   values[selection]
 end
 
+def install_bash
+  puts
+  puts "Installing Bash Enhancements..."
+
+  puts
+  puts "Creating directories for your customizations..."
+  run %{ mkdir -p $HOME/.bash.before }
+  run %{ mkdir -p $HOME/.bash.after }
+
+  if ! File.exist?("#{ENV['HOME']}/.bash-git-prompt")
+    puts
+    puts "Configuring Git aware prompt..."
+    run %{ git clone "https://github.com/daxgames/bash-git-prompt.git" "#{ENV['HOME']}/.bash-git-prompt" }
+  end
+
+  # Preserve pre-existing ~/.bashrc
+  if File.exist?(File.join(ENV['HOME'], '.bashrc')) && ! File.exist?( File.join(ENV['HOME'], '.bash.after', '001_bashrc.sh'))
+    puts
+    puts "Preserving existing '~/.bashrc' filw..."
+    FileUtils.mv(File.join(ENV['HOME'], '.bashrc'), File.join(ENV['HOME'], '.bash.after', '001_bashrc.sh'))
+  end
+
+  install_files(Dir.glob('bash/bashrc'), :symlink)
+end
+
 def install_prezto
   puts
   puts "Installing Prezto (ZSH Enhancements)..."
 
-  if RUBY_PLATFORM.downcase.include?("x86_64-cygwin")
+  if RUBY_PLATFORM.downcase.include?("cygwin")
     run %{ cmd /c "mklink /d "%USERPROFILE%\.zprezto" "%USERPROFILE%\.yadr\zsh\prezto"" }
   else
     run %{ ln -nfs "$HOME/.yadr/zsh/prezto" "${ZDOTDIR:-$HOME}/.zprezto" }
@@ -341,10 +380,21 @@ def install_prezto
 end
 
 def want_to_install? (section)
-  if ! ENV["install_#{section.split(' ')[0]}"].nil? && ENV["ASK"]=="true" && $stdout.isatty
+  # Allow configuration throught env varialbes
+  install_type = section.split(' ')[0].upcase()
+  install_env = ENV["__YADR_INSTALL_#{install_type}"] || ''
+
+  if ! install_env.to_s.empty?
+    install_env == 'y'
+  elsif ENV["ASK"]=="true" && $stdout.isatty
     puts "Would you like to install configuration files for: #{section}? [y]es, [n]o"
-    STDIN.gets.chomp == 'y'
+
+    # set env var to match user answer so we do not ask again
+    ENV["__YADR_INSTALL_#{install_type}"] = STDIN.gets.chomp
+    ENV["__YADR_INSTALL_#{install_type}"] == 'y'
   else
+    # set env var to match returned answer so we do not ask again
+    ENV["__YADR_INSTALL_#{install_type}"] = 'y'
     true
   end
 end
@@ -355,7 +405,7 @@ def install_files(files, method = :symlink)
     source = "#{ENV["PWD"]}/#{f}"
     target = "#{ENV["HOME"]}/.#{file}"
 
-    if RUBY_PLATFORM.downcase.include?("x86_64-cygwin")
+    if RUBY_PLATFORM.downcase.include?("cygwin")
       source=`cygpath -d "#{source}"`
       target=`cygpath -d "#{target}"`
     end
@@ -370,7 +420,7 @@ def install_files(files, method = :symlink)
     end
 
     if method == :symlink
-      if RUBY_PLATFORM.downcase.include?("x86_64-cygwin")
+      if RUBY_PLATFORM.downcase.include?("cygwin")
         if Dir.exist?(target)
           run %{ cmd /c "mklink /d "#{target}" "#{source}"" }
         else

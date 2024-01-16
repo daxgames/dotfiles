@@ -1,53 +1,54 @@
 #!/bin/sh
 
-[ -d ~/.bashrc.before -a -d ~/.bashrc.after ] && export PREFERRED_SHELL=bash
-
-if [ -n "${PREFERRED_SHELL}" -a "${PREFERRED_SHELL}" = "bash" ] ; then
-    export install_zsh=n
-
-    [ ! -d ~/.bash-git-prompt ] && git clone https://github.com/daxgames/bash-git-prompt.git ~/.bash-git-prompt
-    [ ! -d ~/.bashrc.before ] && mkdir ~/.bashrc.before
-    [ ! -d ~/.bashrc.after ] && mkdir ~/.bashrc.after
-
-    test -h "$HOME/.bashrc"
-    is_symlink=$?
-    echo "is_symlink: ${is_symlink}"
-    if [ ${is_symlink} -gt 0 ] && [ ! -f "$HOME/.bashrc.after/001_bashrc.sh" ] ; then
-	      [ ! -f ~/.bashrc.bak ] && cp ~/.bashrc ~/.bashrc.bak
-        mv ~/.bashrc ~/.bashrc.after/001_bashrc.sh
-        ln -sf ~/.yadr/bash/bashrc ~/.bashrc
-    fi
-fi
-
 if [ ! -d "$HOME/.yadr" ]; then
     echo "Installing YADR for the first time"
-    git clone -b main --depth=1 https://github.com/daxgames/dotfiles.git "$HOME/.yadr"
+
+    git_repo=$(echo ${__YADR_REPO_URL:-https://github.com/daxgames/dotfiles.git})
+    git_branch=$(echo ${__YADR_REPO_BRANCH:-main})
+
+    if [ -z "${__YADR_DEBUG}" ] ; then
+      git_repo=$(git ls-remote --get-url 2>/dev/null)
+      git_branch=dev-new
+    fi
+
+    [ -n "${DEBUG}" ] && env | grep "__YADR_"
+    echo "git_repo: ${git_repo}"
+    echo "git_branch: ${git_branch}"
+
+    echo git clone -b ${git_branch} --depth=1 ${git_repo} "$HOME/.yadr"
+    git clone -b ${git_branch} --depth=1 ${git_repo} "$HOME/.yadr"
     cd "$HOME/.yadr"
     [ "$1" = "ask" ] && export ASK="true"
 
     OS=$(uname)
-    if [ "${PLATFORM}" = "Linux" ] ; then
-        PLATFORM_FAMILY=rhel
-        if [ $(command -v lsb_release) ] ; then
-            PLATFORM=$(lsb_release -is | tr [A-Z] [a-z])
-            PLATFORM_FAMILY=$(lsb_release -is | tr [A-Z] [a-z])
-            PLATFORM_VERSION=$(lsb_release -rs)
+    if [ "${OS}" = "Linux" ] ; then
+        if [ -f /etc/os-release ] ; then
+            echo "Determining Linux OS using '/etc/os-release'..."
+            PLATFORM=$(cat /etc/os-release | grep -i ^id= | cut -d = -f2 | sed 's/"//g')
+            PLATFORM_FAMILY=$(cat /etc/os-release | grep -i ^id_like= | cut -d = -f2 | sed 's/"//g')
+            PLATFORM_VERSION=$(cat /etc/os-release | grep -i ^version_id= | cut -d = -f2 | sed 's/"//g')
+            echo "PLATFORM: '${PLATFORM}'"
 
             [ "${PLATFORM}" = "centos" ] && PLATFORM_FAMILY=rhel
+            [ "${PLATFORM}" = "fedora" ] && PLATFORM_FAMILY=rhel
+            [ "${PLATFORM}" = "debian" ] && PLATFORM_FAMILY=debian
         elif [ -f /etc/redhat-release ] ; then
             PLATFORM=redhat
             PLATFORM_FAMILY=rhel
         fi
 
-        if [ ! $(command -v rake) ] ; then
-            if [ "${PLATFORM_FAMILY}" = "ubuntu" ] ; then
-                sudo apt install -y rake
+        export PLATFORM PLATFORM_FAMILY PLATFORM_VERSION
+        [ -z "${__YADR_DEBUG}" ] && env | grep PLATFORM | sort
+
+        if [ -z "$(command -v rake)" ] ; then
+            echo "Installing 'rake' in '${PLATFORM_FAMILY}'..."
+            if [ "${PLATFORM_FAMILY}" = "debian" ]; then
+                `which sudo 2>/dev/null` apt install -y rake
             elif [ "${PLATFORM_FAMILY}" = "rhel" ] ; then
-                sudo yum install -y rake
+                [ "${PLATFORM_VERSION}" -lt 8 ] && `which sudo 2>/dev/null` yum install -y rubygem-rake
+                [ "${PLATFORM_VERSION}" -gt 7 ] && `which sudo 2>/dev/null` dnf install -y rubygem-rake
             fi
         fi
-    elif [ "${PLATFORM}" = "Darwin" ] ; then
-        PLATFORM_FAMILY=$(echo ${PLATFORM} | tr [A-Z] [a-z])
     fi
 
     rake install
