@@ -1,5 +1,7 @@
 2024-01-15
 ==================
+* `yadr-uninstall` script
+* `yadr-set-branch` script
 * Enhanced Linux Support
   * RedHat and Debian based distros are supported.
   * `install.sh` installs Ruby and rake are installed using native package managers ([yum|dnf]/apt-get)..
