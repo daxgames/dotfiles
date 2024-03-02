@@ -12,6 +12,15 @@ if OS.linux?
    tap 'gromgit/fuse'
 end
 
+cask 'firefox'
+cask 'font-fira-code'
+cask 'font-hack-nerd-font'
+cask 'font-fira-nerd-font'
+cask 'font-fira-code-nerd-font'
+cask 'font-fira-mono-nerd-font'
+cask 'google-chrome'
+cask 'inkscape'
+
 if OS.mac?
     cask 'firefox'
     cask 'font-fira-code'
