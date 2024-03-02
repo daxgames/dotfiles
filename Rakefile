@@ -22,6 +22,12 @@ task :install => [:submodule_init, :submodules] do
   install_files(Dir.glob('tmux/*')) if want_to_install?('tmux config')
   install_files(Dir.glob('vimify/*')) if want_to_install?('vimification of command line tools')
   install_files(Dir.glob('{vim,vimrc}'))
+  if File.exists?(File.join(ENV['HOME'], '.vimrc.before'))
+    run %{ ln -sf "$HOME/.vimrc.before" "$HOME/.config/nvim/settings/before/000-vimrc.before.vim" }
+  end
+  if File.exists?(File.join(ENV['HOME'], '.vimrc.after'))
+    run %{ ln -sf "$HOME/.vimrc.after" "$HOME/.config/nvim/settings/after/zzz-vimrc.after.vim" }
+  end
 
   run %{ ln -nfs ~/.yadr/nvim ~/.config/nvim }
 
