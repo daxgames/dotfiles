@@ -1,7 +1,9 @@
 require 'rake'
 require 'fileutils'
+require File.join(File.dirname(__FILE__), 'bin', 'yadr', 'vundle')
 
 $is_macos = RUBY_PLATFORM.downcase.include?("darwin")
+$is_linux = RUBY_PLATFORM.downcase.include?("linux")
 
 desc "Hook our dotfiles into system-standard positions."
 task :install => [:submodule_init, :submodules] do
@@ -11,28 +13,40 @@ task :install => [:submodule_init, :submodules] do
   puts "======================================================"
   puts
 
-  install_homebrew
+  install_homebrew if $is_macos
+
+  install_bash if want_to_install?('bash configs (color, aliases)')
+  
+  if $is_linux
+    install_zsh if want_to_install?('zsh (shell, enhancements))')
+    # TODO: INSTALL 'bat'
+  end
+
+  install_python_modules
 
   install_rvm_binstubs
   # this has all the runcoms from this directory.
   install_files(Dir.glob('git/*')) if want_to_install?('git configs (color, aliases)')
-  install_files(Dir.glob('irb/*')) if want_to_install?('irb/pry configs (more colorful)')
+  install_files(Dir.glob('irb/*')) if want_to_install?('irb pry configs (more colorful)')
   install_files(Dir.glob('ruby/*')) if want_to_install?('rubygems config (faster/no docs)')
   install_files(Dir.glob('ctags/*')) if want_to_install?('ctags config (better js/ruby support)')
   install_files(Dir.glob('tmux/*')) if want_to_install?('tmux config')
   install_files(Dir.glob('vimify/*')) if want_to_install?('vimification of command line tools')
-  install_files(Dir.glob('{vim,vimrc}'))
+  if want_to_install?('vim configuration (highly recommended)')
+    install_files(Dir.glob('{vim,vimrc}'))
+    Rake::Task["install_vundle"].execute
+    
+    if File.exists?(File.join(ENV['HOME'], '.vimrc.before'))
+      run %{ ln -sf "$HOME/.vimrc.before" "$HOME/.config/nvim/settings/before/000-vimrc.before.vim" }
+    end
 
-  if File.exists?(File.join(ENV['HOME'], '.vimrc.before'))
-    run %{ ln -sf "$HOME/.vimrc.before" "$HOME/.config/nvim/settings/before/000-vimrc.before.vim" }
-  end
+    if File.exists?(File.join(ENV['HOME'], '.vimrc.after'))
+      run %{ ln -sf "$HOME/.vimrc.after" "$HOME/.config/nvim/settings/after/zzz-vimrc.after.vim" }
+    end
 
-  if File.exists?(File.join(ENV['HOME'], '.vimrc.after'))
-    run %{ ln -sf "$HOME/.vimrc.after" "$HOME/.config/nvim/settings/after/zzz-vimrc.after.vim" }
-  end
-
-  if File.exists?(File.join(ENV['HOME'], '.vimrc.after'))
-    run %{ ln -sf "$HOME/.vimrc.after" "$HOME/.config/nvim/settings/after/zzz-vimrc.after.vim" }
+    if File.exists?(File.join(ENV['HOME'], '.vimrc.after'))
+      run %{ ln -sf "$HOME/.vimrc.after" "$HOME/.config/nvim/settings/after/zzz-vimrc.after.vim" }
+    end
   end
 
   run %{ ln -nfs ~/.yadr/nvim ~/.config/nvim }
@@ -47,17 +61,22 @@ task :install => [:submodule_init, :submodules] do
   install_fonts
 
   if $is_macos
+    install_term_theme if RUBY_PLATFORM.downcase.include?("darwin")
     run %{ ~/.yadr/iTerm2/bootstrap-iterm2.sh }
   end
 
   run_bundle_config
 
+  save_config
+
   success_msg("installed")
 end
 
 task :install_prezto do
-  if want_to_install?('zsh enhancements & prezto')
-    install_prezto
+  if want_to_install?('prezto & zsh enhancements')
+    if RUBY_PLATFORM.downcase.include?("darwin") || ENV['__YADR_INSTALL_ZSH'] == 'y'
+      install_prezto
+    end
   end
 end
 
@@ -90,12 +109,48 @@ task :submodules do
   end
 end
 
+desc "Runs Vundle installer in a clean vim environment"
+task :install_vundle do
+  puts "======================================================"
+  puts "Installing and updating vundles."
+  puts "The installer will now proceed to run PluginInstall to install vundles."
+  puts "======================================================"
+
+  puts ""
+
+  vundle_path = File.join('vim','bundle', 'vundle')
+  unless File.exist?(vundle_path)
+    run %{
+      cd $HOME/.yadr
+      git clone https://github.com/gmarik/vundle.git #{vundle_path}
+    }
+  end
+
+  Vundle::update_vundle
+end
+
 task :default => 'install'
 
 private
 def run(cmd)
   puts "[Running] #{cmd}"
-  `#{cmd}` unless ENV['DEBUG']
+  if RUBY_PLATFORM.downcase.include?("cygwin")
+    system(cmd) unless ENV['DEBUG']
+  else
+    `#{cmd}` unless ENV['DEBUG']
+  end
+end
+
+def save_config
+  if ENV['__YADR_SAVE_CONFIG'] == 'y'
+    if File.exist?("#{ENV['HOME']}/.bash.before")
+      run %{ env | grep '__YADR_' | sed 's/^__YADR_/export __YADR_/' | sort > "#{ENV['HOME']}/.bash.before/yadr_config.sh" }
+    end
+
+    if File.exist?("#{ENV['HOME']}/.zsh.before")
+      run %{ env | grep '__YADR_' | sed 's/^__YADR_/export __YADR_/' | sort > "#{ENV['HOME']}/.zsh.before/yadr_config.zsh" }
+    end
+  end
 end
 
 def number_of_cores
@@ -150,6 +205,51 @@ def install_rvm_binstubs
   puts "======================================================"
   run %{ chmod +x $rvm_path/hooks/after_cd_bundler }
   puts
+end
+
+def install_zsh
+  run %{which zsh}
+  unless $?.success?
+    puts "======================================================"
+    puts "Installing Zsh...If it's already"
+    puts "installed, this will do nothing."
+    puts "======================================================"
+
+    if ENV['PLATFORM_FAMILY'] == 'debian'
+      run %{ apt install -y zsh }
+    elsif ENV['PLATFORM_FAMILY'] == 'rhel'
+      if ENV['PLATFORM_VERSION'].to_i < 8
+        run %{ yum install -y zsh }
+      else
+        run %{ dnf install -y zsh }
+      end
+    end
+  end
+end
+
+def install_python_modules
+  run %{which pip}
+  unless $?.success?
+    puts "======================================================"
+    puts "Installing Python Pip...If it's already"
+    puts "installed, this will do nothing."
+    puts "======================================================"
+    if ENV['PLATFORM_FAMILY'] == 'debian'
+      run %{ apt install -y pip }
+    elsif ENV['PLATFORM_FAMILY'] == 'rhel'
+      if ENV['PLATFORM_VERSION'].to_i < 8
+        run %{ yum install -y python3-pip }
+      else
+        run %{ dnf install -y python3-pip }
+      end
+    end
+  end
+
+  if ENV['PLATFORM_FAMILY'] == 'debian'
+    run %{ pip install pynvim }
+  elsif ENV['PLATFORM_FAMILY'] == 'rhel'
+    run %{ pip3 install pynvim }
+  end
 end
 
 def install_homebrew
@@ -228,7 +328,7 @@ def install_fonts
   puts "Installing patched fonts for Powerline/Lightline."
   puts "======================================================"
   run %{ cp -f $HOME/.yadr/fonts/* $HOME/Library/Fonts } if $is_macos
-  run %{ mkdir -p ~/.fonts && cp ~/.yadr/fonts/* ~/.fonts && fc-cache -vf ~/.fonts } if !$is_macos
+  run %{ mkdir -p ~/.fonts && cp ~/.yadr/fonts/* ~/.fonts && fc-cache -vf ~/.fonts } if $is_linux
   puts
 end
 
@@ -300,11 +400,40 @@ def ask(message, values)
   values[selection]
 end
 
+def install_bash
+  puts
+  puts "Installing Bash Enhancements..."
+
+  puts
+  puts "Creating directories for your customizations..."
+  run %{ mkdir -p $HOME/.bash.before }
+  run %{ mkdir -p $HOME/.bash.after }
+
+  if ! File.exist?("#{ENV['HOME']}/.bash-git-prompt")
+    puts
+    puts "Configuring Git aware prompt..."
+    run %{ git clone "https://github.com/daxgames/bash-git-prompt.git" "#{ENV['HOME']}/.bash-git-prompt" }
+  end
+
+  # Preserve pre-existing ~/.bashrc
+  if File.exist?(File.join(ENV['HOME'], '.bashrc')) && ! File.exist?( File.join(ENV['HOME'], '.bash.after', '001_bashrc.sh'))
+    puts
+    puts "Preserving existing '~/.bashrc' filw..."
+    FileUtils.mv(File.join(ENV['HOME'], '.bashrc'), File.join(ENV['HOME'], '.bash.after', '001_bashrc.sh'))
+  end
+
+  install_files(Dir.glob('bash/bashrc'), :symlink)
+end
+
 def install_prezto
   puts
   puts "Installing Prezto (ZSH Enhancements)..."
 
-  run %{ ln -nfs "$HOME/.yadr/zsh/prezto" "${ZDOTDIR:-$HOME}/.zprezto" }
+  if RUBY_PLATFORM.downcase.include?("cygwin")
+    run %{ cmd /c "mklink /d "%USERPROFILE%\.zprezto" "%USERPROFILE%\.yadr\zsh\prezto"" }
+  else
+    run %{ ln -nfs "$HOME/.yadr/zsh/prezto" "${ZDOTDIR:-$HOME}/.zprezto" }
+  end
 
   # The prezto runcoms are only going to be installed if zprezto has never been installed
   install_files(Dir.glob('zsh/prezto-override/zshrc'), :symlink)
@@ -349,9 +478,20 @@ def install_prezto
 end
 
 def want_to_install? (section)
-  if ENV["ASK"]=="true"
+  # Allow configuration throught env varialbes
+  install_type = section.split(' ')[0].upcase()
+  install_env = ENV["__YADR_INSTALL_#{install_type}"] || ''
+
+  if ! install_env.to_s.empty?
+    ENV["__YADR_SAVE_CONFIG"] = 'y'
+    install_env == 'y'
+  elsif ENV["ASK"]=="true" && $stdout.isatty
     puts "Would you like to install configuration files for: #{section}? [y]es, [n]o"
     STDIN.gets.chomp == 'y'
+    # set env var to match user answer so we do not ask again
+    ENV["__YADR_SAVE_CONFIG"] = 'y'
+    ENV["__YADR_INSTALL_#{install_type}"] = STDIN.gets.chomp
+    ENV["__YADR_INSTALL_#{install_type}"] == 'y'
   else
     true
   end
@@ -363,6 +503,11 @@ def install_files(files, method = :symlink)
     source = "#{ENV["PWD"]}/#{f}"
     target = "#{ENV["HOME"]}/.#{file}"
 
+    if RUBY_PLATFORM.downcase.include?("cygwin")
+      source=`cygpath -d "#{source}"`
+      target=`cygpath -d "#{target}"`
+    end
+
     puts "======================#{file}=============================="
     puts "Source: #{source}"
     puts "Target: #{target}"
@@ -373,7 +518,15 @@ def install_files(files, method = :symlink)
     end
 
     if method == :symlink
-      run %{ ln -nfs "#{source}" "#{target}" }
+      if RUBY_PLATFORM.downcase.include?("cygwin")
+        if Dir.exist?(target)
+          run %{ cmd /c "mklink /d "#{target}" "#{source}"" }
+        else
+          run %{ cmd /c "mklink "#{target}" "#{source}"" }
+        end
+      else
+        run %{ ln -nfs "#{source}" "#{target}" }
+      end
     else
       run %{ cp -f "#{source}" "#{target}" }
     end
@@ -381,6 +534,16 @@ def install_files(files, method = :symlink)
     puts "=========================================================="
     puts
   end
+end
+
+def needs_migration_to_vundle?
+  File.exist? File.join('vim', 'bundle', 'tpope-vim-pathogen')
+end
+
+
+def list_vim_submodules
+  result=`git submodule -q foreach 'echo $name"||"\`git remote -v | awk "END{print \\\\\$2}"\`'`.select{ |line| line =~ /^vim.bundle/ }.map{ |line| line.split('||') }
+  Hash[*result.flatten]
 end
 
 def apply_theme_to_iterm_profile_idx(index, color_scheme_path)

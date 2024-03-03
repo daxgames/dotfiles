@@ -1,7 +1,11 @@
 # path, the 0 in the filename causes this to load first
-#
-# If you have duplicate entries on your PATH, run this command to fix it:
-# PATH=$(echo "$PATH" | awk -v RS=':' -v ORS=":" '!a[$1]++{if (NR > 1) printf ORS; printf $a[$1]}')
+
+pathPrepend() {
+  # Only adds to the path if it's not already there
+  if ! echo $PATH | egrep -q "(^|:)$1($|:)" ; then
+    PATH=$1:$PATH
+  fi
+}
 
 pathAppend() {
   # Only adds to the path if it's not already there
@@ -12,4 +16,8 @@ pathAppend() {
 
 [[ "$OSTYPE" == linux* ]] && [[ -f /home/linuxbrew/.linuxbrew/bin/brew ]] && eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
 
+# Remove duplicate entries from PATH:
+PATH=$(echo "$PATH" | awk -v RS=':' -v ORS=":" '!a[$1]++{if (NR > 1) printf ORS; printf $a[$1]}')
+
 pathAppend "$HOME/.yadr/bin"
+pathAppend "$HOME/.yadr/bin/yadr"

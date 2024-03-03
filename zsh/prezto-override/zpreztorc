@@ -37,6 +37,7 @@ zstyle ':prezto:load' pmodule \
   'git' \
   'osx' \
   'node' \
+  'ruby' \
   'syntax-highlighting' \
   'history-substring-search' \
   'tmux' \
@@ -82,7 +83,7 @@ zstyle ':prezto:module:editor' key-bindings 'vi'
 # Set the prompt theme to load.
 # Setting it to 'random' loads a random theme.
 # Auto set to 'off' on dumb terminals.
-zstyle ':prezto:module:prompt' theme 'skwp'
+zstyle ':prezto:module:prompt' theme 'sorin'
 
 #
 # Screen

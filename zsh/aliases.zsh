@@ -12,6 +12,13 @@ elif [[ $unamestr == 'Darwin' ]]; then
   platform='darwin'
 fi
 
+# YADR support
+alias yav='yadr vim-add-plugin'
+alias ydv='yadr vim-delete-plugin'
+alias ylv='yadr vim-list-plugin'
+alias yup='yadr update-plugins'
+alias yip='yadr init-plugins'
+
 # PS
 alias psa="ps aux"
 alias psg="ps aux | rg "
@@ -33,6 +40,9 @@ elif [[ $platform == 'darwin' ]]; then
   alias ls='ls -Gh'
 fi
 
+# show me files matching "ls grep"
+alias lsg='ll | grep'
+
 # Alias Editing
 TRAPHUP() {
   source $yadr/zsh/aliases.zsh
@@ -42,8 +52,13 @@ alias ae='vim $yadr/zsh/aliases.zsh' #alias edit
 alias ar='source $yadr/zsh/aliases.zsh'  #alias reload
 alias gar="killall -HUP -u \"$USER\" zsh"  #global alias reload
 
-# nvim using
-alias vim="nvim"
+# vim using
+mvim --version > /dev/null 2>&1
+MACVIM_INSTALLED=$?
+if [ $MACVIM_INSTALLED -eq 0 ]; then
+  alias vim="mvim -v"
+fi
+
 alias v="nvim"
 alias vf='nvim $(fzf)'
 
@@ -126,7 +141,7 @@ alias l='less'
 alias lh='ls -alt | head' # see the last modified files
 alias screen='TERM=screen screen'
 alias cl='clear'
-alias cat='bat'
+# alias cat='bat'
 
 # Zippin
 alias gz='tar -zcvf'
