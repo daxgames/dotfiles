@@ -3,6 +3,12 @@ let NERDTreeMinimalUI = 1
 let NERDTreeDirArrows = 1
 let g:NERDTreeWinSize = 30
 
+" Nerdtree settings
+nmap nt :NERDTreeToggle<CR>
+let NERDTreeShowHidden=1
+" let g:NERDTreeWinPos = "right"
+
+
 " Ignore Node.js `node_modules` folder
 let NERDTreeIgnore=['^node_modules$[[dir]]']
 
