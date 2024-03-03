@@ -6,13 +6,24 @@
   current = yellow reverse
   local = yellow
   remote = green
+[color "diff"]
+  meta = yellow bold
+  frag = magenta bold
+  old = red
+  new = green
 [alias]
   # add
   a = add                           # add
   chunkyadd = add --patch           # stage commits chunk by chunk
+  # Shows list of contributors of a repository.
+  contributors = shortlog --summary --numbered --email
+
+  # via http://philjackson.github.io/2013/04/07/handy-git-tips-to-stop-you-getting-fired.html
+  snapshot = !git stash save "snapshot: $(date)" && git stash apply "stash@{0}"
+  snapshots = !git stash list --grep snapshot
 
   #via http://stackoverflow.com/questions/5188320/how-can-i-get-a-list-of-git-branches-ordered-by-most-recent-commit
-  recent-branches = !git for-each-ref --count=5 --sort=-committerdate refs/heads/ --format='%(refname:short)'
+  recent-branches = !git for-each-ref --count=15 --sort=-committerdate refs/heads/ --format='%(refname:short)'
 
   # branch
   b = branch -v                     # branch (verbose)
@@ -96,7 +107,7 @@
 [merge]
   summary = true
   verbosity = 1
-	tool = bc
+  tool = mvimdiff
 [apply]
   whitespace = nowarn
 [branch]
@@ -119,7 +130,6 @@
   algorithm = patience
   compactionHeuristic = true
   colorMoved = default
-	tool = bc
 [diff "spaceman-diff"]
   command = "spaceman-diff"
 [rerere]
@@ -160,5 +170,3 @@
 	defaultBranch = main
 [include]
   path = .gitconfig.user
-[mergetool "bc"]
-	trustExitCode = true

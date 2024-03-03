@@ -1,14 +1,16 @@
+# This is my fork of https://gitter.im/skwp/dotfiles.
+
      _     _           _
     | |   | |         | |
     | |___| |_____  __| | ____     Yet Another Dotfile Repo
     |_____  (____ |/ _  |/ ___)
-     _____| / ___ ( (_| | |        @lfilho's Version
+     _____| / ___ ( (_| | |        @daxgames's Version
     (_______\_____|\____|_|
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[![Build Status](https://travis-ci.org/lfilho/dotfiles.svg?branch=main)](https://travis-ci.org/lfilho/dotfiles)&nbsp;![PRs Welcome][prs-badge]&nbsp;![macos supported][apple-logo]&nbsp;![linux supported][linux-logo]
 
 ```bash
-sh -c "`curl -fsSL https://raw.githubusercontent.com/daxgames/dotfiles/linux-daxgames/install.sh`"
+sh -c "`curl -fsSL https://raw.githubusercontent.com/daxgames/dotfiles/main/install.sh`"
 ```
 
 ---
@@ -99,7 +101,7 @@ I've been using Yadr since 2013 but since a couple of years ago my preferences a
 
 Here are the differences in a nutshell (also make sure you read the [What's included, how to learn, how to customize?](#whats-included-how-to-learn-how-to-customize) section):
 
-- NeoVim in Terminal rather than GUI MacVim
+- NeoVim and Vim in Terminal rather than GUI MacVim
 - Generally faster vim experience (mostly because of RipGrep and NeoVim's async stuff, but we also use less plugins)
 - Keymaps that don't rely on MacOS's <kbd>Cmd</kbd> key, so keymaps would stay cohesive in both TUI vim, GUI vim and Linux environments.
 - Testing. We have basic CI testing. See more about it in the [Testing](#testing) section.
