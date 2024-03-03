@@ -4,7 +4,10 @@ function! SetupWrapping()
   set showbreak=…
 endfunction
 
-" TODO: this should happen automatically for certain file types (e.g. markdown)
+augroup AutoWrapFiles
+    autocmd!
+    autocmd FileType {tex,markdown,text} call SetupWrapping()
+augroup END
 command! -nargs=* Wrap :call SetupWrapping()<CR>
 
 vmap <D-j> gj
