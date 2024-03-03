@@ -21,6 +21,12 @@ imap <silent> ,D -
 " Change inside various enclosures with \" and \'
 " The f makes it find the enclosure so you don't have
 " to be standing inside it
+nnoremap <A-'> f'ci'
+nnoremap <A-"> f"ci"
+nnoremap <A-(> f(ci(
+nnoremap <A-)> f)ci)
+nnoremap <A-[> f[ci[
+nnoremap <A-]> f]ci]
 nnoremap \' f'ci'
 nnoremap \" f"ci"
 nnoremap \( f(ci(
@@ -28,12 +34,16 @@ nnoremap \) f)ci)
 nnoremap \[ f[ci[
 nnoremap \] f]ci]
 
-" ==== NERD tree
-" ,N for nerd tree
-nmap \N :NERDTreeToggle<CR>
-
 " move up/down quickly by using Alt-j, Alt-k
 " which will move us around by functions
+nnoremap <silent> <A-j> }
+nnoremap <silent> <A-k> {
+autocmd FileType ruby map <buffer> <A-j> ]m
+autocmd FileType ruby map <buffer> <A-k> [m
+autocmd FileType rspec map <buffer> <A-j> }
+autocmd FileType rspec map <buffer> <A-k> {
+autocmd FileType javascript map <buffer> <A-k> }
+autocmd FileType javascript map <buffer> <A-j> {
 nnoremap <silent> \j }
 nnoremap <silent> \k {
 autocmd FileType ruby map <buffer> \j ]m
@@ -43,6 +53,9 @@ autocmd FileType rspec map <buffer> \k {
 autocmd FileType javascript map <buffer> \j }
 autocmd FileType javascript map <buffer> \k {
 
+" Command-/ to toggle comments
+map <A-/> :TComment<CR>
+imap <A-/> <Esc>:TComment<CR>i
 " ,/ to toggle comments
 map ,/ :TComment<CR>
 imap ,/ <Esc>:TComment<CR>i
@@ -78,6 +91,9 @@ nnoremap <C-Right>  <C-w>>
 " ============================
 " Tabularize - alignment
 " ============================
+" Hit Alt-Shift-A then type a character you want to align by
+nmap <A-A> :Tabularize /
+vmap <A-A> :Tabularize /
 " Hit ,A then type a character you want to align by
 nmap ,A :Tabularize /
 vmap ,A :Tabularize /

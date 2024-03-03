@@ -96,7 +96,7 @@
 [merge]
   summary = true
   verbosity = 1
-  tool = vimdiff
+	tool = bc
 [apply]
   whitespace = nowarn
 [branch]
@@ -119,6 +119,7 @@
   algorithm = patience
   compactionHeuristic = true
   colorMoved = default
+	tool = bc
 [diff "spaceman-diff"]
   command = "spaceman-diff"
 [rerere]
@@ -159,3 +160,5 @@
 	defaultBranch = main
 [include]
   path = .gitconfig.user
+[mergetool "bc"]
+	trustExitCode = true

@@ -19,6 +19,12 @@ nvim/settings/before/*.vim
 !nvim/settings/before/main.vim
 nvim/settings/after/*.vim
 !nvim/settings/after/main.vim
-nvim/plugins/userplugins.vim
-nvim/settings/userplugin-*.vim
+nvim/plugins/*userplugin*.vim
+nvim/settings/before/*userplugin*.vim
+nvim/settings/after/*userplugin*.vim
+nvim/settings/*userplugin*.vim
+nvim/settings/before/*userconfig*.vim
+nvim/settings/after/*userconfig*.vim
+nvim/settings/*userconfig*.vim
 Brewfile.lock.json
+

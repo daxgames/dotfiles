@@ -154,6 +154,15 @@ It's using Gruvbox colors. For screenshots on how Vim looks with Gruvbox, you ca
 The provided inputrc and editrc will turn your various command line tools like mysql and irb into vim prompts.
 There's also an included Ctrl-R reverse history search feature in editrc, very useful in irb, postgres command line, and etc.
 
+_Note: The below user config paths are not committed back to Git, so you can add your own plugins and configuration without polluting the main repo._
+
+- Add user plugins to `~/.config/nvim/plugins/*userplugin*.vim`.
+- Add user settings or plugin config to:
+  - `~/.config/nvim/settings/{before,after}/*userconfig*.vim`.
+  - `~/.config/nvim/settings/{before,after}/*userplugin*.vim`.
+  - `~/.config/nvim/settings/*userconfig*.vim`.
+  - `~/.config/nvim/settings/*userplugin*.vim`.
+
 ## OSX
 
 See [Other recommended OSX productivity tools](doc/osx_tools.md).

@@ -13,6 +13,8 @@ function! <SID>StripTrailingWhitespaces()
 endfunction
 command! StripTrailingWhitespaces call <SID>StripTrailingWhitespaces()
 
+nmap ,w :StripTrailingWhitespaces<CR>
+
 autocmd BufWritePre * :call <SID>StripTrailingWhitespaces()
 
 " Delete blank lines after a { or before a }

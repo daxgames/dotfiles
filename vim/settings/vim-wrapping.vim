@@ -1,7 +1,7 @@
-" http://vimcasts.org/episodes/soft-wrapping-text/
+" " http://vimcasts.org/episodes/soft-wrapping-text/
 function! SetupWrapping()
-  set wrap linebreak nolist
-  set showbreak=…
+  setlocal wrap linebreak nolist
+  setlocal showbreak=…
 endfunction
 
 augroup AutoWrapFiles

@@ -8,3 +8,5 @@ Plug 'xsunsmile/showmarks' "visual representation of the location marks
 Plug 'nathanaelkane/vim-indent-guides' " Visual representation of indentation levels
 Plug 'ryanoasis/vim-devicons' " Icons on NERDTree, Denite, Lightline, etc
 Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
+Plug 'skwp/vim-colors-solarized'
+
