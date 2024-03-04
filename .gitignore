@@ -24,5 +24,8 @@ nvim/settings/after/*.vim
 **/**/before/*userplugin*.*
 **/**/after/*userplugin*.*
 **/**/*userplugin*.*
+**/**/before/*userconfig*.*
+**/**/after/*userconfig*.*
+**/**/*userconfig*.*
 Brewfile.lock.json
 
