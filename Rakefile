@@ -1,6 +1,7 @@
 require 'rake'
 require 'fileutils'
 require File.join(File.dirname(__FILE__), 'bin', 'yadr', 'vundle')
+require File.join(File.dirname(__FILE__), 'bin', 'yadr', 'vimplug')
 
 $is_macos = RUBY_PLATFORM.downcase.include?('darwin')
 $is_linux = RUBY_PLATFORM.downcase.include?('linux')
@@ -53,12 +54,11 @@ task :install => [:submodule_init, :submodules] do
     end
   end
 
-  run %{which nvim}
-  unless $?.success?
-    run %{ ln -nfs ~/.yadr/nvim ~/.config/nvim }
-
-    run %{ nvim --noplugin -u /home/vagrant/.config/nvim/plugins/main.vim -N +set hidden +syntax on +let g:session_autosave = no +PlugClean +PlugInstall! +qall }
-  end
+  run %{ ln -nfs "$HOME/.yadr/nvim" "$HOME/.config/nvim" }
+  Rake::Task["install_vimplug"].execute
+  # puts "[Running] Neovim plugin install..."
+  # system "nvim --noplugin -u \"#{ENV['HOME']}/.config/nvim/plugins/main.vim\" +qall"
+  # system "nvim -u NORC -u \"#{ENV['HOME']}/.config/nvim/plugins/main.vim\" -N \"+set hidden\" \"+syntax on\" +PlugClean +PlugInstall! +qall"
 
   run %{ mkdir -p ~/.config/ranger }
   run %{ ln -nfs ~/.yadr/ranger ~/.config/ranger }
@@ -134,6 +134,25 @@ task :install_vundle do
   end
 
   Vundle::update_vundle
+end
+
+desc "Runs Plug installer in a clean vim environment"
+task :install_vimplug do
+  puts "======================================================"
+  puts "Installing and updating Neovim plugins."
+  puts "The installer will now proceed to run PluginInstall to install plugs."
+  puts "======================================================"
+
+  puts ""
+
+  vimplug_path = File.join(ENV['HOME'], '.local', 'share', 'nvim', 'site', 'autoload', 'plug.vim')
+  unless File.exist?(vimplug_path)
+    run %{
+      curl -fLo #{vimplug_path} --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+    }
+  end
+
+  VimPlug::update_plugins
 end
 
 task :default => 'install'
@@ -242,6 +261,7 @@ def install_neovim_linux
   run %{ curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz }
   run %{ sudo rm -rf /opt/nvim }
   run %{ sudo tar -C /opt -xzf nvim-linux64.tar.gz }
+  run %{ rm -f nvim-linux64.tar.gz }
 end
 
 def install_python_modules
