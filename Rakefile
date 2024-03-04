@@ -2,21 +2,21 @@ require 'rake'
 require 'fileutils'
 require File.join(File.dirname(__FILE__), 'bin', 'yadr', 'vundle')
 
-$is_macos = RUBY_PLATFORM.downcase.include?("darwin")
-$is_linux = RUBY_PLATFORM.downcase.include?("linux")
+$is_macos = RUBY_PLATFORM.downcase.include?('darwin')
+$is_linux = RUBY_PLATFORM.downcase.include?('linux')
 
-desc "Hook our dotfiles into system-standard positions."
+desc 'Hook our dotfiles into system-standard positions.'
 task :install => [:submodule_init, :submodules] do
   puts
-  puts "======================================================"
-  puts "Welcome to YADR Installation."
-  puts "======================================================"
+  puts '======================================================'
+  puts 'Welcome to YADR Installation.'
+  puts '======================================================'
   puts
 
   install_homebrew if $is_macos
 
   install_bash if want_to_install?('bash configs (color, aliases)')
-  
+
   if $is_linux
     install_zsh if want_to_install?('zsh (shell, enhancements))')
     # TODO: INSTALL 'bat'
@@ -35,16 +35,16 @@ task :install => [:submodule_init, :submodules] do
   if want_to_install?('vim configuration (highly recommended)')
     install_files(Dir.glob('{vim,vimrc}'))
     Rake::Task["install_vundle"].execute
-    
-    if File.exists?(File.join(ENV['HOME'], '.vimrc.before'))
+
+    if File.exist?(File.join(ENV['HOME'], '.vimrc.before'))
       run %{ ln -sf "$HOME/.vimrc.before" "$HOME/.config/nvim/settings/before/000-vimrc.before.vim" }
     end
 
-    if File.exists?(File.join(ENV['HOME'], '.vimrc.after'))
+    if File.exist?(File.join(ENV['HOME'], '.vimrc.after'))
       run %{ ln -sf "$HOME/.vimrc.after" "$HOME/.config/nvim/settings/after/zzz-vimrc.after.vim" }
     end
 
-    if File.exists?(File.join(ENV['HOME'], '.vimrc.after'))
+    if File.exist?(File.join(ENV['HOME'], '.vimrc.after'))
       run %{ ln -sf "$HOME/.vimrc.after" "$HOME/.config/nvim/settings/after/zzz-vimrc.after.vim" }
     end
   end
@@ -167,19 +167,19 @@ end
 def linux_variant
   r = { :distro => nil, :family => nil }
 
-  if File.exists?('/etc/lsb-release')
+  if File.exist?('/etc/lsb-release')
     File.open('/etc/lsb-release', 'r').read.each_line do |line|
       r = { :distro => $1 } if line =~ /^DISTRIB_ID=(.*)/
     end
   end
 
-  if File.exists?('/etc/debian_version')
+  if File.exist?('/etc/debian_version')
     r[:distro] = 'Debian' if r[:distro].nil?
     r[:family] = 'Debian' if r[:variant].nil?
-  elsif File.exists?('/etc/redhat-release') or File.exists?('/etc/centos-release')
+  elsif File.exist?('/etc/redhat-release') or File.exist?('/etc/centos-release')
     r[:family] = 'RedHat' if r[:family].nil?
-    r[:distro] = 'CentOS' if File.exists?('/etc/centos-release')
-  elsif File.exists?('/etc/SuSE-release')
+    r[:distro] = 'CentOS' if File.exist?('/etc/centos-release')
+  elsif File.exist?('/etc/SuSE-release')
     r[:distro] = 'SLES' if r[:distro].nil?
   end
 
@@ -264,7 +264,7 @@ def install_homebrew
       run %{bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"}
     else
       puts "Running Homebrew 'install.sh' on Linux..."
-      if ! File.exists?('/home/linuxbrew')
+      if ! File.exist?('/home/linuxbrew')
         run %{sudo mkdir -p /home/linuxbrew}
         run %{sudo chmod 777 /home/linuxbrew}
       end
@@ -458,13 +458,13 @@ def install_prezto
     puts "Zsh is already configured as your shell of choice. Restart your session to load the new settings"
   else
     puts "Setting zsh as your default shell"
-    if File.exists?("/usr/local/bin/zsh")
+    if File.exist?("/usr/local/bin/zsh")
       if File.readlines("/private/etc/shells").grep("/usr/local/bin/zsh").empty?
         puts "Adding zsh to standard shell list"
         run %{ echo "/usr/local/bin/zsh" | sudo tee -a /private/etc/shells }
       end
       run %{ sudo chsh -s /usr/local/bin/zsh $USER }
-    elsif File.exists?("/home/linuxbrew/.linuxbrew/bin/zsh")
+    elsif File.exist?("/home/linuxbrew/.linuxbrew/bin/zsh")
       if File.readlines("/etc/shells").grep("/home/linuxbrew/.linuxbrew/bin/zsh").empty?
         puts "Adding zsh to standard shell list"
         run %{ echo "/home/linuxbrew/.linuxbrew/bin/zsh" | sudo tee -a /etc/shells }
@@ -512,7 +512,7 @@ def install_files(files, method = :symlink)
     puts "Source: #{source}"
     puts "Target: #{target}"
 
-    if File.exists?(target) && (!File.symlink?(target) || (File.symlink?(target) && File.readlink(target) != source))
+    if File.exist?(target) && (!File.symlink?(target) || (File.symlink?(target) && File.readlink(target) != source))
       puts "[Overwriting] #{target}...leaving original at #{target}.backup..."
       run %{ mv "$HOME/.#{file}" "$HOME/.#{file}.backup" }
     end
