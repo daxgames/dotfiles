@@ -56,9 +56,6 @@ task :install => [:submodule_init, :submodules] do
 
   run %{ ln -nfs "$HOME/.yadr/nvim" "$HOME/.config/nvim" }
   Rake::Task["install_vimplug"].execute
-  # puts "[Running] Neovim plugin install..."
-  # system "nvim --noplugin -u \"#{ENV['HOME']}/.config/nvim/plugins/main.vim\" +qall"
-  # system "nvim -u NORC -u \"#{ENV['HOME']}/.config/nvim/plugins/main.vim\" -N \"+set hidden\" \"+syntax on\" +PlugClean +PlugInstall! +qall"
 
   run %{ mkdir -p ~/.config/ranger }
   run %{ ln -nfs ~/.yadr/ranger ~/.config/ranger }
@@ -68,7 +65,7 @@ task :install => [:submodule_init, :submodules] do
   install_fonts
 
   if $is_macos
-    install_term_theme if RUBY_PLATFORM.downcase.include?("darwin")
+    install_term_theme
     run %{ ~/.yadr/iTerm2/bootstrap-iterm2.sh }
   end
 
@@ -81,7 +78,7 @@ end
 
 task :install_prezto do
   if want_to_install?('prezto & zsh enhancements')
-    if RUBY_PLATFORM.downcase.include?("darwin") || ENV['__YADR_INSTALL_ZSH'] == 'y'
+    if $is_macos || ENV['__YADR_INSTALL_ZSH'] == 'y'
       install_prezto
     end
   end
