@@ -14,11 +14,15 @@ task :install => [:submodule_init, :submodules] do
   puts '======================================================'
   puts
 
+  ENV['PATH'] = "#{File.join(ENV['HOME'], 'bin')}:#{ENV['PATH']}"
   install_homebrew if $is_macos
 
   if $is_linux
     install_zsh if want_to_install?('zsh (shell, enhancements))')
-    install_neovim_linux if want_to_install?('neovim - latest (text editor)')
+    install_from_github('bat', 'https://github.com/sharkdp/bat/releases/download/v0.24.0/bat-v0.24.0-i686-unknown-linux-musl.tar.gz')
+    install_from_github('nvim', 'https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz')
+    install_from_github('rg', 'https://github.com/BurntSushi/ripgrep/releases/download/14.1.0/ripgrep-14.1.0-x86_64-unknown-linux-musl.tar.gz')
+    # install_neovim_linux if want_to_install?('neovim - latest (text editor)')
   end
 
   install_python_modules
@@ -250,15 +254,20 @@ def install_zsh
   end
 end
 
-def install_neovim_linux
+def install_from_github(app_name, download_url)
+  download_path = File.join('/tmp',"#{app_name}.tar.gz")
+  install_path = File.join('/opt', app_name)
+  link_path = File.join(ENV['HOME'], 'bin', app_name)
   puts "======================================================"
-  puts "Installing/Updating Neovim to '/opt/nvim-linux64'..."
+  puts "Installing/Updating '#{app_name}' to '#{install_path}'..."
   puts "======================================================"
-
-  run %{ curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz }
-  run %{ sudo rm -rf /opt/nvim }
-  run %{ sudo tar -C /opt -xzf nvim-linux64.tar.gz }
-  run %{ rm -f nvim-linux64.tar.gz }
+  puts "Downloading #{download_url}"
+  run %{ curl -Lo #{download_path} #{download_url} }
+  run %{ sudo rm -rf #{install_path} }
+  run %{ sudo mkdir -p #{install_path} }
+  run %{ sudo tar -C #{install_path} --strip-components=1 -xzf #{download_path} }
+  run %{ rm -f #{download_path} }
+  run %{ ln -sf $(find #{install_path} -type f -name '#{app_name}') #{link_path} }
 end
 
 def install_python_modules
