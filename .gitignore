@@ -16,13 +16,13 @@ bin/subl
 tags
 
 nvim/settings/before/*.vim
+!nvim/settings/before/000-run_first.vim
 !nvim/settings/before/main.vim
 nvim/settings/after/*.vim
 !nvim/settings/after/main.vim
 
 # Ignore user files
-**/**/before/*userplugin*.*
-**/**/after/*userplugin*.*
 **/**/*userplugin*.*
+**/**/*userconfig*.*
 Brewfile.lock.json
 

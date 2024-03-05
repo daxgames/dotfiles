@@ -1,6 +1,7 @@
 require 'rake'
 require 'fileutils'
 require File.join(File.dirname(__FILE__), 'bin', 'yadr', 'vundle')
+require File.join(File.dirname(__FILE__), 'bin', 'yadr', 'vimplug')
 
 $is_macos = RUBY_PLATFORM.downcase.include?('darwin')
 $is_linux = RUBY_PLATFORM.downcase.include?('linux')
@@ -15,11 +16,9 @@ task :install => [:submodule_init, :submodules] do
 
   install_homebrew if $is_macos
 
-  install_bash if want_to_install?('bash configs (color, aliases)')
-
   if $is_linux
     install_zsh if want_to_install?('zsh (shell, enhancements))')
-    # TODO: INSTALL 'bat'
+    install_neovim_linux if want_to_install?('neovim - latest (text editor)')
   end
 
   install_python_modules
@@ -32,36 +31,41 @@ task :install => [:submodule_init, :submodules] do
   install_files(Dir.glob('ctags/*')) if want_to_install?('ctags config (better js/ruby support)')
   install_files(Dir.glob('tmux/*')) if want_to_install?('tmux config')
   install_files(Dir.glob('vimify/*')) if want_to_install?('vimification of command line tools')
+
+  Rake::Task["install_prezto"].execute
+
+  install_bash if want_to_install?('bash configs (color, aliases)')
+
   if want_to_install?('vim configuration (highly recommended)')
     install_files(Dir.glob('{vim,vimrc}'))
     Rake::Task["install_vundle"].execute
 
     if File.exist?(File.join(ENV['HOME'], '.vimrc.before'))
-      run %{ ln -sf "$HOME/.vimrc.before" "$HOME/.config/nvim/settings/before/000-vimrc.before.vim" }
+      run %{ ln -sf "$HOME/.vimrc.before" "$HOME/.config/nvim/settings/before/000-userconfig-vimrc.before.vim" }
     end
 
     if File.exist?(File.join(ENV['HOME'], '.vimrc.after'))
-      run %{ ln -sf "$HOME/.vimrc.after" "$HOME/.config/nvim/settings/after/zzz-vimrc.after.vim" }
+      run %{ ln -sf "$HOME/.vimrc.after" "$HOME/.config/nvim/settings/after/zzz-userconfig-vimrc.after.vim" }
     end
 
-    if File.exist?(File.join(ENV['HOME'], '.vimrc.after'))
-      run %{ ln -sf "$HOME/.vimrc.after" "$HOME/.config/nvim/settings/after/zzz-vimrc.after.vim" }
+    if File.exist?(File.join('/opt/nvim-linux64/bin/nvim')) && $is_linux
+      run %{ mkdir -p "$HOME/bin" }
+      run %{ ln -sf "/opt/nvim-linux64/bin/nvim" "$HOME/bin/nvim" }
     end
   end
 
-  run %{ ln -nfs ~/.yadr/nvim ~/.config/nvim }
+  run %{ ln -nfs "$HOME/.yadr/nvim" "$HOME/.config/nvim" }
+  Rake::Task["install_vimplug"].execute
 
   run %{ mkdir -p ~/.config/ranger }
   run %{ ln -nfs ~/.yadr/ranger ~/.config/ranger }
 
   run %{ touch ~/.hushlogin }
 
-  Rake::Task["install_prezto"].execute
-
   install_fonts
 
   if $is_macos
-    install_term_theme if RUBY_PLATFORM.downcase.include?("darwin")
+    install_term_theme
     run %{ ~/.yadr/iTerm2/bootstrap-iterm2.sh }
   end
 
@@ -74,7 +78,7 @@ end
 
 task :install_prezto do
   if want_to_install?('prezto & zsh enhancements')
-    if RUBY_PLATFORM.downcase.include?("darwin") || ENV['__YADR_INSTALL_ZSH'] == 'y'
+    if $is_macos || ENV['__YADR_INSTALL_ZSH'] == 'y'
       install_prezto
     end
   end
@@ -127,6 +131,25 @@ task :install_vundle do
   end
 
   Vundle::update_vundle
+end
+
+desc "Runs Plug installer in a clean vim environment"
+task :install_vimplug do
+  puts "======================================================"
+  puts "Installing and updating Neovim plugins."
+  puts "The installer will now proceed to run PluginInstall to install plugs."
+  puts "======================================================"
+
+  puts ""
+
+  vimplug_path = File.join(ENV['HOME'], '.local', 'share', 'nvim', 'site', 'autoload', 'plug.vim')
+  unless File.exist?(vimplug_path)
+    run %{
+      curl -fLo #{vimplug_path} --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+    }
+  end
+
+  VimPlug::update_plugins
 end
 
 task :default => 'install'
@@ -225,6 +248,17 @@ def install_zsh
       end
     end
   end
+end
+
+def install_neovim_linux
+  puts "======================================================"
+  puts "Installing/Updating Neovim to '/opt/nvim-linux64'..."
+  puts "======================================================"
+
+  run %{ curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz }
+  run %{ sudo rm -rf /opt/nvim }
+  run %{ sudo tar -C /opt -xzf nvim-linux64.tar.gz }
+  run %{ rm -f nvim-linux64.tar.gz }
 end
 
 def install_python_modules
@@ -555,6 +589,7 @@ def apply_theme_to_iterm_profile_idx(index, color_scheme_path)
   run %{ /usr/libexec/PlistBuddy -c "Merge '#{color_scheme_path}' :'New Bookmarks':#{index}" ~/Library/Preferences/com.googlecode.iterm2.plist }
   run %{ defaults read com.googlecode.iterm2 }
 end
+
 def success_msg(action)
   puts %q{
    _     _           _
