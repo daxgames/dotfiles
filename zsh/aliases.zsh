@@ -141,7 +141,7 @@ alias l='less'
 alias lh='ls -alt | head' # see the last modified files
 alias screen='TERM=screen screen'
 alias cl='clear'
-# alias cat='bat'
+alias cat='bat'
 
 # Zippin
 alias gz='tar -zcvf'
