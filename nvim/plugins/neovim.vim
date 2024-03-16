@@ -20,3 +20,4 @@ Plug 'neovim/nvim-lspconfig'
 Plug 'nvimtools/none-ls.nvim'
 " =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
+Plug 'NvChad/nvterm'
