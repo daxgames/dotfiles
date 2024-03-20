@@ -11,7 +11,7 @@ if [ ! -d "$HOME/.yadr" ]; then
       git_branch=$(git branch --show-current)
     fi
 
-    [ -n "${DEBUG}" ] && env | grep "__YADR_"
+    [ -n "${__YADR_DEBUG}" ] && env | grep "__YADR_"
     echo "git_repo: ${git_repo}"
     echo "git_branch: ${git_branch}"
 
