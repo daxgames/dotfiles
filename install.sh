@@ -53,6 +53,10 @@ if [ ! -d "$HOME/.yadr" ]; then
         PLATFORM_FAMILY=$(echo ${PLATFORM} | tr [A-Z] [a-z])
     fi
 
+    # Enable persistent undo
+    mkdir -p $HOME/.vim/backups > /dev/null 2>&1
+    mkdir -p $HOME/.share/nvim/backups > /dev/null 2>&1
+
     rake install
 else
     echo "YADR is already installed"
