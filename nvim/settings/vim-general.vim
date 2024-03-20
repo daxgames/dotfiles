@@ -87,7 +87,7 @@ set updatetime=300
 set shortmess+=c
 
 " Recently vim can merge signcolumn and number column into one
-set signcolumn=number
+" set signcolumn=number
 
 " ================ Persistent Undo ==================
 " Keep undo history across sessions, by storing in file.
