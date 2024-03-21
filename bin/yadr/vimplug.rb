@@ -26,8 +26,12 @@ module VimPlug
     vundles_from_file.select{ |line| line =~ /^Plug .*/ }.map{ |line| line.gsub(/Plug "(.*)"/, '\1')}
   end
 
-  def self.update_plugins
+  def self.install_plugins
     system "nvim --noplugin -u #{ENV['HOME']}/.config/nvim/plugins/main.vim -N \"+set hidden\" \"+syntax on\" +PlugClean +PlugInstall! +qall"
+  end
+
+  def self.update_plugins
+    system "nvim --noplugin -u #{ENV['HOME']}/.config/nvim/plugins/main.vim -N \"+set hidden\" \"+syntax on\" +PlugClean +PlugUpdate! +qall"
   end
 
   private

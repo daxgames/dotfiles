@@ -90,6 +90,7 @@ end
 
 desc 'Updates the installation'
 task :update do
+  ENV["__YADR_UPDATE"] = "y"
   Rake::Task["install"].execute
   #TODO: for now, we do the same as install. But it would be nice
   #not to clobber zsh files
@@ -153,7 +154,11 @@ task :install_vimplug do
     }
   end
 
-  VimPlug::update_plugins
+  if "#{ENV['__YADR_UPDATE']}" == "y"
+    VimPlug::update_plugins
+  else
+    VimPlug::install_plugins
+  end
 end
 
 task :default => 'install'
