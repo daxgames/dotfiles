@@ -13,7 +13,8 @@ require('neo-tree').setup {
         require("neo-tree.ui.renderer").focus_node(state, node:get_parent_id())
       end
     }
-  }
+  },
+  close_if_last_window = true,
 }
 
 vim.keymap.set('n', 'nt', '<Cmd>Neotree toggle<CR>')
