@@ -95,11 +95,14 @@ rake update
 
 ## What is (this fork's version of) YADR?
 
-This is @daxgames's fork of the great work done by Yan (@skwp), [Yadr](https://github.com/skwp/dotfiles) and Luiz (@lfilho), [Yadr](https://github.com/lfilho/dotfiles).
+This is @daxgames's fork of the great work done by:
 
-It is a combination of the best of the above repos, with some personal preferences and improvements.
+- Yan (@skwp), [Yadr](https://github.com/skwp/dotfiles)
+- Luiz (@lfilho), [Yadr](https://github.com/lfilho/dotfiles)
 
-I've been using Yadr since 2013 but since a couple of years ago my preferences and configurations started to diverge too much from upstream. So now my repo is barely mergeable with the original one. Although I'm still a contributor there, my main focus should on my fork (unless we converge again in the future of course :-)).
+Luiz and I have been using YADR for a long time and we have been contributing to it as well. We both decided to fork it and make it our own for a few reasons.
+
+This repo is a combination of the two repos above, with some personal preferences and improvements.
 
 Here are the differences in a nutshell (also make sure you read the [What's included, how to learn, how to customize?](#whats-included-how-to-learn-how-to-customize) section):
 
