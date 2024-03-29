@@ -6,7 +6,7 @@ endfunction
 
 augroup AutoWrapFiles
     autocmd!
-    autocmd FileType {tex,markdown,text} call SetupWrapping()
+    autocmd FileType {tex,text} call SetupWrapping()
 augroup END
 command! -nargs=* Wrap :call SetupWrapping()<CR>
 
