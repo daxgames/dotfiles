@@ -107,7 +107,7 @@ This repo is a combination of the two repos above, with some personal preference
 Here are the differences in a nutshell (also make sure you read the [What's included, how to learn, how to customize?](#whats-included-how-to-learn-how-to-customize) section):
 
 - NeoVim and Vim in Terminal rather than GUI MacVim
-- Generally faster vim experience (mostly because of RipGrep and NeoVim's async stuff, but we also use less plugins)
+- Generally faster vim experience (mostly because of RipGrep and NeoVim's async stuff)
 - Keymaps that don't rely on MacOS's <kbd>Cmd</kbd> key, so keymaps would stay cohesive in both TUI vim, GUI vim and Linux environments.
 - Testing. We have basic CI testing. See more about it in the [Testing](#testing) section.
 - Different set of VIM plugins. That's too big of a list to keep up to date here in README so if you're interested you're better off comparing the two repo's plugins. What I can say is:
@@ -118,9 +118,13 @@ Here are the differences in a nutshell (also make sure you read the [What's incl
 - Different file and folder organization and conventions for vim plugins and configurations (all contained to installation folder)
 - Automated iTerm2 configuration (including themes and colors)
 - Brew packages. I have added a [`Brewfile`](./Brewfile) which makes easier to mantain and more flexible for the community to customize (you can point `brew` to different Brewfiles whenever you need; also easier to customize in your own fork)
+  - Homebrew is only used on MacOS in this fork.
 - Docker. Means you can test this repo in a Docker container without messing with your host environment until you're sure. More on that in the [Docker Support](#docker-support) section below.
-- Linux support. It's still very far from ideal, but it's my intention to leave the repo working for both MacOS and Linux as well as we can. The initial effort is done via the Docker support. The community can take it from there and help improve things.
-- Themes and colors. I'm not a fan of Solarized so I removed it and so far I'm enjoying Gruvbox theme (both for Vim and the terminal). I have also created my own zsh prompt. There are some screenshots in the [Screenshots](#screenshots) section below.
+- Linux support. I use the repo daily working in both MacOS and Linux.
+- Themes and colors. I am a fan of Solarized but I found it work very differently in various OS and Terminals so I use [OneHalf Dark](https://github.com/sonph/onehalf) for tmux, vim, and terminals.
+  - Tmux:
+    - Theme [OneHalf Dark](httos://github.com/sonph/onehalf) is a tmux plugin applied by a custom `~/.tmux.conf.user` file.
+    - Statusline is powerline style.
 
 ## What's included, how to learn, how to customize?
 
