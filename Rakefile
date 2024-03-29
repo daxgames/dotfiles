@@ -400,15 +400,28 @@ def want_to_install? (section)
 
   if ! install_env.to_s.empty?
     ENV["__YADR_SAVE_CONFIG"] = 'y'
-    install_env == 'y'
+    puts "install_env: #{install_env}"
+    if install_env == 'y'
+      ENV["__YADR_INSTALL_#{install_type}"] == 'y'
+      true
+    else
+      ENV["__YADR_INSTALL_#{install_type}"] == 'n'
+      false
+    end
   elsif ENV["ASK"]=="true" && $stdout.isatty
     puts "Would you like to install configuration files for: #{section}? [y]es, [n]o"
 
     # set env var to match user answer so we do not ask again
     ENV["__YADR_SAVE_CONFIG"] = 'y'
     ENV["__YADR_INSTALL_#{install_type}"] = STDIN.gets.chomp
-    ENV["__YADR_INSTALL_#{install_type}"] == 'y'
+    if ENV["__YADR_INSTALL_#{install_type}"] == 'y'
+      true
+    else
+      false
+    end
   else
+    ENV["__YADR_INSTALL_#{install_type}"] = 'y'
+    ENV["__YADR_SAVE_CONFIG"] = 'y'
     true
   end
 end
