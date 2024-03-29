@@ -4,13 +4,13 @@
     | |   | |         | |
     | |___| |_____  __| | ____     Yet Another Dotfile Repo
     |_____  (____ |/ _  |/ ___)
-     _____| / ___ ( (_| | |        @daxgames's Version
+     _____| / ___ ( (_| | |        @maximus-codeshuttle's Version
     (_______\_____|\____|_|
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[![Build Status](https://travis-ci.org/lfilho/dotfiles.svg?branch=main)](https://travis-ci.org/lfilho/dotfiles)&nbsp;![PRs Welcome][prs-badge]&nbsp;![macos supported][apple-logo]&nbsp;![linux supported][linux-logo]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[![Build Status](https://travis-ci.org/maximus-codeshuttle/dotfiles.svg?branch=main)](https://travis-ci.org/maximus-codeshuttle/dotfiles)&nbsp;![PRs Welcome][prs-badge]&nbsp;![macos supported][apple-logo]&nbsp;![linux supported][linux-logo]
 
 ```bash
-sh -c "`curl -fsSL https://raw.githubusercontent.com/daxgames/dotfiles/main/install.sh`"
+sh -c "`curl -fsSL https://raw.githubusercontent.com/maximus-codeshuttle/dotfiles/main/install.sh`"
 ```
 
 ---
@@ -45,13 +45,13 @@ Table of Contents:
 To get started please run:
 
 ```bash
-sh -c "`curl -fsSL https://raw.githubusercontent.com/lfilho/dotfiles/main/install.sh`"
+sh -c "`curl -fsSL https://raw.githubusercontent.com/maximus-codeshuttle/dotfiles/main/install.sh`"
 ```
 
 **Note:** YADR will automatically install all of its subcomponents. If you want to be asked about each one, use:
 
 ```bash
-sh -c "`curl -fsSL https://raw.githubusercontent.com/lfilho/dotfiles/main/install.sh`" -s ask
+sh -c "`curl -fsSL https://raw.githubusercontent.com/maximus-codeshuttle/dotfiles/main/install.sh`" -s ask
 ```
 
 ### Instructions for Linux
@@ -95,7 +95,7 @@ rake update
 
 ## What is (this fork's version of) YADR?
 
-This is @lfilho's fork of the great work done by Yan (@skwp), [Yadr](https://github.com/skwp/dotfiles).
+This is @maximus-codeshuttle's fork of the great work done by Yan (@skwp), [Yadr](https://github.com/skwp/dotfiles).
 
 I've been using Yadr since 2013 but since a couple of years ago my preferences and configurations started to diverge too much from upstream. So now my repo is barely mergeable with the original one. Although I'm still a contributor there, my main focus should on my fork (unless we converge again in the future of course :-)).
 
