@@ -96,7 +96,7 @@ rake update
 
 ## What is (this fork's version of) YADR?
 
-This is the Dax Games fork of the great work done by:
+This is @daxgames's fork of the great work done by:
 
 - Yan (@skwp), [Yadr - skwp](https://github.com/skwp/dotfiles)
 - Luiz (@lfilho), [Yadr - lfilho](https://github.com/lfilho/dotfiles)
