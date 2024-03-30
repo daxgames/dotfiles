@@ -20,8 +20,7 @@ sh -c "`curl -fsSL https://raw.githubusercontent.com/daxgames/dotfiles/main/inst
 Table of Contents:
 
 - [Installation](#installation)
-  - [One liner for OSX](#one-liner-for-osx)
-  - [Instructions for Linux](#instructions-for-linux)
+  - [One liner for OSX and Linux](#one-liner-for-osx-and-linux)
   - [Wait, you're not done!](#wait-youre-not-done)
 - [Upgrading](#upgrading)
 - [What is YADR?](#what-is-yadr)
@@ -40,7 +39,9 @@ Table of Contents:
 
 ## Installation
 
-### One liner for OSX
+### One liner for OSX and Linux
+
+_Note: Install on Linux has been verified on Ubuntu and Fedora derivatives. Other distros may require manual intervention._
 
 To get started please run:
 
