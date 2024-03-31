@@ -59,7 +59,7 @@ sh -c "`curl -fsSL https://raw.githubusercontent.com/daxgames/dotfiles/main/inst
 
 _Please do help us improving Linux support in this repo ;-)_
 
-Linux installation is finnicky and might require running some of the commands from `Rakefile` manually. PRs are welcome! :)
+Linux installation can be finnicky and might require running some of the commands to instsall supporting software manually. PRs are welcome! :)
 
 _TIP_: You can check the [`Dockerfile`](./Dockerfile) to see what's need for a basic installation.
 
@@ -98,8 +98,8 @@ rake update
 
 This is @daxgames's fork of the great work done by:
 
-- Yan (@skwp), [Yadr](https://github.com/skwp/dotfiles)
-- Luiz (@lfilho), [Yadr](https://github.com/lfilho/dotfiles)
+- Yan (@skwp), [Yadr - skwp](https://github.com/skwp/dotfiles)
+- Luiz (@lfilho), [Yadr - lfilho](https://github.com/lfilho/dotfiles)
 
 Luiz and I have been using YADR for a long time and we have been contributing to it as well. We both decided to fork it and make it our own for a few reasons.
 
@@ -107,25 +107,24 @@ This repo is a combination of the two repos above, with some personal preference
 
 Here are the differences in a nutshell (also make sure you read the [What's included, how to learn, how to customize?](#whats-included-how-to-learn-how-to-customize) section):
 
-- NeoVim and Vim in Terminal rather than GUI MacVim
-- Generally faster vim experience (mostly because of RipGrep and NeoVim's async stuff)
-- Keymaps that don't rely on MacOS's <kbd>Cmd</kbd> key, so keymaps would stay cohesive in both TUI vim, GUI vim and Linux environments.
-- Testing. We have basic CI testing. See more about it in the [Testing](#testing) section.
-- Different set of VIM plugins. That's too big of a list to keep up to date here in README so if you're interested you're better off comparing the two repo's plugins. What I can say is:
-  - We focus less on Ruby, since it's not my most used language
-  - We focus a little more on Javascript/Node
-  - We focus on plugins that work better with NeoVim's better features and architecture
-- Couple of new aliases for command line and also git
-- Different file and folder organization and conventions for vim plugins and configurations (all contained to installation folder)
-- Automated iTerm2 configuration (including themes and colors)
-- Brew packages. I have added a [`Brewfile`](./Brewfile) which makes easier to mantain and more flexible for the community to customize (you can point `brew` to different Brewfiles whenever you need; also easier to customize in your own fork)
-  - Homebrew is only used on MacOS in this fork.
-- Docker. Means you can test this repo in a Docker container without messing with your host environment until you're sure. More on that in the [Docker Support](#docker-support) section below.
+- Configurations for both NeoVim([Yadr - lfilho](https://github.com/lfilho/dotfiles)) and Vim in Terminal using MacVim([Yadr - skwp](https://github.com/skwp/dotfiles)).
+  - Check them out for details on each, below are the main differences in this combined fork.
 - Linux support. I use the repo daily working in both MacOS and Linux.
+- Different set of NeoVim/VIM plugins. That's too big of a list to keep up to date here in README so if you're interested you're better off comparing the two repo's plugins. What I can say is:
+  - NeoVim is the main focus moving forward.
+    - Configuration comes mostly from [Yadr - lfilho](https://github.com/lfilho/dotfiles).
+    - Focus on plugins that work better with NeoVim's better features and architecture
+    - Removed Coc and replaced it with LSP
+    - Added a few more plugins that add some things I/we like.
+  - Vim is still supported but not a priority and may eventually be phased out.  I am not sure I am ready to COMPLETELY switch yet!
+    - Configuration comes mostly from [Yadr - skwp](https://github.com/skwp/dotfiles)
+    - Removed Syntastic and replaced it with ALE.
+    - Removed NeoComplete and replaced it with Deoplete.
+    - Added a few more plugins that add some things I/we like.
+- Homebrew is only used on MacOS in this fork.
 - Themes and colors. I am a fan of Solarized but I found it work very differently in various OS and Terminals so I use [OneHalf Dark](https://github.com/sonph/onehalf) for tmux, vim, and terminals.
-  - Tmux:
-    - Theme [OneHalf Dark](httos://github.com/sonph/onehalf) is a tmux plugin applied by a custom `~/.tmux.conf.user` file.
-    - Statusline is powerline style.
+  - NeoVim/Vim and iTerm2 are configured to use OneHalf Dark.
+    - Theme [OneHalf Dark](httos://github.com/sonph/onehalf).
 
 ## What's included, how to learn, how to customize?
 

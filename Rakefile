@@ -491,11 +491,6 @@ def install_prezto
   install_files(Dir.glob('zsh/prezto/runcoms/zprofile'), :symlink)
   install_files(Dir.glob('zsh/prezto/runcoms/zshenv'), :symlink)
 
-  # puts
-  # puts "Overriding prezto ~/.zpreztorc with YADR's zpreztorc to enable additional modules..."
-  # run %{ ln -nfs "$HOME/.yadr/zsh/prezto-override/zpreztorc" "${ZDOTDIR:-$HOME}/.zpreztorc" }
-  # run %{ ln -s ~/.zprezto/modules/prompt/external/powerlevel9k/powerlevel9k.zsh-theme ~/.zprezto/modules/prompt/functions/prompt_powerlevel9k_setup }
-
   puts
   puts "Creating directories for your customizations"
   run %{ mkdir -p $HOME/.zsh.before }
