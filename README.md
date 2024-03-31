@@ -59,7 +59,7 @@ sh -c "`curl -fsSL https://raw.githubusercontent.com/daxgames/dotfiles/main/inst
 
 _Please do help us improving Linux support in this repo ;-)_
 
-Linux installation can be finnicky depending on the distribution and might require running some commands to install supporting software manually. PRs are welcome! :)
+Linux installation is finnicky and might require running some of the commands from `Rakefile` manually. PRs are welcome! :)
 
 _TIP_: You can check the [`Dockerfile`](./Dockerfile) to see what's need for a basic installation.
 
@@ -108,7 +108,7 @@ This repo is a combination of the two repos above, with some personal preference
 Here are the differences in a nutshell (also make sure you read the [What's included, how to learn, how to customize?](#whats-included-how-to-learn-how-to-customize) section):
 
 - Configurations for both NeoVim([Yadr - lfilho](https://github.com/lfilho/dotfiles)) and Vim in Terminal using MacVim([Yadr - skwp](https://github.com/skwp/dotfiles)).
-- Generally faster vim experience (mostly because of RipGrep and NeoVim's async stuff, but we also use less plugins)
+  - Check them out for details on each, below are the main differences in this combined fork.
 - Linux support. I use the repo daily working in both MacOS and Linux.
 - Different set of NeoVim/VIM plugins. That's too big of a list to keep up to date here in README so if you're interested you're better off comparing the two repo's plugins. What I can say is:
   - NeoVim is the main focus moving forward.
@@ -122,10 +122,9 @@ Here are the differences in a nutshell (also make sure you read the [What's incl
     - Removed NeoComplete and replaced it with Deoplete.
     - Added a few more plugins that add some things I/we like.
 - Homebrew is only used on MacOS in this fork.
-- Linux support. I use the repo daily working in both MacOS and Linux.
 - Themes and colors. I am a fan of Solarized but I found it work very differently in various OS and Terminals so I use [OneHalf Dark](https://github.com/sonph/onehalf) for tmux, vim, and terminals.
-- Themes and colors. I'm not a fan of Solarized so I removed it and so far I'm enjoying Gruvbox theme (both for Vim and the terminal). I have also created my own zsh prompt. There are some screenshots in the [Screenshots](#screenshots) section below.
-    - Statusline is powerline style.
+  - NeoVim/Vim and iTerm2 are configured to use OneHalf Dark.
+    - Theme [OneHalf Dark](httos://github.com/sonph/onehalf).
 
 ## What's included, how to learn, how to customize?
 
