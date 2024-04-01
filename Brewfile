@@ -2,19 +2,16 @@
 tap 'cantino/mcfly'
 
 if OS.mac?
-    tap 'homebrew/cask'
+    # tap 'homebrew/bundle'
+    # tap 'homebrew/cask'
+    tap 'homebrew/cask-fonts'
+    # tap 'homebrew/core'
 end
-
-tap 'homebrew/bundle'
-tap 'homebrew/cask'
-tap 'homebrew/cask-fonts'
-tap 'homebrew/core'
 
 if OS.linux?
    tap 'gromgit/fuse'
 end
 
-cask 'firefox'
 cask 'font-fira-code'
 cask 'font-hack-nerd-font'
 cask 'font-fira-code-nerd-font'
