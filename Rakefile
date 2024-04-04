@@ -502,25 +502,27 @@ def install_prezto
   run %{ mkdir -p $HOME/.zsh.after }
   run %{ mkdir -p $HOME/.zsh.prompts }
 
-  if "#{ENV['SHELL']}".include? 'zsh' then
-    puts "Zsh is already configured as your shell of choice. Restart your session to load the new settings"
-  else
-    puts "Setting zsh as your default shell"
-    if File.exist?("/usr/local/bin/zsh")
-      if File.readlines("/private/etc/shells").grep("/usr/local/bin/zsh").empty?
-        puts "Adding zsh to standard shell list"
-        run %{ echo "/usr/local/bin/zsh" | sudo tee -a /private/etc/shells }
-      end
-      run %{ sudo chsh -s /usr/local/bin/zsh $USER }
-    elsif File.exist?("/home/linuxbrew/.linuxbrew/bin/zsh")
-      if File.readlines("/etc/shells").grep("/home/linuxbrew/.linuxbrew/bin/zsh").empty?
-        puts "Adding zsh to standard shell list"
-        run %{ echo "/home/linuxbrew/.linuxbrew/bin/zsh" | sudo tee -a /etc/shells }
-      end
-      run %{ sudo chsh -s /home/linuxbrew/.linuxbrew/bin/zsh $USER }
+  if want_to_install?('zsh_default_shell (mak zsh the default shell))')
+    if "#{ENV['SHELL']}".include? 'zsh' then
+      puts "Zsh is already configured as your shell of choice. Restart your session to load the new settings"
     else
-      puts "Falling back to default/system zsh"
-      run %{ chsh -s /bin/zsh }
+      puts "Setting zsh as your default shell"
+      if File.exist?("/usr/local/bin/zsh")
+        if File.readlines("/private/etc/shells").grep("/usr/local/bin/zsh").empty?
+          puts "Adding zsh to standard shell list"
+          run %{ echo "/usr/local/bin/zsh" | sudo tee -a /private/etc/shells }
+        end
+        run %{ sudo chsh -s /usr/local/bin/zsh $USER }
+      elsif File.exist?("/home/linuxbrew/.linuxbrew/bin/zsh")
+        if File.readlines("/etc/shells").grep("/home/linuxbrew/.linuxbrew/bin/zsh").empty?
+          puts "Adding zsh to standard shell list"
+          run %{ echo "/home/linuxbrew/.linuxbrew/bin/zsh" | sudo tee -a /etc/shells }
+        end
+        run %{ sudo chsh -s /home/linuxbrew/.linuxbrew/bin/zsh $USER }
+      else
+        puts "Falling back to default/system zsh"
+        run %{ chsh -s /bin/zsh }
+      end
     end
   end
 end
