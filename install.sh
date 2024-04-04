@@ -3,10 +3,10 @@
 if [ ! -d "$HOME/.yadr" ]; then
     echo "Installing YADR for the first time"
 
-    git_repo=$(echo ${__YADR_REPO_URL:-https://github.com/daxgames/dotfiles.git})
+    git_repo=$(echo ${__YADR_REPO_URL:-https://github.com/maximus-codeshuttle/dotfiles.git})
     git_branch=$(echo ${__YADR_REPO_BRANCH:-main})
 
-    if [ -z "${__YADR_DEBUG}" ] ; then
+    if [ -n "${__YADR_DEBUG}" ] ; then
       git_repo=$(git ls-remote --get-url 2>/dev/null)
       git_branch=$(git branch --show-current)
     fi
@@ -54,4 +54,7 @@ if [ ! -d "$HOME/.yadr" ]; then
     rake install
 else
     echo "YADR is already installed"
+    cd ~/.yadr
+    git pull --rebase
+    rake update
 fi

@@ -42,6 +42,8 @@ task :install => [:submodule_init, :submodules] do
 
   run_bundle_config
 
+  save_config
+
   success_msg("installed")
 end
 
@@ -131,6 +133,18 @@ def run(cmd)
     system(cmd) unless ENV['DEBUG']
   else
     `#{cmd}` unless ENV['DEBUG']
+  end
+end
+
+def save_config
+  if ENV['__YADR_SAVE_CONFIG'] == 'y'
+    if File.exist?("#{ENV['HOME']}/.bash.before")
+      run %{ env | grep '__YADR_' | sed 's/^__YADR_/export __YADR_/' | sort > "#{ENV['HOME']}/.bash.before/yadr_config.sh" }
+    end
+
+    if File.exist?("#{ENV['HOME']}/.zsh.before")
+      run %{ env | grep '__YADR_' | sed 's/^__YADR_/export __YADR_/' | sort > "#{ENV['HOME']}/.zsh.before/yadr_config.zsh" }
+    end
   end
 end
 
@@ -394,16 +408,29 @@ def want_to_install? (section)
   install_env = ENV["__YADR_INSTALL_#{install_type}"] || ''
 
   if ! install_env.to_s.empty?
-    install_env == 'y'
+    ENV["__YADR_SAVE_CONFIG"] = 'y'
+    puts "install_env: #{install_env}"
+    if install_env == 'y'
+      ENV["__YADR_INSTALL_#{install_type}"] == 'y'
+      true
+    else
+      ENV["__YADR_INSTALL_#{install_type}"] == 'n'
+      false
+    end
   elsif ENV["ASK"]=="true" && $stdout.isatty
     puts "Would you like to install configuration files for: #{section}? [y]es, [n]o"
 
     # set env var to match user answer so we do not ask again
+    ENV["__YADR_SAVE_CONFIG"] = 'y'
     ENV["__YADR_INSTALL_#{install_type}"] = STDIN.gets.chomp
-    ENV["__YADR_INSTALL_#{install_type}"] == 'y'
+    if ENV["__YADR_INSTALL_#{install_type}"] == 'y'
+      true
+    else
+      false
+    end
   else
-    # set env var to match returned answer so we do not ask again
     ENV["__YADR_INSTALL_#{install_type}"] = 'y'
+    ENV["__YADR_SAVE_CONFIG"] = 'y'
     true
   end
 end

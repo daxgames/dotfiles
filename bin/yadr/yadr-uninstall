@@ -2,3 +2,6 @@
 
 cd ~/
 ls -la | grep yadr | awk '{print $9}' | xargs rm -rf
+[[ -f $HOME/.zshrc.backup ]] && mv $HOME/.zshrc.backup $HOME/.zshrc
+[[ -f $HOME/.gitconfig.backup ]] && mv $HOME/.gitconfig.backup $HOME/.gitconfig
+[[ -f $HOME/.tmux.conf.backup ]] && mv $HOME/.tmux.conf.backup $HOME/.tmux.conf
