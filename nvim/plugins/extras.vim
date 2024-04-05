@@ -8,4 +8,4 @@ Plug 'juneedahamed/vc.vim'
 Plug 'github/copilot.vim'
 Plug 'vim-scripts/Tango-colour-scheme'
 Plug 'sonph/onehalf', {'rtp': 'vim'}
-Plug 'ku1ik/vim-monokai.git'
+Plug 'ku1ik/vim-monokai'
