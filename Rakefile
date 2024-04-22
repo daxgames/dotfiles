@@ -543,6 +543,7 @@ def want_to_install? (section)
     ENV["__YADR_INSTALL_#{install_type}"] = STDIN.gets.chomp
     ENV["__YADR_INSTALL_#{install_type}"] == 'y'
   else
+    ENV["__YADR_INSTALL_#{install_type}"] == 'y'
     true
   end
 end
