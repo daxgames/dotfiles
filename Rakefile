@@ -33,6 +33,19 @@ task :install => [:submodule_init, :submodules] do
   install_files(Dir.glob('irb/*')) if want_to_install?('irb pry configs (more colorful)')
   install_files(Dir.glob('ruby/*')) if want_to_install?('rubygems config (faster/no docs)')
   install_files(Dir.glob('ctags/*')) if want_to_install?('ctags config (better js/ruby support)')
+
+  if want_to_install?('tmux config')
+    install_files(Dir.glob('tmux/*'))
+    if ! File::exist?("#{File.join(ENV['HOME'], '.tmux', 'plugins', 'tpm')}")
+      run %{ git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm }
+    else
+      run %{
+        cd "#{File.join(ENV['HOME'], '.tmux', 'plugins', 'tpm')}"
+        git pull --rebase
+      }
+    end
+  end
+
   install_files(Dir.glob('tmux/*')) if want_to_install?('tmux config')
   install_files(Dir.glob('vimify/*')) if want_to_install?('vimification of command line tools')
 
@@ -110,7 +123,7 @@ task :submodules do
     puts "======================================================"
 
     run %{
-      cd $HOME/.yadr
+      cd "#{File.join(ENV['HOME'], '.yadr')}"
       git submodule update --recursive
       git clean -df
     }
