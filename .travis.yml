@@ -1,0 +1,21 @@
+language: generic
+
+services:
+  - docker
+
+git:
+  depth: 1
+
+matrix:
+  include:
+    - os: osx
+      osx_image: xcode10.1
+    - os: linux
+      sudo: required
+      dist: focal
+
+before_install: ./test/travis-before-install.sh
+
+install: ./test/travis-install.sh
+
+script: ./test/travis-test-script.sh

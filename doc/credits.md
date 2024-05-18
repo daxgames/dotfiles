@@ -14,7 +14,6 @@ and other places for the cream of the crop of vim awesomeness.
 And everything that's in the modules included in vim/bundle of course.
 Please explore these people's work.
 
-
 ### Contributors
 
 Yadr is made possible by many awesome people, too many to list :) But here are a few of the bigger contributors and core committers.
@@ -24,3 +23,8 @@ Yadr is made possible by many awesome people, too many to list :) But here are a
  * Switch from oh-my-zsh to Presto: @[JeanMertz](https://github.com/JeanMertz)
  * Vundle migration: @[duhanebel](https://github.com/duhanebel)
  * Docker support: @[lfilho](https://github.com/lfilho)
+ * The sources of this fork:
+   * @[skwp](https://github.com/skwp)
+   * @[lfilho](https://github.com/lfilho)
+ * This fork: @[daxgames](https://github.com/daxgames)
+ * And everyone listed here: https://github.com/daxgames/dotfiles/graphs/contributors

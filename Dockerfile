@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 LABEL maintainer="Luiz Filho <lfilho@gmail.com>"
 
 ENV TERM xterm-256color
@@ -21,8 +21,9 @@ RUN localedef -i en_US -f UTF-8 en_US.UTF-8 && \
 # Install dependencies
 # `universe` is needed for ruby
 # `security` is needed for fontconfig and fc-cache
-# Let the container know that there is no tty
-RUN DEBIAN_FRONTEND=noninteractive \
+# `noninteractive` is to let the container know that there is no tty
+RUN DEBIAN_FRONTEND noninteractive \
+  add-apt-repository "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) universe security" && \
   add-apt-repository ppa:aacebedo/fasd && \
   apt-get update && \
   apt-get -yqq install \
@@ -32,6 +33,7 @@ RUN DEBIAN_FRONTEND=noninteractive \
     fasd \
     fontconfig \
     git \
+    neovim \
     python \
     python-setuptools \
     python-dev \

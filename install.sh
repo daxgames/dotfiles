@@ -1,9 +1,9 @@
 #!/bin/sh
 
 if [ ! -d "$HOME/.yadr" ]; then
-    echo "Installing YADR for the first time"
+    echo "Installing daxgames's YADR for the first time"
 
-    git_repo=$(echo ${__YADR_REPO_URL:-https://github.com/maximus-codeshuttle/dotfiles.git})
+    git_repo=$(echo ${__YADR_REPO_URL:-https://github.com/daxgames/dotfiles.git})
     git_branch=$(echo ${__YADR_REPO_BRANCH:-main})
 
     if [ -n "${__YADR_DEBUG}" ] ; then
@@ -11,7 +11,7 @@ if [ ! -d "$HOME/.yadr" ]; then
       git_branch=$(git branch --show-current)
     fi
 
-    [ -n "${DEBUG}" ] && env | grep "__YADR_"
+    [ -n "${__YADR_DEBUG}" ] && env | grep "__YADR_"
     echo "git_repo: ${git_repo}"
     echo "git_branch: ${git_branch}"
 
@@ -49,12 +49,19 @@ if [ ! -d "$HOME/.yadr" ]; then
                 [ "${PLATFORM_VERSION}" -gt 7 ] && `which sudo 2>/dev/null` dnf install -y rubygem-rake
             fi
         fi
+    elif [ "${PLATFORM}" = "Darwin" ] ; then
+        PLATFORM_FAMILY=$(echo ${PLATFORM} | tr [A-Z] [a-z])
     fi
+
+    # Enable persistent undo
+    mkdir -p $HOME/.vim/backups > /dev/null 2>&1
+    mkdir -p $HOME/.share/nvim/backups > /dev/null 2>&1
 
     rake install
 else
     echo "YADR is already installed"
-    cd ~/.yadr
+    pushd $HOME/.yadr >>/dev/null 2>&1
     git pull --rebase
     rake update
+    popd >>/dev/null 2>&1
 fi
