@@ -1,10 +1,5 @@
 " Make it beautiful - colors and fonts
 
-" colorscheme base16-lfilho
-" let base16colorspace=256
-" let g:hybrid_custom_term_colors = 1
-" let g:hybrid_reduced_contrast = 1
-
 if has("termguicolors")
   set termguicolors
 endif
@@ -49,3 +44,5 @@ set synmaxcol=800
 
 " Resize splits when the window is resized
 au VimResized * :wincmd =
+
+colorscheme onehalfdark
