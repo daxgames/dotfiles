@@ -124,7 +124,7 @@ Here are the differences in a nutshell (also make sure you read the [What's incl
 - Homebrew is only used on MacOS in this fork.
 - Themes and colors. I am a fan of Solarized but I found it work very differently in various OS and Terminals so I use [OneHalf Dark](https://github.com/sonph/onehalf) for tmux, vim, and terminals.
   - NeoVim/Vim and iTerm2 are configured to use OneHalf Dark.
-    - Theme [OneHalf Dark](httos://github.com/sonph/onehalf).
+    - Theme [One Half Dark](httos://github.com/sonph/onehalf).
 
 ## What's included, how to learn, how to customize?
 
@@ -150,15 +150,11 @@ Head to [test/README.md](./test/README.md) for more details.
 
 ## Screenshot
 
-Here's how my zsh prompt looks like on iTerm:
+Here's how my zsh prompt looks like on iTerm with tmux:
 
-![](./doc/screenshot-iterm-gruvbox.png)
+![](./doc/screenshot-iterm-onehalfdark.png)
 
-And here's another example inside a tmux's pane with tmux's statusline (powerline style):
-
-![](./doc/screenshot-tmux-gruvbox.png)
-
-It's using Gruvbox colors. For screenshots on how Vim looks with Gruvbox, you can check [their gallery](https://github.com/morhetz/gruvbox/wiki/Gallery) out.
+It's using [One Half Dark](httos://github.com/sonph/onehalf) iTerm theme.
 
 ## Vimization of everything
 
