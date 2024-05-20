@@ -59,7 +59,7 @@ sh -c "`curl -fsSL https://raw.githubusercontent.com/daxgames/dotfiles/main/inst
 
 _Please do help us improving Linux support in this repo ;-)_
 
-Linux installation is finnicky and might require running some of the commands from `Rakefile` manually. PRs are welcome! :)
+Linux installation can be finnicky depending on the distribution and might require running some commands to install supporting software manually. PRs are welcome! :)
 
 _TIP_: You can check the [`Dockerfile`](./Dockerfile) to see what's need for a basic installation.
 
