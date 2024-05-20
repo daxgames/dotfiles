@@ -124,7 +124,7 @@ Here are the differences in a nutshell (also make sure you read the [What's incl
 - Homebrew is only used on MacOS in this fork.
 - Themes and colors. I am a fan of Solarized but I found it work very differently in various OS and Terminals so I use [OneHalf Dark](https://github.com/sonph/onehalf) for tmux, vim, and terminals.
   - NeoVim/Vim and iTerm2 are configured to use OneHalf Dark.
-    - Theme [OneHalf Dark](httos://github.com/sonph/onehalf).
+    - Theme [One Half Dark](httos://github.com/sonph/onehalf).
 
 ## What's included, how to learn, how to customize?
 
