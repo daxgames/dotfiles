@@ -14,6 +14,10 @@ task :install => [:submodule_init, :submodules] do
   puts '======================================================'
   puts
 
+  if ! File.exist?("#{ENV['HOME']}/bin")
+    run %{ mkdir -p $HOME/bin }
+  end
+
   ENV['PATH'] = "#{File.join(ENV['HOME'], 'bin')}:#{ENV['PATH']}"
   install_homebrew if $is_macos
 
