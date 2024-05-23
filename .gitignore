@@ -16,3 +16,4 @@ bin/subl
 tags
 Brewfile.lock.json
 nvim/
+ranger/
