@@ -22,6 +22,18 @@ task :install => [:submodule_init, :submodules] do
   install_homebrew if $is_macos
 
   if $is_linux
+    if linux_variant[:distro] == 'Ubuntu' || linux_variant[:distro] == 'Debian'
+      # Running on Debian/Ubuntu
+      run %{sudo apt update -y}
+      run %{sudo apt install -y build-essential python3-pip ruby-dev}
+    elsif linux_variant[:family] == 'Redhat'
+      run %{yum groups install "Development Tools"}
+      if linux_variant[:distro] == nil
+        # Running on Redhat Linux
+      elsif linux_variant[:distro] == 'Centos'
+        # Running on Centos Linux
+      end
+    end
     install_zsh if want_to_install?('zsh (shell, enhancements))')
     install_from_github('bat', 'https://github.com/sharkdp/bat/releases/download/v0.24.0/bat-v0.24.0-i686-unknown-linux-musl.tar.gz')
     install_from_github('nvim', 'https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz')
@@ -61,6 +73,11 @@ task :install => [:submodule_init, :submodules] do
     install_files(Dir.glob('{vim,vimrc}'))
     Rake::Task["install_vundle"].execute
 
+    # run %{pip3 install tmuxp}
+    run %{pip3 install --user neovim} # For NeoVim plugins
+    run %{pip3 install --user pynvim} # For NeoVim plugins
+    run %{gem install neovim --user-install} # For NeoVim plugins
+
     if File.exist?(File.join(ENV['HOME'], '.vimrc.before'))
       run %{ ln -sf "$HOME/.vimrc.before" "$HOME/.config/nvim/settings/before/000-userconfig-vimrc.before.vim" }
     end
@@ -99,9 +116,7 @@ end
 
 task :install_prezto do
   if want_to_install?('prezto & zsh enhancements')
-    if $is_macos || ENV['__YADR_INSTALL_ZSH'] == 'y'
-      install_prezto
-    end
+    install_prezto
   end
 end
 
@@ -300,12 +315,12 @@ def install_python_modules
     puts "installed, this will do nothing."
     puts "======================================================"
     if ENV['PLATFORM_FAMILY'] == 'debian'
-      run %{ apt install -y pip }
+      run %{ sudo apt install -y pip }
     elsif ENV['PLATFORM_FAMILY'] == 'rhel'
       if ENV['PLATFORM_VERSION'].to_i < 8
-        run %{ yum install -y python3-pip }
+        run %{ sudo yum install -y python3-pip }
       else
-        run %{ dnf install -y python3-pip }
+        run %{ sudo dnf install -y python3-pip }
       end
     end
   end
@@ -349,17 +364,6 @@ def install_homebrew
         puts "'brew' is NOT in the path!"
         exit 0
       end
-
-      if linux_variant[:distro] == 'Ubuntu' || linux_variant[:distro] == 'Debian'
-        # Running on Debian/Ubuntu
-        run %{sudo apt-get install build-essential}
-      elsif linux_variant[:family] == 'Redhat'
-        if linux_variant[:distro] == nil
-          # Running on Redhat Linux
-        elsif linux_variant[:distro] == 'Centos'
-          # Running on Centos Linux
-        end
-      end
     end
   end
 
@@ -380,10 +384,6 @@ def install_homebrew
   else
     run %{brew bundle install --verbose}
   end
-  # run %{pip3 install tmuxp}
-  run %{pip3 install --user neovim} # For NeoVim plugins
-  run %{pip3 install --user pynvim} # For NeoVim plugins
-  run %{gem install neovim} # For NeoVim plugins
   puts
   puts
 end
