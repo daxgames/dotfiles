@@ -265,12 +265,12 @@ def install_zsh
     puts "======================================================"
 
     if ENV['PLATFORM_FAMILY'] == 'debian'
-      run %{ apt install -y zsh }
+      run %{ sudo apt install -y zsh }
     elsif ENV['PLATFORM_FAMILY'] == 'rhel'
       if ENV['PLATFORM_VERSION'].to_i < 8
-        run %{ yum install -y zsh }
+        run %{ sudo yum install -y zsh }
       else
-        run %{ dnf install -y zsh }
+        run %{ sudo dnf install -y zsh }
       end
     end
   end
