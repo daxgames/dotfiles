@@ -283,7 +283,7 @@ end
 
 def install_from_github(app_name, download_url)
   download_path = File.join('/tmp',"#{app_name}.tar.gz")
-  install_path = File.join('/opt', app_name)
+  install_path = File.join(ENV['HOME'], '.local', app_name)
   link_path = File.join(ENV['HOME'], 'bin', app_name)
   puts "======================================================"
   puts "Installing/Updating '#{app_name}' to '#{install_path}'..."
