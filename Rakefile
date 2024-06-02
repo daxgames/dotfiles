@@ -27,12 +27,8 @@ task :install => [:submodule_init, :submodules] do
       run %{sudo apt update -y}
       run %{sudo apt install -y build-essential python3-pip ruby-dev}
     elsif linux_variant[:family] == 'Redhat'
+      run %{yum update -y}
       run %{yum groups install "Development Tools"}
-      if linux_variant[:distro] == nil
-        # Running on Redhat Linux
-      elsif linux_variant[:distro] == 'Centos'
-        # Running on Centos Linux
-      end
     end
     install_zsh if want_to_install?('zsh (shell, enhancements))')
     install_from_github('bat', 'https://github.com/sharkdp/bat/releases/download/v0.24.0/bat-v0.24.0-i686-unknown-linux-musl.tar.gz')
