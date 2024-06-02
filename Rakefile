@@ -290,9 +290,9 @@ def install_from_github(app_name, download_url)
   puts "======================================================"
   puts "Downloading #{download_url}"
   run %{ curl -Lo #{download_path} #{download_url} }
-  run %{ sudo rm -rf #{install_path} }
-  run %{ sudo mkdir -p #{install_path} }
-  run %{ sudo tar -C #{install_path} --strip-components=1 -xzf #{download_path} }
+  run %{ rm -rf #{install_path} }
+  run %{ mkdir -p #{install_path} }
+  run %{ tar -C #{install_path} --strip-components=1 -xzf #{download_path} }
   run %{ rm -f #{download_path} }
   run %{ ln -sf $(find #{install_path} -type f -name '#{app_name}') #{link_path} }
 end
