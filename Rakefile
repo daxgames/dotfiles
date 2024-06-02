@@ -22,16 +22,11 @@ task :install => [:submodule_init, :submodules] do
   install_homebrew if $is_macos
 
   if $is_linux
-    run %{which brew}
-    if $?.success?
-      install_homebrew
-    else
-      install_zsh if want_to_install?('zsh (shell, enhancements))')
-      install_from_github('bat', 'https://github.com/sharkdp/bat/releases/download/v0.24.0/bat-v0.24.0-i686-unknown-linux-musl.tar.gz')
-      install_from_github('nvim', 'https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz')
-      install_from_github('rg', 'https://github.com/BurntSushi/ripgrep/releases/download/14.1.0/ripgrep-14.1.0-x86_64-unknown-linux-musl.tar.gz')
-      install_from_github('delta', 'https://github.com/dandavison/delta/releases/download/0.15.0/delta-0.15.0-x86_64-unknown-linux-musl.tar.gz')
-    end
+    install_zsh if want_to_install?('zsh (shell, enhancements))')
+    install_from_github('bat', 'https://github.com/sharkdp/bat/releases/download/v0.24.0/bat-v0.24.0-i686-unknown-linux-musl.tar.gz')
+    install_from_github('nvim', 'https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz')
+    install_from_github('rg', 'https://github.com/BurntSushi/ripgrep/releases/download/14.1.0/ripgrep-14.1.0-x86_64-unknown-linux-musl.tar.gz')
+    install_from_github('delta', 'https://github.com/dandavison/delta/releases/download/0.15.0/delta-0.15.0-x86_64-unknown-linux-musl.tar.gz')
   end
 
   install_python_modules
@@ -496,49 +491,52 @@ def install_bash
 end
 
 def install_prezto
-  puts
-  puts "Installing Prezto (ZSH Enhancements)..."
+  run %{which zsh}
+  if $?.success?
+    puts
+    puts "Installing Prezto (ZSH Enhancements)..."
 
-  if RUBY_PLATFORM.downcase.include?("cygwin")
-    run %{ cmd /c "mklink /d "%USERPROFILE%\.zprezto" "%USERPROFILE%\.yadr\zsh\prezto"" }
-  else
-    run %{ ln -nfs "$HOME/.yadr/zsh/prezto" "${ZDOTDIR:-$HOME}/.zprezto" }
-  end
-
-  # The prezto runcoms are only going to be installed if zprezto has never been installed
-  install_files(Dir.glob('zsh/prezto-override/zshrc'), :symlink)
-  install_files(Dir.glob('zsh/prezto/runcoms/zlogin'), :symlink)
-  install_files(Dir.glob('zsh/prezto/runcoms/zlogout'), :symlink)
-  install_files(Dir.glob('zsh/prezto-override/zpreztorc'), :symlink)
-  install_files(Dir.glob('zsh/prezto/runcoms/zprofile'), :symlink)
-  install_files(Dir.glob('zsh/prezto/runcoms/zshenv'), :symlink)
-
-  puts
-  puts "Creating directories for your customizations"
-  run %{ mkdir -p $HOME/.zsh.before }
-  run %{ mkdir -p $HOME/.zsh.after }
-  run %{ mkdir -p $HOME/.zsh.prompts }
-
-  if want_to_install?('zsh_default_shell (mak zsh the default shell))')
-    if "#{ENV['SHELL']}".include? 'zsh' then
-      puts "Zsh is already configured as your shell of choice. Restart your session to load the new settings"
+    if RUBY_PLATFORM.downcase.include?("cygwin")
+      run %{ cmd /c "mklink /d "%USERPROFILE%\.zprezto" "%USERPROFILE%\.yadr\zsh\prezto"" }
     else
-      puts "Setting zsh as your default shell"
-      if File.exist?("/usr/local/bin/zsh")
-        if File.readlines("/private/etc/shells").grep("/usr/local/bin/zsh").empty?
-          puts "Adding zsh to standard shell list"
-          run %{ echo "/usr/local/bin/zsh" | sudo tee -a /private/etc/shells }
-        end
-        run %{ sudo chsh -s /usr/local/bin/zsh $USER }
-      elsif File.exist?("/home/linuxbrew/.linuxbrew/bin/zsh")
-        if File.readlines("/etc/shells").grep("/home/linuxbrew/.linuxbrew/bin/zsh").empty?
-          puts "Adding zsh to standard shell list"
-          run %{ echo "/home/linuxbrew/.linuxbrew/bin/zsh" | sudo tee -a /etc/shells }
-        end
-        run %{ sudo chsh -s /home/linuxbrew/.linuxbrew/bin/zsh $USER }
+      run %{ ln -nfs "$HOME/.yadr/zsh/prezto" "${ZDOTDIR:-$HOME}/.zprezto" }
+    end
+
+    # The prezto runcoms are only going to be installed if zprezto has never been installed
+    install_files(Dir.glob('zsh/prezto-override/zshrc'), :symlink)
+    install_files(Dir.glob('zsh/prezto/runcoms/zlogin'), :symlink)
+    install_files(Dir.glob('zsh/prezto/runcoms/zlogout'), :symlink)
+    install_files(Dir.glob('zsh/prezto-override/zpreztorc'), :symlink)
+    install_files(Dir.glob('zsh/prezto/runcoms/zprofile'), :symlink)
+    install_files(Dir.glob('zsh/prezto/runcoms/zshenv'), :symlink)
+
+    puts
+    puts "Creating directories for your customizations"
+    run %{ mkdir -p $HOME/.zsh.before }
+    run %{ mkdir -p $HOME/.zsh.after }
+    run %{ mkdir -p $HOME/.zsh.prompts }
+
+    if want_to_install?('zsh_default_shell (mak zsh the default shell))')
+      if "#{ENV['SHELL']}".include? 'zsh' then
+        puts "Zsh is already configured as your shell of choice. Restart your session to load the new settings"
       else
-        puts "Falling back to default/system zsh"
-        run %{ chsh -s /bin/zsh }
+        puts "Setting zsh as your default shell"
+        if File.exist?("/usr/local/bin/zsh")
+          if File.readlines("/private/etc/shells").grep("/usr/local/bin/zsh").empty?
+            puts "Adding zsh to standard shell list"
+            run %{ echo "/usr/local/bin/zsh" | sudo tee -a /private/etc/shells }
+          end
+          run %{ sudo chsh -s /usr/local/bin/zsh $USER }
+        elsif File.exist?("/home/linuxbrew/.linuxbrew/bin/zsh")
+          if File.readlines("/etc/shells").grep("/home/linuxbrew/.linuxbrew/bin/zsh").empty?
+            puts "Adding zsh to standard shell list"
+            run %{ echo "/home/linuxbrew/.linuxbrew/bin/zsh" | sudo tee -a /etc/shells }
+          end
+          run %{ sudo chsh -s /home/linuxbrew/.linuxbrew/bin/zsh $USER }
+        else
+          puts "Falling back to default/system zsh"
+          run %{ chsh -s /bin/zsh }
+        end
       end
     end
   end
