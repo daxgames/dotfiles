@@ -27,6 +27,7 @@ nnoremap <A-(> f(ci(
 nnoremap <A-)> f)ci)
 nnoremap <A-[> f[ci[
 nnoremap <A-]> f]ci]
+
 nnoremap \' f'ci'
 nnoremap \" f"ci"
 nnoremap \( f(ci(
@@ -44,14 +45,15 @@ autocmd FileType rspec map <buffer> <A-j> }
 autocmd FileType rspec map <buffer> <A-k> {
 autocmd FileType javascript map <buffer> <A-k> }
 autocmd FileType javascript map <buffer> <A-j> {
-nnoremap <silent> \j }
-nnoremap <silent> \k {
 autocmd FileType ruby map <buffer> \j ]m
 autocmd FileType ruby map <buffer> \k [m
 autocmd FileType rspec map <buffer> \j }
 autocmd FileType rspec map <buffer> \k {
 autocmd FileType javascript map <buffer> \j }
 autocmd FileType javascript map <buffer> \k {
+
+nnoremap <silent> \j }
+nnoremap <silent> \k {
 
 " Command-/ to toggle comments
 map <A-/> :TComment<CR>

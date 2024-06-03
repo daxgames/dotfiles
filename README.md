@@ -4,13 +4,13 @@
     | |   | |         | |
     | |___| |_____  __| | ____     Yet Another Dotfile Repo
     |_____  (____ |/ _  |/ ___)
-     _____| / ___ ( (_| | |        @daxgames's Version
+     _____| / ___ ( (_| | |
     (_______\_____|\____|_|
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[![Build Status](https://travis-ci.org/lfilho/dotfiles.svg?branch=main)](https://travis-ci.org/lfilho/dotfiles)&nbsp;![PRs Welcome][prs-badge]&nbsp;![macos supported][apple-logo]&nbsp;![linux supported][linux-logo]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;![PRs Welcome][prs-badge]&nbsp;![macos supported][apple-logo]&nbsp;![linux supported][linux-logo]
 
 ```bash
-sh -c "`curl -fsSL https://raw.githubusercontent.com/daxgames/dotfiles/main/install.sh`"
+sh -c "`curl -fsSL https://raw.githubusercontent.com/maximus-codeshuttle/dotfiles/main/install.sh`"
 ```
 
 ---
@@ -20,8 +20,7 @@ sh -c "`curl -fsSL https://raw.githubusercontent.com/daxgames/dotfiles/main/inst
 Table of Contents:
 
 - [Installation](#installation)
-  - [One liner for OSX](#one-liner-for-osx)
-  - [Instructions for Linux](#instructions-for-linux)
+  - [One liner for OSX and Linux](#one-liner-for-osx-and-linux)
   - [Wait, you're not done!](#wait-youre-not-done)
 - [Upgrading](#upgrading)
 - [What is YADR?](#what-is-yadr)
@@ -40,25 +39,27 @@ Table of Contents:
 
 ## Installation
 
-### One liner for OSX
+### One liner for OSX and Linux
+
+_Note: Install on Linux has been verified on Ubuntu and Fedora derivatives. Other distros may require manual intervention._
 
 To get started please run:
 
 ```bash
-sh -c "`curl -fsSL https://raw.githubusercontent.com/lfilho/dotfiles/main/install.sh`"
+sh -c "`curl -fsSL https://raw.githubusercontent.com/maximus-codeshuttle/dotfiles/main/install.sh`"
 ```
 
 **Note:** YADR will automatically install all of its subcomponents. If you want to be asked about each one, use:
 
 ```bash
-sh -c "`curl -fsSL https://raw.githubusercontent.com/lfilho/dotfiles/main/install.sh`" -s ask
+sh -c "`curl -fsSL https://raw.githubusercontent.com/maximus-codeshuttle/dotfiles/main/install.sh`" -s ask
 ```
 
 ### Instructions for Linux
 
 _Please do help us improving Linux support in this repo ;-)_
 
-Linux installation is finnicky and might require running some of the commands from `Rakefile` manually. PRs are welcome! :)
+Linux installation can be finnicky depending on the distribution and might require running some commands to install supporting software manually. PRs are welcome! :)
 
 _TIP_: You can check the [`Dockerfile`](./Dockerfile) to see what's need for a basic installation.
 
@@ -95,27 +96,36 @@ rake update
 
 ## What is (this fork's version of) YADR?
 
-This is @lfilho's fork of the great work done by Yan (@skwp), [Yadr](https://github.com/skwp/dotfiles).
+This is the Maximus fork of the great work done by:
 
-I've been using Yadr since 2013 but since a couple of years ago my preferences and configurations started to diverge too much from upstream. So now my repo is barely mergeable with the original one. Although I'm still a contributor there, my main focus should on my fork (unless we converge again in the future of course :-)).
+- Yan (@skwp), [Yadr - skwp](https://github.com/skwp/dotfiles)
+- Luiz (@lfilho), [Yadr - lfilho](https://github.com/lfilho/dotfiles)
+- Dax (@daxgames), [Yadr - daxgames](https://github.com/daxgames/dotfiles)
+
+Luiz and I have been using YADR for a long time and we have been contributing to it as well. We both decided to fork it and make it our own for a few reasons.
+
+This repo is a combination of the two repos above, with some personal preferences and improvements.
 
 Here are the differences in a nutshell (also make sure you read the [What's included, how to learn, how to customize?](#whats-included-how-to-learn-how-to-customize) section):
 
-- NeoVim and Vim in Terminal rather than GUI MacVim
-- Generally faster vim experience (mostly because of RipGrep and NeoVim's async stuff, but we also use less plugins)
-- Keymaps that don't rely on MacOS's <kbd>Cmd</kbd> key, so keymaps would stay cohesive in both TUI vim, GUI vim and Linux environments.
-- Testing. We have basic CI testing. See more about it in the [Testing](#testing) section.
-- Different set of VIM plugins. That's too big of a list to keep up to date here in README so if you're interested you're better off comparing the two repo's plugins. What I can say is:
-  - We focus less on Ruby, since it's not my most used language
-  - We focus a little more on Javascript/Node
-  - We focus on plugins that work better with NeoVim's better features and architecture
-- Couple of new aliases for command line and also git
-- Different file and folder organization and conventions for vim plugins and configurations (all contained to installation folder)
-- Automated iTerm2 configuration (including themes and colors)
-- Brew packages. I have added a [`Brewfile`](./Brewfile) which makes easier to mantain and more flexible for the community to customize (you can point `brew` to different Brewfiles whenever you need; also easier to customize in your own fork)
-- Docker. Means you can test this repo in a Docker container without messing with your host environment until you're sure. More on that in the [Docker Support](#docker-support) section below.
-- Linux support. It's still very far from ideal, but it's my intention to leave the repo working for both MacOS and Linux as well as we can. The initial effort is done via the Docker support. The community can take it from there and help improve things.
-- Themes and colors. I'm not a fan of Solarized so I removed it and so far I'm enjoying Gruvbox theme (both for Vim and the terminal). I have also created my own zsh prompt. There are some screenshots in the [Screenshots](#screenshots) section below.
+- Configurations for both NeoVim([Yadr - lfilho](https://github.com/lfilho/dotfiles)) and Vim in Terminal using MacVim([Yadr - skwp](https://github.com/skwp/dotfiles)).
+  - Check them out for details on each, below are the main differences in this combined fork.
+- Linux support. I use the repo daily working in both MacOS and Linux.
+- Different set of NeoVim/VIM plugins. That's too big of a list to keep up to date here in README so if you're interested you're better off comparing the two repo's plugins. What I can say is:
+  - NeoVim is the main focus moving forward.
+    - Configuration comes mostly from [Yadr - lfilho](https://github.com/lfilho/dotfiles).
+    - Focus on plugins that work better with NeoVim's better features and architecture
+    - Removed Coc and replaced it with LSP
+    - Added a few more plugins that add some things I/we like.
+  - Vim is still supported but not a priority and may eventually be phased out.  I am not sure I am ready to COMPLETELY switch yet!
+    - Configuration comes mostly from [Yadr - skwp](https://github.com/skwp/dotfiles)
+    - Removed Syntastic and replaced it with ALE.
+    - Removed NeoComplete and replaced it with Deoplete.
+    - Added a few more plugins that add some things I/we like.
+- Homebrew is only used on MacOS in this fork.
+- Themes and colors. I am a fan of Solarized but I found it work very differently in various OS and Terminals so I use [OneHalf Dark](https://github.com/sonph/onehalf) for tmux, vim, and terminals.
+  - NeoVim/Vim and iTerm2 are configured to use OneHalf Dark.
+    - Theme [One Half Dark](httos://github.com/sonph/onehalf).
 
 ## What's included, how to learn, how to customize?
 
@@ -141,15 +151,11 @@ Head to [test/README.md](./test/README.md) for more details.
 
 ## Screenshot
 
-Here's how my zsh prompt looks like on iTerm:
+Here's how the zsh prompt looks like on iTerm with tmux:
 
-![](./doc/screenshot-iterm-gruvbox.png)
+![](./doc/screenshot-iterm-onehalfdark.png)
 
-And here's another example inside a tmux's pane with tmux's statusline (powerline style):
-
-![](./doc/screenshot-tmux-gruvbox.png)
-
-It's using Gruvbox colors. For screenshots on how Vim looks with Gruvbox, you can check [their gallery](https://github.com/morhetz/gruvbox/wiki/Gallery) out.
+It's using [One Half Dark](httos://github.com/sonph/onehalf) iTerm theme.
 
 ## Vimization of everything
 

@@ -1,10 +1,5 @@
 " Make it beautiful - colors and fonts
 
-" colorscheme base16-lfilho
-" let base16colorspace=256
-" let g:hybrid_custom_term_colors = 1
-" let g:hybrid_reduced_contrast = 1
-
 if has("termguicolors")
   set termguicolors
 endif
@@ -13,7 +8,7 @@ set background=dark
 if has("gui_running")
   set lines=60
   set columns=190
-  
+
   " Show tab number (useful for Cmd-1, Cmd-2.. mapping)
   " For some reason this doesn't work as a regular set command,
   " (the numbers don't show up) so I made it a VimEnter event
@@ -31,12 +26,12 @@ if has("gui_running")
       let g:solarized_termcolors=256
       let g:solarized_termtrans=1
     end
-    
+
     set guifont=Fira\ Code:h12
   end
 endif
 
-colorscheme solarized
+colorscheme onehalfdark
 
 " Highlight VCS conflict markers
 match ErrorMsg '^\(<\|=\|>\)\{7\}\([^=].\+\)\?$'
@@ -49,3 +44,5 @@ set synmaxcol=800
 
 " Resize splits when the window is resized
 au VimResized * :wincmd =
+
+colorscheme onehalfdark

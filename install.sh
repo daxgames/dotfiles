@@ -1,9 +1,9 @@
 #!/bin/sh
 
 if [ ! -d "$HOME/.yadr" ]; then
-    echo "Installing daxgames's YADR for the first time"
+    echo "Installing maximus-codeshuttle's YADR for the first time"
 
-    git_repo=$(echo ${__YADR_REPO_URL:-https://github.com/daxgames/dotfiles.git})
+    git_repo=$(echo ${__YADR_REPO_URL:-https://github.com/maximus-codeshuttle/dotfiles.git})
     git_branch=$(echo ${__YADR_REPO_BRANCH:-main})
 
     if [ -n "${__YADR_DEBUG}" ] ; then

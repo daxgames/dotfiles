@@ -1740,6 +1740,8 @@
 	<false/>
 	<key>DisableWindowSizeSnap</key>
 	<true/>
+	<key>DoubleClickPerformsSmartSelection</key>
+	<true/>
 	<key>EnableRendezvous</key>
 	<false/>
 	<key>FocusFollowsMouse</key>
@@ -2746,6 +2748,8 @@
 	<false/>
 	<key>SeparateStatusBarsPerPane</key>
 	<false/>
+	<key>SeparateWindowTitlePerTab</key>
+	<true/>
 	<key>ShowBookmarkName</key>
 	<false/>
 	<key>ShowFullScreenTabBar</key>

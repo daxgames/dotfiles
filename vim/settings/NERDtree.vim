@@ -6,7 +6,7 @@ let g:NERDTreeWinSize = 30
 " Nerdtree settings
 nmap nt :NERDTreeToggle<CR>
 let NERDTreeShowHidden=1
-" let g:NERDTreeWinPos = "right"
+let g:NERDTreeWinPos = "right"
 
 
 " Ignore Node.js `node_modules` folder

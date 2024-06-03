@@ -14,10 +14,22 @@ task :install => [:submodule_init, :submodules] do
   puts '======================================================'
   puts
 
+  if ! File.exist?("#{ENV['HOME']}/bin")
+    run %{ mkdir -p $HOME/bin }
+  end
+
   ENV['PATH'] = "#{File.join(ENV['HOME'], 'bin')}:#{ENV['PATH']}"
   install_homebrew if $is_macos
 
   if $is_linux
+    if linux_variant[:distro] == 'Ubuntu' || linux_variant[:distro] == 'Debian'
+      # Running on Debian/Ubuntu
+      run %{sudo apt update -y}
+      run %{sudo apt install -y build-essential python3-pip ruby-dev}
+    elsif linux_variant[:family] == 'Redhat'
+      run %{yum update -y}
+      run %{yum groups install "Development Tools"}
+    end
     install_zsh if want_to_install?('zsh (shell, enhancements))')
     install_from_github('bat', 'https://github.com/sharkdp/bat/releases/download/v0.24.0/bat-v0.24.0-i686-unknown-linux-musl.tar.gz')
     install_from_github('nvim', 'https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz')
@@ -33,6 +45,19 @@ task :install => [:submodule_init, :submodules] do
   install_files(Dir.glob('irb/*')) if want_to_install?('irb pry configs (more colorful)')
   install_files(Dir.glob('ruby/*')) if want_to_install?('rubygems config (faster/no docs)')
   install_files(Dir.glob('ctags/*')) if want_to_install?('ctags config (better js/ruby support)')
+
+  if want_to_install?('tmux config')
+    install_files(Dir.glob('tmux/*'))
+    if ! File::exist?("#{File.join(ENV['HOME'], '.tmux', 'plugins', 'tpm')}")
+      run %{ git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm }
+    else
+      run %{
+        cd "#{File.join(ENV['HOME'], '.tmux', 'plugins', 'tpm')}"
+        git pull --rebase
+      }
+    end
+  end
+
   install_files(Dir.glob('tmux/*')) if want_to_install?('tmux config')
   install_files(Dir.glob('vimify/*')) if want_to_install?('vimification of command line tools')
 
@@ -43,6 +68,11 @@ task :install => [:submodule_init, :submodules] do
   if want_to_install?('vim configuration (highly recommended)')
     install_files(Dir.glob('{vim,vimrc}'))
     Rake::Task["install_vundle"].execute
+
+    # run %{pip3 install tmuxp}
+    run %{pip3 install --user neovim} # For NeoVim plugins
+    run %{pip3 install --user pynvim} # For NeoVim plugins
+    run %{gem install neovim --user-install} # For NeoVim plugins
 
     if File.exist?(File.join(ENV['HOME'], '.vimrc.before'))
       run %{ ln -sf "$HOME/.vimrc.before" "$HOME/.config/nvim/settings/before/000-userconfig-vimrc.before.vim" }
@@ -82,9 +112,7 @@ end
 
 task :install_prezto do
   if want_to_install?('prezto & zsh enhancements')
-    if $is_macos || ENV['__YADR_INSTALL_ZSH'] == 'y'
-      install_prezto
-    end
+    install_prezto
   end
 end
 
@@ -110,7 +138,7 @@ task :submodules do
     puts "======================================================"
 
     run %{
-      cd $HOME/.yadr
+      cd "#{File.join(ENV['HOME'], '.yadr')}"
       git submodule update --recursive
       git clean -df
     }
@@ -248,12 +276,12 @@ def install_zsh
     puts "======================================================"
 
     if ENV['PLATFORM_FAMILY'] == 'debian'
-      run %{ apt install -y zsh }
+      run %{ sudo apt install -y zsh }
     elsif ENV['PLATFORM_FAMILY'] == 'rhel'
       if ENV['PLATFORM_VERSION'].to_i < 8
-        run %{ yum install -y zsh }
+        run %{ sudo yum install -y zsh }
       else
-        run %{ dnf install -y zsh }
+        run %{ sudo dnf install -y zsh }
       end
     end
   end
@@ -261,16 +289,16 @@ end
 
 def install_from_github(app_name, download_url)
   download_path = File.join('/tmp',"#{app_name}.tar.gz")
-  install_path = File.join('/opt', app_name)
+  install_path = File.join(ENV['HOME'], '.local', app_name)
   link_path = File.join(ENV['HOME'], 'bin', app_name)
   puts "======================================================"
   puts "Installing/Updating '#{app_name}' to '#{install_path}'..."
   puts "======================================================"
   puts "Downloading #{download_url}"
   run %{ curl -Lo #{download_path} #{download_url} }
-  run %{ sudo rm -rf #{install_path} }
-  run %{ sudo mkdir -p #{install_path} }
-  run %{ sudo tar -C #{install_path} --strip-components=1 -xzf #{download_path} }
+  run %{ rm -rf #{install_path} }
+  run %{ mkdir -p #{install_path} }
+  run %{ tar -C #{install_path} --strip-components=1 -xzf #{download_path} }
   run %{ rm -f #{download_path} }
   run %{ ln -sf $(find #{install_path} -type f -name '#{app_name}') #{link_path} }
 end
@@ -283,12 +311,12 @@ def install_python_modules
     puts "installed, this will do nothing."
     puts "======================================================"
     if ENV['PLATFORM_FAMILY'] == 'debian'
-      run %{ apt install -y pip }
+      run %{ sudo apt install -y pip }
     elsif ENV['PLATFORM_FAMILY'] == 'rhel'
       if ENV['PLATFORM_VERSION'].to_i < 8
-        run %{ yum install -y python3-pip }
+        run %{ sudo yum install -y python3-pip }
       else
-        run %{ dnf install -y python3-pip }
+        run %{ sudo dnf install -y python3-pip }
       end
     end
   end
@@ -332,17 +360,6 @@ def install_homebrew
         puts "'brew' is NOT in the path!"
         exit 0
       end
-
-      if linux_variant[:distro] == 'Ubuntu' || linux_variant[:distro] == 'Debian'
-        # Running on Debian/Ubuntu
-        run %{sudo apt-get install build-essential}
-      elsif linux_variant[:family] == 'Redhat'
-        if linux_variant[:distro] == nil
-          # Running on Redhat Linux
-        elsif linux_variant[:distro] == 'Centos'
-          # Running on Centos Linux
-        end
-      end
     end
   end
 
@@ -363,10 +380,6 @@ def install_homebrew
   else
     run %{brew bundle install --verbose}
   end
-  # run %{pip3 install tmuxp}
-  run %{pip3 install --user neovim} # For NeoVim plugins
-  run %{pip3 install --user pynvim} # For NeoVim plugins
-  run %{gem install neovim} # For NeoVim plugins
   puts
   puts
 end
@@ -460,7 +473,7 @@ def install_bash
   if ! File.exist?("#{ENV['HOME']}/.bash-git-prompt")
     puts
     puts "Configuring Git aware prompt..."
-    run %{ git clone "https://github.com/daxgames/bash-git-prompt.git" "#{ENV['HOME']}/.bash-git-prompt" }
+    run %{ git clone "https://github.com/maximus-codeshuttle/bash-git-prompt.git" "#{ENV['HOME']}/.bash-git-prompt" }
   end
 
   # Preserve pre-existing ~/.bashrc
@@ -474,53 +487,53 @@ def install_bash
 end
 
 def install_prezto
-  puts
-  puts "Installing Prezto (ZSH Enhancements)..."
+  run %{which zsh}
+  if $?.success?
+    puts
+    puts "Installing Prezto (ZSH Enhancements)..."
 
-  if RUBY_PLATFORM.downcase.include?("cygwin")
-    run %{ cmd /c "mklink /d "%USERPROFILE%\.zprezto" "%USERPROFILE%\.yadr\zsh\prezto"" }
-  else
-    run %{ ln -nfs "$HOME/.yadr/zsh/prezto" "${ZDOTDIR:-$HOME}/.zprezto" }
-  end
-
-  # The prezto runcoms are only going to be installed if zprezto has never been installed
-  install_files(Dir.glob('zsh/prezto-override/zshrc'), :symlink)
-  install_files(Dir.glob('zsh/prezto/runcoms/zlogin'), :symlink)
-  install_files(Dir.glob('zsh/prezto/runcoms/zlogout'), :symlink)
-  install_files(Dir.glob('zsh/prezto-override/zpreztorc'), :symlink)
-  install_files(Dir.glob('zsh/prezto/runcoms/zprofile'), :symlink)
-  install_files(Dir.glob('zsh/prezto/runcoms/zshenv'), :symlink)
-
-  # puts
-  # puts "Overriding prezto ~/.zpreztorc with YADR's zpreztorc to enable additional modules..."
-  # run %{ ln -nfs "$HOME/.yadr/zsh/prezto-override/zpreztorc" "${ZDOTDIR:-$HOME}/.zpreztorc" }
-  # run %{ ln -s ~/.zprezto/modules/prompt/external/powerlevel9k/powerlevel9k.zsh-theme ~/.zprezto/modules/prompt/functions/prompt_powerlevel9k_setup }
-
-  puts
-  puts "Creating directories for your customizations"
-  run %{ mkdir -p $HOME/.zsh.before }
-  run %{ mkdir -p $HOME/.zsh.after }
-  run %{ mkdir -p $HOME/.zsh.prompts }
-
-  if "#{ENV['SHELL']}".include? 'zsh' then
-    puts "Zsh is already configured as your shell of choice. Restart your session to load the new settings"
-  else
-    puts "Setting zsh as your default shell"
-    if File.exist?("/usr/local/bin/zsh")
-      if File.readlines("/private/etc/shells").grep("/usr/local/bin/zsh").empty?
-        puts "Adding zsh to standard shell list"
-        run %{ echo "/usr/local/bin/zsh" | sudo tee -a /private/etc/shells }
-      end
-      run %{ sudo chsh -s /usr/local/bin/zsh $USER }
-    elsif File.exist?("/home/linuxbrew/.linuxbrew/bin/zsh")
-      if File.readlines("/etc/shells").grep("/home/linuxbrew/.linuxbrew/bin/zsh").empty?
-        puts "Adding zsh to standard shell list"
-        run %{ echo "/home/linuxbrew/.linuxbrew/bin/zsh" | sudo tee -a /etc/shells }
-      end
-      run %{ sudo chsh -s /home/linuxbrew/.linuxbrew/bin/zsh $USER }
+    if RUBY_PLATFORM.downcase.include?("cygwin")
+      run %{ cmd /c "mklink /d "%USERPROFILE%\.zprezto" "%USERPROFILE%\.yadr\zsh\prezto"" }
     else
-      puts "Falling back to default/system zsh"
-      run %{ chsh -s /bin/zsh }
+      run %{ ln -nfs "$HOME/.yadr/zsh/prezto" "${ZDOTDIR:-$HOME}/.zprezto" }
+    end
+
+    # The prezto runcoms are only going to be installed if zprezto has never been installed
+    install_files(Dir.glob('zsh/prezto-override/zshrc'), :symlink)
+    install_files(Dir.glob('zsh/prezto/runcoms/zlogin'), :symlink)
+    install_files(Dir.glob('zsh/prezto/runcoms/zlogout'), :symlink)
+    install_files(Dir.glob('zsh/prezto-override/zpreztorc'), :symlink)
+    install_files(Dir.glob('zsh/prezto/runcoms/zprofile'), :symlink)
+    install_files(Dir.glob('zsh/prezto/runcoms/zshenv'), :symlink)
+
+    puts
+    puts "Creating directories for your customizations"
+    run %{ mkdir -p $HOME/.zsh.before }
+    run %{ mkdir -p $HOME/.zsh.after }
+    run %{ mkdir -p $HOME/.zsh.prompts }
+
+    if want_to_install?('zsh_default_shell (mak zsh the default shell))')
+      if "#{ENV['SHELL']}".include? 'zsh' then
+        puts "Zsh is already configured as your shell of choice. Restart your session to load the new settings"
+      else
+        puts "Setting zsh as your default shell"
+        if File.exist?("/usr/local/bin/zsh")
+          if File.readlines("/private/etc/shells").grep("/usr/local/bin/zsh").empty?
+            puts "Adding zsh to standard shell list"
+            run %{ echo "/usr/local/bin/zsh" | sudo tee -a /private/etc/shells }
+          end
+          run %{ sudo chsh -s /usr/local/bin/zsh $USER }
+        elsif File.exist?("/home/linuxbrew/.linuxbrew/bin/zsh")
+          if File.readlines("/etc/shells").grep("/home/linuxbrew/.linuxbrew/bin/zsh").empty?
+            puts "Adding zsh to standard shell list"
+            run %{ echo "/home/linuxbrew/.linuxbrew/bin/zsh" | sudo tee -a /etc/shells }
+          end
+          run %{ sudo chsh -s /home/linuxbrew/.linuxbrew/bin/zsh $USER }
+        else
+          puts "Falling back to default/system zsh"
+          run %{ chsh -s /bin/zsh }
+        end
+      end
     end
   end
 end
@@ -541,6 +554,7 @@ def want_to_install? (section)
     ENV["__YADR_INSTALL_#{install_type}"] = STDIN.gets.chomp
     ENV["__YADR_INSTALL_#{install_type}"] == 'y'
   else
+    ENV["__YADR_INSTALL_#{install_type}"] == 'y'
     true
   end
 end

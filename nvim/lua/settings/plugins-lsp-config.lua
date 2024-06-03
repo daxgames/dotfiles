@@ -14,6 +14,8 @@ require("mason-lspconfig").setup({
     "lua_ls",
     "tsserver",
     "groovyls",
+    "yamlls",
+    "jinja_lsp",
   }
 })
 
@@ -22,6 +24,8 @@ local lspconfig = require('lspconfig')
 lspconfig.lua_ls.setup {}
 lspconfig.tsserver.setup {}
 lspconfig.groovyls.setup {}
+lspconfig.yamlls.setup {}
+lspconfig.jinja_lsp.setup {}
 
 vim.keymap.set('n', 'gf', vim.lsp.buf.format, {})
 vim.keymap.set('n', 'gd', vim.lsp.buf.definition, {})

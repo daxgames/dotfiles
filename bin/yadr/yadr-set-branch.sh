@@ -6,23 +6,6 @@ cd ~/.yadr
 
 git checkout ${version}
 
-
-# ln -sf ${HOME}/.yadr/ctags/ctags ${HOME}/.ctags
-# ln -sf ${HOME}/.yadr/vimify/editrc ${HOME}/.editrc
-# ln -sf ${HOME}/.yadr/ruby/gemrc ${HOME}/.gemrc
-# ln -sf ${HOME}/.yadr/git/gitconfig ${HOME}/.gitconfig
-# ln -sf ${HOME}/.yadr/git/gitignore ${HOME}/.gitignore
-# ln -sf ${HOME}/.yadr/vimify/inputrc ${HOME}/.inputrc
-# ln -sf ${HOME}/.yadr/irb/pryrc ${HOME}/.pryrc
-# ln -sf ${HOME}/.yadr/ruby/rdebugrc ${HOME}/.rdebugrc
-# ln -sf ${HOME}/.yadr/tmux/tmux.conf ${HOME}/.tmux.conf
-# ln -sf ${HOME}/.yadr/vim ${HOME}/.vim
-# ln -sf ${HOME}/.yadr/vimrc ${HOME}/.vimrc
-# ln -sf ${HOME}/.yadr/zsh/prezto/runcoms/zlogin ${HOME}/.zlogin
-# ln -sf ${HOME}/.yadr/zsh/prezto/runcoms/zlogout ${HOME}/.zlogout
-# ln -sf ${HOME}/.yadr/zsh/prezto ${HOME}/.zprezto
-# ln -sf ${HOME}/.yadr/zsh/prezto/runcoms/zprofile ${HOME}/.zprofile
-# ln -sf ${HOME}/.yadr/zsh/prezto/runcoms/zshenv ${HOME}/.zshenv
 if [[ $version == main ]] ; then
   ln -sf ${HOME}/.yadr/vim ${HOME}/.vim
   ln -sf ${HOME}/.yadr/irb/pryrc ${HOME}/.pryrc
