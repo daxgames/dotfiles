@@ -130,8 +130,8 @@
   algorithm = patience
   compactionHeuristic = true
   colorMoved = default
-[diff "spaceman-diff"]
-  command = "spaceman-diff"
+# [diff "spaceman-diff"]
+#   command = "spaceman-diff"
 [rerere]
   # Remember my merges
   # http://gitfu.wordpress.com/2008/04/20/git-rerere-rereremember-what-you-did-last-time/
