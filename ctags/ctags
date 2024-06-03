@@ -1,11 +1,12 @@
 
 --langdef=js
 --langmap=js:.js
---regex-JavaScript=/([A-Za-z0-9._$\(\)]+)[ \t]*[:=][ \t]*function[ \t]*\(/\1/m,method/
---regex-JavaScript=/([A-Za-z0-9._$\#\(\)]+)[ \t]*[:][ \t]*([A-Za-z0-9._\-\#\'\"]+)[ \t]*/\1/p,property/
---regex-JavaScript=/([A-Za-z0-9._$\#\(\)]+)[ \t]*[:][ \t]*([A-Za-z0-9\'\"._\-\#\(]+)[ \t]*\{/\1/p,property/
---regex-JavaScript=/var ([A-Za-z0-9._$\#]+)[ \t]*[=][ \t]*([A-Za-z0-9._'"\$\#\[\{]+)[,|;]/\1/v,variable/
---regex-JavaScript=/([A-Za-z0-9._$\#]+)[ \t]*[=][ \t]*([A-Za-z0-9._'"\$\#]+)extend\(/\1/c,class/
+--regex-js=/([A-Za-z0-9._$]+)[ \t]*[:=][ \t]*\{/\1/,object/
+--regex-js=/([A-Za-z0-9._$()]+)[ \t]*[:=][ \t]*function[ \t]*\(/\1/,function/
+--regex-js=/function[ \t]+([A-Za-z0-9._$]+)[ \t]*([^)])/\1/,function/
+--regex-js=/([A-Za-z0-9._$]+)[ \t]*[:=][ \t]*\[/\1/,array/
+--regex-js=/([^= ]+)[ \t]*=[ \t]*[^"]'[^']*/\1/,string/
+--regex-js=/([^= ]+)[ \t]*=[ \t]*[^']"[^"]*/\1/,string/
 
 --regex-ruby=/(^|[:;])[ \t]*([A-Z][[:alnum:]_]+) *=/\2/c,class,constant/
 --regex-ruby=/(^|;)[ \t]*(has_many|belongs_to|has_one|has_and_belongs_to_many)\(? *:([[:alnum:]_]+)/\3/f,function,association/
@@ -17,9 +18,9 @@
 
 --langdef=markdown
 --langmap=markdown:.md.markdown.mdown.mkd.mkdn
---regex-markdown=/^#[ \t]+(.*)/\1/h,heading1/
---regex-markdown=/^##[ \t]+(.*)/\1/h,heading2/
---regex-markdown=/^###[ \t]+(.*)/\1/h,heading3/
+--regex-markdown=/^(#+)[ \t]+([^#]*)/\1 \2/h,header,Markdown Headers/
+--regex-markdown=/\[([^\[]+)\]\(([^\)]+)\)/\1/l,link,Markdown Links/
+--regex-markdown=/!\[\]\(.*[\/ ](.*\.[a-z]{3})\)/\1/i,image,Markdown Image/
 
 --langdef=coffee
 --langmap=coffee:.coffee
@@ -42,3 +43,10 @@
 --regex-less=/^[ t]*#([A-Za-z0-9_-]+)/1/i,id,ids/
 --regex-less=/^[ t]*(([A-Za-z0-9_-]+[ tn,]+)+){/1/t,tag,tags/
 --regex-less=/^[ t]*@medias+([A-Za-z0-9_-]+)/1/m,media,medias/
+
+--recurse=yes
+--exclude=.git
+--exclude=vendor/*
+--exclude=node_modules/*
+--exclude=db/*
+--exclude=log/*

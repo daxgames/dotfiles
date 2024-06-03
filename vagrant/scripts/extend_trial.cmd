@@ -1,2 +1,0 @@
-slmgr /rearm
-pause

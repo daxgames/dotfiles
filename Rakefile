@@ -1,44 +1,107 @@
 require 'rake'
 require 'fileutils'
 require File.join(File.dirname(__FILE__), 'bin', 'yadr', 'vundle')
+require File.join(File.dirname(__FILE__), 'bin', 'yadr', 'vimplug')
 
-desc "Hook our dotfiles into system-standard positions."
+$is_macos = RUBY_PLATFORM.downcase.include?('darwin')
+$is_linux = RUBY_PLATFORM.downcase.include?('linux')
+
+desc 'Hook our dotfiles into system-standard positions.'
 task :install => [:submodule_init, :submodules] do
   puts
-  puts "======================================================"
-  puts "Welcome to YADR Installation."
-  puts "======================================================"
+  puts '======================================================'
+  puts 'Welcome to YADR Installation.'
+  puts '======================================================'
   puts
 
-  install_homebrew if RUBY_PLATFORM.downcase.include?("darwin")
+  if ! File.exist?("#{ENV['HOME']}/bin")
+    run %{ mkdir -p $HOME/bin }
+  end
 
-  install_bash if want_to_install?('bash configs (color, aliases)')
-  if RUBY_PLATFORM.downcase.include?("linux")
+  ENV['PATH'] = "#{File.join(ENV['HOME'], 'bin')}:#{ENV['PATH']}"
+  install_homebrew if $is_macos
+
+  if $is_linux
+    if linux_variant[:distro] == 'Ubuntu' || linux_variant[:distro] == 'Debian'
+      # Running on Debian/Ubuntu
+      run %{sudo apt update -y}
+      run %{sudo apt install -y build-essential python3-pip ruby-dev}
+    elsif linux_variant[:family] == 'Redhat'
+      run %{yum update -y}
+      run %{yum groups install "Development Tools"}
+    end
     install_zsh if want_to_install?('zsh (shell, enhancements))')
+    install_from_github('bat', 'https://github.com/sharkdp/bat/releases/download/v0.24.0/bat-v0.24.0-i686-unknown-linux-musl.tar.gz')
+    install_from_github('nvim', 'https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz')
+    install_from_github('rg', 'https://github.com/BurntSushi/ripgrep/releases/download/14.1.0/ripgrep-14.1.0-x86_64-unknown-linux-musl.tar.gz')
+    install_from_github('delta', 'https://github.com/dandavison/delta/releases/download/0.15.0/delta-0.15.0-x86_64-unknown-linux-musl.tar.gz')
   end
 
   install_python_modules
 
   install_rvm_binstubs
-
   # this has all the runcoms from this directory.
   install_files(Dir.glob('git/*')) if want_to_install?('git configs (color, aliases)')
   install_files(Dir.glob('irb/*')) if want_to_install?('irb pry configs (more colorful)')
   install_files(Dir.glob('ruby/*')) if want_to_install?('rubygems config (faster/no docs)')
   install_files(Dir.glob('ctags/*')) if want_to_install?('ctags config (better js/ruby support)')
+
+  if want_to_install?('tmux config')
+    install_files(Dir.glob('tmux/*'))
+    if ! File::exist?("#{File.join(ENV['HOME'], '.tmux', 'plugins', 'tpm')}")
+      run %{ git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm }
+    else
+      run %{
+        cd "#{File.join(ENV['HOME'], '.tmux', 'plugins', 'tpm')}"
+        git pull --rebase
+      }
+    end
+  end
+
   install_files(Dir.glob('tmux/*')) if want_to_install?('tmux config')
   install_files(Dir.glob('vimify/*')) if want_to_install?('vimification of command line tools')
+
+  Rake::Task["install_prezto"].execute
+
+  install_bash if want_to_install?('bash configs (color, aliases)')
 
   if want_to_install?('vim configuration (highly recommended)')
     install_files(Dir.glob('{vim,vimrc}'))
     Rake::Task["install_vundle"].execute
+
+    # run %{pip3 install tmuxp}
+    run %{pip3 install --user neovim} # For NeoVim plugins
+    run %{pip3 install --user pynvim} # For NeoVim plugins
+    run %{gem install neovim --user-install} # For NeoVim plugins
+
+    if File.exist?(File.join(ENV['HOME'], '.vimrc.before'))
+      run %{ ln -sf "$HOME/.vimrc.before" "$HOME/.config/nvim/settings/before/000-userconfig-vimrc.before.vim" }
+    end
+
+    if File.exist?(File.join(ENV['HOME'], '.vimrc.after'))
+      run %{ ln -sf "$HOME/.vimrc.after" "$HOME/.config/nvim/settings/after/zzz-userconfig-vimrc.after.vim" }
+    end
+
+    if File.exist?(File.join('/opt/nvim-linux64/bin/nvim')) && $is_linux
+      run %{ mkdir -p "$HOME/bin" }
+      run %{ ln -sf "/opt/nvim-linux64/bin/nvim" "$HOME/bin/nvim" }
+    end
   end
 
-  Rake::Task["install_prezto"].execute
+  run %{ ln -nfs "$HOME/.yadr/nvim" "$HOME/.config/nvim" }
+  Rake::Task["install_vimplug"].execute
+
+  run %{ mkdir -p ~/.config/ranger }
+  run %{ ln -nfs ~/.yadr/ranger ~/.config/ranger }
+
+  run %{ touch ~/.hushlogin }
 
   install_fonts
 
-  install_term_theme if RUBY_PLATFORM.downcase.include?("darwin")
+  if $is_macos
+    install_term_theme
+    run %{ ~/.yadr/iTerm2/bootstrap-iterm2.sh }
+  end
 
   run_bundle_config
 
@@ -49,15 +112,13 @@ end
 
 task :install_prezto do
   if want_to_install?('prezto & zsh enhancements')
-    if RUBY_PLATFORM.downcase.include?("darwin") || ENV['__YADR_INSTALL_ZSH'] == 'y'
-      install_prezto
-    end
+    install_prezto
   end
 end
 
 desc 'Updates the installation'
 task :update do
-  Rake::Task["vundle_migration"].execute if needs_migration_to_vundle?
+  ENV["__YADR_UPDATE"] = "y"
   Rake::Task["install"].execute
   #TODO: for now, we do the same as install. But it would be nice
   #not to clobber zsh files
@@ -77,31 +138,12 @@ task :submodules do
     puts "======================================================"
 
     run %{
-      cd $HOME/.yadr
+      cd "#{File.join(ENV['HOME'], '.yadr')}"
       git submodule update --recursive
       git clean -df
     }
     puts
   end
-end
-
-desc "Performs migration from pathogen to vundle"
-task :vundle_migration do
-  puts "======================================================"
-  puts "Migrating from pathogen to vundle vim plugin manager. "
-  puts "This will move the old .vim/bundle directory to"
-  puts ".vim/bundle.old and replacing all your vim plugins with"
-  puts "the standard set of plugins. You will then be able to "
-  puts "manage your vim's plugin configuration by editing the "
-  puts "file .vim/vundles.vim"
-  puts "======================================================"
-
-  Dir.glob(File.join('vim', 'bundle','**')) do |sub_path|
-    run %{git config -f #{File.join('.git', 'config')} --remove-section submodule.#{sub_path}}
-    # `git rm --cached #{sub_path}`
-    FileUtils.rm_rf(File.join('.git', 'modules', sub_path))
-  end
-  FileUtils.mv(File.join('vim','bundle'), File.join('vim', 'bundle.old'))
 end
 
 desc "Runs Vundle installer in a clean vim environment"
@@ -122,6 +164,29 @@ task :install_vundle do
   end
 
   Vundle::update_vundle
+end
+
+desc "Runs Plug installer in a clean vim environment"
+task :install_vimplug do
+  puts "======================================================"
+  puts "Installing and updating Neovim plugins."
+  puts "The installer will now proceed to run PluginInstall to install plugs."
+  puts "======================================================"
+
+  puts ""
+
+  vimplug_path = File.join(ENV['HOME'], '.local', 'share', 'nvim', 'site', 'autoload', 'plug.vim')
+  unless File.exist?(vimplug_path)
+    run %{
+      curl -fLo #{vimplug_path} --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+    }
+  end
+
+  if "#{ENV['__YADR_UPDATE']}" == "y"
+    VimPlug::update_plugins
+  else
+    VimPlug::install_plugins
+  end
 end
 
 task :default => 'install'
@@ -149,13 +214,36 @@ def save_config
 end
 
 def number_of_cores
-  if RUBY_PLATFORM.downcase.include?("darwin")
+  if $is_macos
     cores = run %{ sysctl -n hw.ncpu }
   else
     cores = run %{ nproc }
   end
   puts
   cores.to_i
+end
+
+
+def linux_variant
+  r = { :distro => nil, :family => nil }
+
+  if File.exist?('/etc/lsb-release')
+    File.open('/etc/lsb-release', 'r').read.each_line do |line|
+      r = { :distro => $1 } if line =~ /^DISTRIB_ID=(.*)/
+    end
+  end
+
+  if File.exist?('/etc/debian_version')
+    r[:distro] = 'Debian' if r[:distro].nil?
+    r[:family] = 'Debian' if r[:variant].nil?
+  elsif File.exist?('/etc/redhat-release') or File.exist?('/etc/centos-release')
+    r[:family] = 'RedHat' if r[:family].nil?
+    r[:distro] = 'CentOS' if File.exist?('/etc/centos-release')
+  elsif File.exist?('/etc/SuSE-release')
+    r[:distro] = 'SLES' if r[:distro].nil?
+  end
+
+  return r
 end
 
 def run_bundle_config
@@ -188,15 +276,31 @@ def install_zsh
     puts "======================================================"
 
     if ENV['PLATFORM_FAMILY'] == 'debian'
-      run %{ apt install -y zsh }
+      run %{ sudo apt install -y zsh }
     elsif ENV['PLATFORM_FAMILY'] == 'rhel'
       if ENV['PLATFORM_VERSION'].to_i < 8
-        run %{ yum install -y zsh }
+        run %{ sudo yum install -y zsh }
       else
-        run %{ dnf install -y zsh }
+        run %{ sudo dnf install -y zsh }
       end
     end
   end
+end
+
+def install_from_github(app_name, download_url)
+  download_path = File.join('/tmp',"#{app_name}.tar.gz")
+  install_path = File.join(ENV['HOME'], '.local', app_name)
+  link_path = File.join(ENV['HOME'], 'bin', app_name)
+  puts "======================================================"
+  puts "Installing/Updating '#{app_name}' to '#{install_path}'..."
+  puts "======================================================"
+  puts "Downloading #{download_url}"
+  run %{ curl -Lo #{download_path} #{download_url} }
+  run %{ rm -rf #{install_path} }
+  run %{ mkdir -p #{install_path} }
+  run %{ tar -C #{install_path} --strip-components=1 -xzf #{download_path} }
+  run %{ rm -f #{download_path} }
+  run %{ ln -sf $(find #{install_path} -type f -name '#{app_name}') #{link_path} }
 end
 
 def install_python_modules
@@ -207,12 +311,12 @@ def install_python_modules
     puts "installed, this will do nothing."
     puts "======================================================"
     if ENV['PLATFORM_FAMILY'] == 'debian'
-      run %{ apt install -y pip }
+      run %{ sudo apt install -y pip }
     elsif ENV['PLATFORM_FAMILY'] == 'rhel'
       if ENV['PLATFORM_VERSION'].to_i < 8
-        run %{ yum install -y python3-pip }
+        run %{ sudo yum install -y python3-pip }
       else
-        run %{ dnf install -y python3-pip }
+        run %{ sudo dnf install -y python3-pip }
       end
     end
   end
@@ -231,7 +335,32 @@ def install_homebrew
     puts "Installing Homebrew, the OSX package manager...If it's"
     puts "already installed, this will do nothing."
     puts "======================================================"
-    run %{bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"}
+
+    if $is_macos
+      run %{bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"}
+    else
+      puts "Running Homebrew 'install.sh' on Linux..."
+      if ! File.exist?('/home/linuxbrew')
+        run %{sudo mkdir -p /home/linuxbrew}
+        run %{sudo chmod 777 /home/linuxbrew}
+      end
+
+      run %{yes | bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"}
+
+      puts "Configuring 'brew shellenv' on Linux..."
+      ENV['HOMEBREW_PREFIX'] = "/home/linuxbrew/.linuxbrew"
+      ENV['HOMEBREW_CELLAR'] = "/home/linuxbrew/.linuxbrew/Cellar"
+      ENV['HOMEBREW_REPOSITORY'] = "/home/linuxbrew/.linuxbrew/Homebrew"
+      ENV['PATH'] = "/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:" + ENV['PATH']
+      ENV['MANPATH'] = "/home/linuxbrew/.linuxbrew/share/man:" + ENV['MANPATH'].to_s
+      ENV['INFOPATH'] ="/home/linuxbrew/.linuxbrew/share/info:" + ENV['INFOPATH'].to_s
+
+      run %{which brew}
+      unless $?.success?
+        puts "'brew' is NOT in the path!"
+        exit 0
+      end
+    end
   end
 
   puts
@@ -243,10 +372,14 @@ def install_homebrew
   puts
   puts
   puts "======================================================"
-  puts "Installing Homebrew packages...There may be some warnings."
+  puts "Installing Homebrew and other packages..."
   puts "======================================================"
-  run %{brew install zsh ctags git hub tmux reattach-to-user-namespace the_silver_searcher ghi}
-  run %{brew install macvim}
+  if ENV['CI'] then
+    # A minimal Brewfile to speed up CI Builds
+    run %{brew bundle install --verbose --file=test/Brewfile_ci}
+  else
+    run %{brew bundle install --verbose}
+  end
   puts
   puts
 end
@@ -255,8 +388,8 @@ def install_fonts
   puts "======================================================"
   puts "Installing patched fonts for Powerline/Lightline."
   puts "======================================================"
-  run %{ cp -f $HOME/.yadr/fonts/* $HOME/Library/Fonts } if RUBY_PLATFORM.downcase.include?("darwin")
-  run %{ mkdir -p ~/.fonts && cp ~/.yadr/fonts/* ~/.fonts && fc-cache -vf ~/.fonts } if RUBY_PLATFORM.downcase.include?("linux")
+  run %{ cp -f $HOME/.yadr/fonts/* $HOME/Library/Fonts } if $is_macos
+  run %{ mkdir -p ~/.fonts && cp ~/.yadr/fonts/* ~/.fonts && fc-cache -vf ~/.fonts } if $is_linux
   puts
 end
 
@@ -340,7 +473,7 @@ def install_bash
   if ! File.exist?("#{ENV['HOME']}/.bash-git-prompt")
     puts
     puts "Configuring Git aware prompt..."
-    run %{ git clone "https://github.com/daxgames/bash-git-prompt.git" "#{ENV['HOME']}/.bash-git-prompt" }
+    run %{ git clone "https://github.com/maximus-codeshuttle/bash-git-prompt.git" "#{ENV['HOME']}/.bash-git-prompt" }
   end
 
   # Preserve pre-existing ~/.bashrc
@@ -354,49 +487,52 @@ def install_bash
 end
 
 def install_prezto
-  puts
-  puts "Installing Prezto (ZSH Enhancements)..."
+  run %{which zsh}
+  if $?.success?
+    puts
+    puts "Installing Prezto (ZSH Enhancements)..."
 
-  if RUBY_PLATFORM.downcase.include?("cygwin")
-    run %{ cmd /c "mklink /d "%USERPROFILE%\.zprezto" "%USERPROFILE%\.yadr\zsh\prezto"" }
-  else
-    run %{ ln -nfs "$HOME/.yadr/zsh/prezto" "${ZDOTDIR:-$HOME}/.zprezto" }
-  end
-
-  # The prezto runcoms are only going to be installed if zprezto has never been installed
-  install_files(Dir.glob('zsh/prezto-override/zshrc'), :symlink)
-  install_files(Dir.glob('zsh/prezto/runcoms/zlogin'), :symlink)
-  install_files(Dir.glob('zsh/prezto/runcoms/zlogout'), :symlink)
-  install_files(Dir.glob('zsh/prezto-override/zpreztorc'), :symlink)
-  install_files(Dir.glob('zsh/prezto/runcoms/zprofile'), :symlink)
-  install_files(Dir.glob('zsh/prezto/runcoms/zshenv'), :symlink)
-
-  puts
-  puts "Creating directories for your customizations"
-  run %{ mkdir -p $HOME/.zsh.before }
-  run %{ mkdir -p $HOME/.zsh.after }
-  run %{ mkdir -p $HOME/.zsh.prompts }
-
-  if want_to_install?('zsh_default_shell (mak zsh the default shell))')
-    if "#{ENV['SHELL']}".include? 'zsh' then
-      puts "Zsh is already configured as your shell of choice. Restart your session to load the new settings"
+    if RUBY_PLATFORM.downcase.include?("cygwin")
+      run %{ cmd /c "mklink /d "%USERPROFILE%\.zprezto" "%USERPROFILE%\.yadr\zsh\prezto"" }
     else
-      puts "Setting zsh as your default shell"
-      if File.exist?("/usr/local/bin/zsh")
-        if File.readlines("/private/etc/shells").grep("/usr/local/bin/zsh").empty?
-          puts "Adding zsh to standard shell list"
-          run %{ echo "/usr/local/bin/zsh" | sudo tee -a /private/etc/shells }
-        end
-        run %{ sudo chsh -s /usr/local/bin/zsh $USER }
-      elsif File.exist?("/home/linuxbrew/.linuxbrew/bin/zsh")
-        if File.readlines("/etc/shells").grep("/home/linuxbrew/.linuxbrew/bin/zsh").empty?
-          puts "Adding zsh to standard shell list"
-          run %{ echo "/home/linuxbrew/.linuxbrew/bin/zsh" | sudo tee -a /etc/shells }
-        end
-        run %{ sudo chsh -s /home/linuxbrew/.linuxbrew/bin/zsh $USER }
+      run %{ ln -nfs "$HOME/.yadr/zsh/prezto" "${ZDOTDIR:-$HOME}/.zprezto" }
+    end
+
+    # The prezto runcoms are only going to be installed if zprezto has never been installed
+    install_files(Dir.glob('zsh/prezto-override/zshrc'), :symlink)
+    install_files(Dir.glob('zsh/prezto/runcoms/zlogin'), :symlink)
+    install_files(Dir.glob('zsh/prezto/runcoms/zlogout'), :symlink)
+    install_files(Dir.glob('zsh/prezto-override/zpreztorc'), :symlink)
+    install_files(Dir.glob('zsh/prezto/runcoms/zprofile'), :symlink)
+    install_files(Dir.glob('zsh/prezto/runcoms/zshenv'), :symlink)
+
+    puts
+    puts "Creating directories for your customizations"
+    run %{ mkdir -p $HOME/.zsh.before }
+    run %{ mkdir -p $HOME/.zsh.after }
+    run %{ mkdir -p $HOME/.zsh.prompts }
+
+    if want_to_install?('zsh_default_shell (mak zsh the default shell))')
+      if "#{ENV['SHELL']}".include? 'zsh' then
+        puts "Zsh is already configured as your shell of choice. Restart your session to load the new settings"
       else
-        puts "Falling back to default/system zsh"
-        run %{ chsh -s /bin/zsh }
+        puts "Setting zsh as your default shell"
+        if File.exist?("/usr/local/bin/zsh")
+          if File.readlines("/private/etc/shells").grep("/usr/local/bin/zsh").empty?
+            puts "Adding zsh to standard shell list"
+            run %{ echo "/usr/local/bin/zsh" | sudo tee -a /private/etc/shells }
+          end
+          run %{ sudo chsh -s /usr/local/bin/zsh $USER }
+        elsif File.exist?("/home/linuxbrew/.linuxbrew/bin/zsh")
+          if File.readlines("/etc/shells").grep("/home/linuxbrew/.linuxbrew/bin/zsh").empty?
+            puts "Adding zsh to standard shell list"
+            run %{ echo "/home/linuxbrew/.linuxbrew/bin/zsh" | sudo tee -a /etc/shells }
+          end
+          run %{ sudo chsh -s /home/linuxbrew/.linuxbrew/bin/zsh $USER }
+        else
+          puts "Falling back to default/system zsh"
+          run %{ chsh -s /bin/zsh }
+        end
       end
     end
   end
@@ -409,28 +545,16 @@ def want_to_install? (section)
 
   if ! install_env.to_s.empty?
     ENV["__YADR_SAVE_CONFIG"] = 'y'
-    puts "install_env: #{install_env}"
-    if install_env == 'y'
-      ENV["__YADR_INSTALL_#{install_type}"] == 'y'
-      true
-    else
-      ENV["__YADR_INSTALL_#{install_type}"] == 'n'
-      false
-    end
+    install_env == 'y'
   elsif ENV["ASK"]=="true" && $stdout.isatty
     puts "Would you like to install configuration files for: #{section}? [y]es, [n]o"
-
+    STDIN.gets.chomp == 'y'
     # set env var to match user answer so we do not ask again
     ENV["__YADR_SAVE_CONFIG"] = 'y'
     ENV["__YADR_INSTALL_#{install_type}"] = STDIN.gets.chomp
-    if ENV["__YADR_INSTALL_#{install_type}"] == 'y'
-      true
-    else
-      false
-    end
+    ENV["__YADR_INSTALL_#{install_type}"] == 'y'
   else
-    ENV["__YADR_INSTALL_#{install_type}"] = 'y'
-    ENV["__YADR_SAVE_CONFIG"] = 'y'
+    ENV["__YADR_INSTALL_#{install_type}"] == 'y'
     true
   end
 end

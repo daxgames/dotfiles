@@ -27,13 +27,18 @@
 
   # branch
   b = branch -v                     # branch (verbose)
+  ren-remote = "!f() { git push origin origin/$1:refs/heads/$2 :$1; } ; f"
+  ren-local = branch -m
+  ren = !git ren-local $1 $2 && git ren-remote $1 $2
 
   # commit
   c = commit -m                     # commit with message
   ca = commit -am                   # commit all with message
   ci = commit                       # commit
   amend = commit --amend            # ammend your last commit
+  amend-noedit = commit --amend --no-edit #amend your last commit reusing last commit's message
   ammend = commit --amend           # ammend your last commit
+  ammend-noedit = commit --amend --no-edit #amend your last commit reusing last commit's message
 
   # checkout
   co = checkout                     # checkout
@@ -95,8 +100,9 @@
   pretty = format:%C(blue)%ad%Creset %C(yellow)%h%C(green)%d%Creset %C(blue)%s %C(magenta) [%an]%Creset
 [mergetool]
   prompt = false
-[mergetool "mvimdiff"]
-  cmd="mvim -c 'Gdiff' $MERGED"     # use fugitive.vim for 3-way merge
+  keepBackup = false
+[mergetool "vimdiff"]
+  cmd="nvim -d -c 'Gvdiffsplit' $MERGED"     # use fugitive.vim for 3-way merge
   keepbackup=false
 [merge]
   summary = true
@@ -112,18 +118,55 @@
   default = upstream
 [core]
   autocrlf = false
-  editor = vim
+  editor = nvim
   excludesfile = ~/.yadr/git/gitignore
+  attributesFile = ~/.yadr/git/gitattributes
 [advice]
   statusHints = false
 [diff]
   # Git diff will use (i)ndex, (w)ork tree, (c)ommit and (o)bject
   # instead of a/b/c/d as prefixes for patches
   mnemonicprefix = true
-	algorithm = patience
+  algorithm = patience
+  compactionHeuristic = true
+  colorMoved = default
+[diff "spaceman-diff"]
+  command = "spaceman-diff"
 [rerere]
   # Remember my merges
   # http://gitfu.wordpress.com/2008/04/20/git-rerere-rereremember-what-you-did-last-time/
   enabled = true
+[pager]
+  diff = "delta"
+  show = "delta"
+  reflog = "delta"
+  show = "delta"
+[delta]
+  # syntax-theme = gruvbox-dark
+  navigate = true
+  side-by-side = true
+  line-numbers = true
+
+  commit-decoration-style = blue ol
+  commit-style = raw
+  file-style = omit
+  hunk-header-decoration-style = blue box
+  hunk-header-file-style = red
+  hunk-header-line-number-style = "#067a00"
+  hunk-header-style = file line-number syntax
+  dark = true
+  # minus-emph-style = normal "#ffc0c0"
+  # minus-empty-line-marker-style = normal "#ffe0e0"
+  # minus-non-emph-style = normal "#ffe0e0"
+  # minus-style = normal "#ffe0e0"
+  # plus-emph-style = syntax "#a0efa0"
+  # plus-empty-line-marker-style = normal "#d0ffd0"
+  # plus-non-emph-style = syntax "#d0ffd0"
+  # plus-style = syntax "#d0ffd0"
+  zero-style = syntax
+[interactive]
+  diffFilter = delta --color-only
+[init]
+	defaultBranch = main
 [include]
   path = .gitconfig.user

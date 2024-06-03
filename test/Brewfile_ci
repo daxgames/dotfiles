@@ -1,0 +1,11 @@
+tap 'homebrew/bundle'
+tap 'homebrew/completions'
+tap 'homebrew/core'
+
+brew 'fasd'
+brew 'gh'
+brew 'neovim'
+brew 'python3'
+brew 'ripgrep'
+brew 'zsh'
+brew 'reattach-to-user-namespace'

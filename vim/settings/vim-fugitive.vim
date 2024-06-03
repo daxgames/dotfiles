@@ -3,7 +3,7 @@
 " parent directory. Here’s a mapping of .. to the above command, but
 " only for buffers containing a git blob or tree
 autocmd User fugitive
-  \ if get(b:, 'fugitive_type', '') =~# '^\%(tree\|blob\)$' |
+  \ if fugitive#buffer().type() =~# '^\%(tree\|blob\)$' |
   \   nnoremap <buffer> .. :edit %:h<CR> |
   \ endif
 
@@ -13,3 +13,14 @@ autocmd User fugitive
 
 autocmd BufReadPost fugitive://* set bufhidden=delete
 
+" Mappings
+" ============================
+nnoremap <leader>gd :Gdiff<cr>
+nnoremap <leader>gs :Gstatus<cr>
+nnoremap <leader>gw :Gwrite<cr>
+nnoremap <leader>ga :Gadd<cr>
+nnoremap <leader>gb :Gblame<cr>
+nnoremap <leader>gco :Gcheckout<cr>
+nnoremap <leader>gci :Gcommit<cr>
+nnoremap <leader>gm :Gmove
+nnoremap <leader>gr :Gremove<cr>

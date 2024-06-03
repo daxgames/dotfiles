@@ -21,8 +21,8 @@ alias yip='yadr init-plugins'
 
 # PS
 alias psa="ps aux"
-alias psg="ps aux | grep "
-alias psr='ps aux | grep ruby'
+alias psg="ps aux | rg "
+alias psr='ps aux | rg ruby'
 
 # Moving around
 alias cdb='cd -'
@@ -53,11 +53,14 @@ alias ar='source $yadr/zsh/aliases.zsh'  #alias reload
 alias gar="killall -HUP -u \"$USER\" zsh"  #global alias reload
 
 # vim using
-mvim --version > /dev/null 2>&1
-MACVIM_INSTALLED=$?
-if [ $MACVIM_INSTALLED -eq 0 ]; then
-  alias vim="mvim -v"
-fi
+# mvim --version > /dev/null 2>&1
+# MACVIM_INSTALLED=$?
+# if [ $MACVIM_INSTALLED -eq 0 ]; then
+#   alias vim="mvim -v"
+# fi
+
+alias v="nvim"
+alias vf='nvim $(fzf)'
 
 # mimic vim functions
 alias :q='exit'
@@ -129,7 +132,7 @@ alias gsmu='git submodule update'
 alias gt='git t'
 alias gbg='git bisect good'
 alias gbb='git bisect bad'
-alias gdmb='git branch --merged | grep -v "\*" | xargs -n 1 git branch -d'
+alias gdmb='git branch --merged | rg -v "\*" | xargs -n 1 git branch -d'
 
 # Common shell functions
 alias less='less -r'
@@ -138,6 +141,7 @@ alias l='less'
 alias lh='ls -alt | head' # see the last modified files
 alias screen='TERM=screen screen'
 alias cl='clear'
+alias cat='bat'
 
 # Zippin
 alias gz='tar -zcvf'
@@ -194,7 +198,7 @@ alias srdmt='spring rake db:migrate db:test:prepare'
 # Sprintly - https://github.com/nextbigsoundinc/Sprintly-GitHub
 alias sp='sprintly'
 # spb = sprintly branch - create a branch automatically based on the bug you're working on
-alias spb="git checkout -b \`sp | tail -2 | grep '#' | sed 's/^ //' | sed 's/[^A-Za-z0-9 ]//g' | sed 's/ /-/g' | cut -d"-" -f1,2,3,4,5\`"
+alias spb="git checkout -b \`sp | tail -2 | rg '#' | sed 's/^ //' | sed 's/[^A-Za-z0-9 ]//g' | sed 's/ /-/g' | cut -d"-" -f1,2,3,4,5\`"
 
 alias hpr='hub pull-request'
 alias grb='git recent-branches'
@@ -210,4 +214,17 @@ alias dbmd='spring rake db:migrate:down'
 alias dbmu='spring rake db:migrate:up'
 
 # Homebrew
-alias brewu='brew update && brew upgrade && brew cleanup && brew doctor'
+alias brewu='brew update && brew upgrade --all && brew cleanup && brew doctor'
+
+# DockeR
+alias dr='docker'
+# DockeR Stop All
+alias drsa='docker stop $(docker ps -a -q)'
+# Docker Remove All Containers
+alias drac='docker rm $(docker ps -a -q)'
+# Docker Remove All Images
+alias drai='docker rmi $(docker images -q)'
+
+# Ripgrep
+# Makes ripgrep use smart-case by default
+alias rg='rg -S'
