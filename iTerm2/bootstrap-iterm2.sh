@@ -4,7 +4,9 @@
 tic ~/.yadr/iTerm2/xterm-256color.terminfo
 
 # Specify the preferences directory
-defaults write com.googlecode.iterm2.plist PrefsCustomFolder -string "~/.yadr/iTerm2"
+if [[ -f "$HOME/.yadr.user/iTerm2/com.googlecode.iterm2.plist" ]]; then
+  defaults write com.googlecode.iterm2.plist PrefsCustomFolder -string "~/.yadr/iTerm2/"
+fi
 
 # Tell iTerm2 to use the custom preferences in the directory
 defaults write com.googlecode.iterm2.plist LoadPrefsFromCustomFolder -bool true
