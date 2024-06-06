@@ -1,27 +1,19 @@
-
 tap 'cantino/mcfly'
-
-if OS.mac?
-    # tap 'homebrew/bundle'
-    # tap 'homebrew/cask'
-    tap 'homebrew/cask-fonts'
-    # tap 'homebrew/core'
-end
 
 if OS.linux?
    tap 'gromgit/fuse'
 end
 
-cask 'font-fira-code'
-cask 'font-hack-nerd-font'
-cask 'font-fira-code-nerd-font'
-cask 'font-fira-mono-nerd-font'
-cask 'google-chrome'
-cask 'inkscape'
-
 if OS.mac?
+    # tap 'homebrew/bundle'
+    # tap 'homebrew/cask'
+    # tap 'homebrew/core'
+    tap 'homebrew/cask-fonts'
     cask 'firefox'
     cask 'font-fira-code'
+    cask 'font-hack-nerd-font'
+    cask 'font-fira-code-nerd-font'
+    cask 'font-fira-mono-nerd-font'
     cask 'google-chrome'
     cask 'inkscape'
     brew 'reattach-to-user-namespace'
