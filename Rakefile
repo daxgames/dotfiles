@@ -1,5 +1,6 @@
 require 'rake'
 require 'fileutils'
+
 require File.join(File.dirname(__FILE__), 'bin', 'yadr', 'vundle')
 require File.join(File.dirname(__FILE__), 'bin', 'yadr', 'vimplug')
 
@@ -288,19 +289,22 @@ def install_zsh
 end
 
 def install_from_github(app_name, download_url)
-  download_path = File.join('/tmp',"#{app_name}.tar.gz")
-  install_path = File.join(ENV['HOME'], '.local', app_name)
-  link_path = File.join(ENV['HOME'], 'bin', app_name)
-  puts "======================================================"
-  puts "Installing/Updating '#{app_name}' to '#{install_path}'..."
-  puts "======================================================"
-  puts "Downloading #{download_url}"
-  run %{ curl -Lo #{download_path} #{download_url} }
-  run %{ rm -rf #{install_path} }
-  run %{ mkdir -p #{install_path} }
-  run %{ tar -C #{install_path} --strip-components=1 -xzf #{download_path} }
-  run %{ rm -f #{download_path} }
-  run %{ ln -sf $(find #{install_path} -type f -name '#{app_name}') #{link_path} }
+  run %{which #{app_name}}
+  unless $?.success?
+    download_path = File.join('/tmp',"#{app_name}.tar.gz")
+    install_path = File.join(ENV['HOME'], '.local', app_name)
+    link_path = File.join(ENV['HOME'], 'bin', app_name)
+    puts "======================================================"
+    puts "Installing/Updating '#{app_name}' to '#{install_path}'..."
+    puts "======================================================"
+    puts "Downloading #{download_url}"
+    run %{ curl -Lo #{download_path} #{download_url} }
+    run %{ rm -rf #{install_path} }
+    run %{ mkdir -p #{install_path} }
+    run %{ tar -C #{install_path} --strip-components=1 -xzf #{download_path} }
+    run %{ rm -f #{download_path} }
+    run %{ ln -sf $(find #{install_path} -type f -name '#{app_name}') #{link_path} }
+  end
 end
 
 def install_python_modules
