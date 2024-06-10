@@ -2,4 +2,7 @@
 
 source $HOME/.zprezto/runcoms/zshrc
 
-for config_file ($HOME/.yadr/zsh/*.zsh) source $config_file
+for config_file ($HOME/.yadr/zsh/*.zsh) ; do
+  [[ -n "${__DEBUG_YADR}" ]] && echo "source $config_file"
+  source $config_file
+done
