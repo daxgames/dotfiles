@@ -503,20 +503,27 @@ def install_prezto
     end
 
     # The prezto runcoms are only going to be installed if zprezto has never been installed
-    install_files(Dir.glob('zsh/prezto-override/zshrc'), :symlink)
     install_files(Dir.glob('zsh/prezto/runcoms/zlogin'), :symlink)
     install_files(Dir.glob('zsh/prezto/runcoms/zlogout'), :symlink)
-    install_files(Dir.glob('zsh/prezto-override/zpreztorc'), :symlink)
     install_files(Dir.glob('zsh/prezto/runcoms/zprofile'), :symlink)
     install_files(Dir.glob('zsh/prezto/runcoms/zshenv'), :symlink)
 
-    puts
-    puts "Creating directories for your customizations"
-    run %{ mkdir -p $HOME/.zsh.before }
-    run %{ mkdir -p $HOME/.zsh.after }
-    run %{ mkdir -p $HOME/.zsh.prompts }
+  puts
+  puts "Overriding prezto ~/.zpreztorc with YADR's zpreztorc to enable additional modules..."
+  run %{ ln -nfs "$HOME/.yadr/zsh/prezto-override/zpreztorc" "${ZDOTDIR:-$HOME}/.zpreztorc" }
+  # run %{ ln -s ~/.zprezto/modules/prompt/external/powerlevel9k/powerlevel9k.zsh-theme ~/.zprezto/modules/prompt/functions/prompt_powerlevel9k_setup }
+  puts "Overriding prezto ~/.zshrc with YADR's zshrc to enable future customization..."
+  install_files(Dir.glob('zsh/prezto-override/zshrc'), :symlink)
+  puts "Overriding prezto ~/.zpreztorc with YADR's .zpreztorc to enable future customization..."
+  install_files(Dir.glob('zsh/prezto-override/zpreztorc'), :symlink)
 
-    if want_to_install?('zsh_default_shell (mak zsh the default shell))')
+  puts
+  puts "Creating directories for your customizations"
+  run %{ mkdir -p $HOME/.zsh.before }
+  run %{ mkdir -p $HOME/.zsh.after }
+  run %{ mkdir -p $HOME/.zsh.prompts }
+
+    if want_to_install?('zsh_default_shell (make zsh the default shell))')
       if "#{ENV['SHELL']}".include? 'zsh' then
         puts "Zsh is already configured as your shell of choice. Restart your session to load the new settings"
       else
