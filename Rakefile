@@ -505,7 +505,6 @@ def install_prezto
     # The prezto runcoms are only going to be installed if zprezto has never been installed
     install_files(Dir.glob('zsh/prezto/runcoms/zlogin'), :symlink)
     install_files(Dir.glob('zsh/prezto/runcoms/zlogout'), :symlink)
-    install_files(Dir.glob('zsh/prezto/runcoms/zpreztorc'), :symlink)
     install_files(Dir.glob('zsh/prezto/runcoms/zprofile'), :symlink)
     install_files(Dir.glob('zsh/prezto/runcoms/zshenv'), :symlink)
 
@@ -515,7 +514,9 @@ def install_prezto
   # run %{ ln -s ~/.zprezto/modules/prompt/external/powerlevel9k/powerlevel9k.zsh-theme ~/.zprezto/modules/prompt/functions/prompt_powerlevel9k_setup }
   puts "Overriding prezto ~/.zshrc with YADR's zshrc to enable future customization..."
   install_files(Dir.glob('zsh/prezto-override/zshrc'), :symlink)
- 
+  puts "Overriding prezto ~/.zpreztorc with YADR's .zpreztorc to enable future customization..."
+  install_files(Dir.glob('zsh/prezto-override/zpreztorc'), :symlink)
+
   puts
   puts "Creating directories for your customizations"
   run %{ mkdir -p $HOME/.zsh.before }
