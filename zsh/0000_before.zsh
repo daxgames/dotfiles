@@ -1,10 +1,8 @@
 # Load any user customizations prior to load
 #
 if [ -d $HOME/.zsh.before/ ]; then
-  if [ "$(ls -A $HOME/.zsh.before/)" ]; then
-    for config_file ($HOME/.zsh.before/*.zsh) ; do
-      [[ -n "${__DEBUG_YADR}" ]] && echo "source $config_file"
-      source $config_file
-    done
-  fi
+  for config_file in $(find $HOME/.zsh.before/ -name '*.zsh' -type f) ; do
+    [[ -n "${__YADR_DEBUG}" ]] && echo "source $config_file"
+    source $config_file
+  done
 fi
