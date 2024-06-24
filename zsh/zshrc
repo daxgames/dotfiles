@@ -1,8 +1,0 @@
-# source $HOME/.yadr/zsh/theme.zsh
-
-source $HOME/.zprezto/runcoms/zshrc
-
-for config_file ($HOME/.yadr/zsh/*.zsh) ; do
-  [[ -n "${__YADR_DEBUG}" ]] && echo "source $config_file"
-  source $config_file
-done

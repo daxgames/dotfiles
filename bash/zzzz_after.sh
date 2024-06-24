@@ -1,9 +1,7 @@
 # Load any custom after code
 if [ -d $HOME/.bash.after/ ]; then
-  if [ "$(ls -A $HOME/.bash.after/)" ]; then
-    for config_file in $(find $HOME/.bash.after/ -name '*.sh' | sort) ; do
-      [ -n "${DEBUG}" ] && echo sourcing $config_file
-      source $config_file
-    done
-  fi
+  for config_file in $(ls $HOME/.bash.after/*.sh 2>/dev/null) ; do
+    [ -n "${__YADR_DEBUG}" ] && echo sourcing $config_file
+    source $config_file
+  done
 fi
