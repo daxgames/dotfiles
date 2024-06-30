@@ -59,12 +59,19 @@ task :install => [:submodule_init, :submodules] do
   install_bash if want_to_install?('bash configs (color, aliases)')
 
   if want_to_install?('vim configuration (highly recommended)')
+    run %{ ln -nfs "$HOME/.yadr/nvim" "$HOME/.config/nvim" }
+    if File.exist?(File.join('/opt/nvim-linux64/bin/nvim')) && $is_linux
+      run %{ ln -nsf "/opt/nvim-linux64/bin/nvim" "$HOME/bin/nvim" }
+    end
+
     install_files(Dir.glob('{vim,vimrc}'))
     Rake::Task["install_vundle"].execute
 
     # run %{pip3 install tmuxp}
-    run %{pip3 install --user neovim} # For NeoVim plugins
-    run %{pip3 install --user pynvim} # For NeoVim plugins
+    if ENV['PLATFORM_FAMILY'] != "arch"
+      run %{pip3 install --user neovim} # For NeoVim plugins
+      run %{pip3 install --user pynvim} # For NeoVim plugins
+    end
     run %{gem install neovim --user-install} # For NeoVim plugins
 
     if File.exist?(File.join(ENV['HOME'], '.vimrc.before'))
@@ -75,14 +82,8 @@ task :install => [:submodule_init, :submodules] do
       run %{ ln -sf "$HOME/.vimrc.after" "$HOME/.config/nvim/settings/after/zzz-userconfig-vimrc.after.vim" }
     end
 
-    if File.exist?(File.join('/opt/nvim-linux64/bin/nvim')) && $is_linux
-      run %{ mkdir -p "$HOME/bin" }
-      run %{ ln -sf "/opt/nvim-linux64/bin/nvim" "$HOME/bin/nvim" }
-    end
+    Rake::Task["install_vimplug"].execute
   end
-
-  run %{ ln -nfs "$HOME/.yadr/nvim" "$HOME/.config/nvim" }
-  Rake::Task["install_vimplug"].execute
 
   run %{ mkdir -p ~/.config/ranger }
   run %{ ln -nfs ~/.yadr/ranger ~/.config/ranger }
