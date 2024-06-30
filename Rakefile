@@ -155,9 +155,9 @@ task :install => [:submodule_init, :submodules] do
     if macos?
       run %{pipx install neovim} # For NeoVim plugins
       run %{pipx install pynvim} # For NeoVim plugins
-    elsif linux['PLATFORM_FAMILY'] != "arch"
       run %{pip3 install --user neovim} # For NeoVim plugins
       run %{pip3 install --user pynvim} # For NeoVim plugins
+    end
       run %{gem install neovim --user-install} # For NeoVim plugins
     end
 
@@ -171,7 +171,6 @@ task :install => [:submodule_init, :submodules] do
 
     Rake::Task["install_vimplug"].execute
   end
-
   run %( mkdir -p ~/.config/ranger )
   run %( ln -nfs ~/.yadr/ranger ~/.config/ranger )
   run %( touch ~/.hushlogin )
