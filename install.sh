@@ -29,6 +29,7 @@ if [ ! -d "$HOME/.yadr" ]; then
             PLATFORM_VERSION=$(cat /etc/os-release | grep -i ^version_id= | cut -d = -f2 | sed 's/"//g')
             echo "PLATFORM: '${PLATFORM}'"
 
+            [ "${PLATFORM}" = "arch" ] && PLATFORM_FAMILY=arch
             [ "${PLATFORM}" = "centos" ] && PLATFORM_FAMILY=rhel
             [ "${PLATFORM}" = "fedora" ] && PLATFORM_FAMILY=rhel
             [ "${PLATFORM}" = "debian" ] && PLATFORM_FAMILY=debian
@@ -42,11 +43,32 @@ if [ ! -d "$HOME/.yadr" ]; then
 
         if [ -z "$(command -v rake)" ] ; then
             echo "Installing 'rake' in '${PLATFORM_FAMILY}'..."
-            if [ "${PLATFORM_FAMILY}" = "debian" ]; then
-                `which sudo 2>/dev/null` apt install -y rake
+            if [ "${PLATFORM_FAMILY}" == "arch" ] ; then
+                `which sudo 2>/dev/null` pacman -Syu \
+                `which sudo 2>/dev/null` pacman -S bat \
+                  fzf \
+                  git \
+                  github-cli \
+                  neovim \
+                  python3 \
+                  python-neovim \
+                  ruby-rake \
+                  ripgrep \
+                  zsh
+            elif [ "${PLATFORM_FAMILY}" = "debian" ]; then
+                `which sudo 2>/dev/null` apt update -y
+                `which sudo 2>/dev/null` apt install -y rake \
+                    build-essential \
+                    python3-pip \
+                    ruby-dev
+
             elif [ "${PLATFORM_FAMILY}" = "rhel" ] ; then
-                [ "${PLATFORM_VERSION}" -lt 8 ] && `which sudo 2>/dev/null` yum install -y rubygem-rake
-                [ "${PLATFORM_VERSION}" -gt 7 ] && `which sudo 2>/dev/null` dnf install -y rubygem-rake
+                [ "${PLATFORM_VERSION}" -lt 8 ] && PACKAGE_MANAGER=yum
+                [ "${PLATFORM_VERSION}" -gt 7 ] && PACKAGE_MANAGER=dnf
+                `which sudo 2>/dev/null` ${PACKAGE_MANAGER} update -y
+                `which sudo 2>/dev/null` ${PACKAGE_MANAGER} groups install -y "Development Tools"
+                `which sudo 2>/dev/null` ${PACKAGE_MANAGER} install -y rubygem-rake zsh
+
             fi
         fi
     elif [ "${PLATFORM}" = "Darwin" ] ; then

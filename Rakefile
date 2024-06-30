@@ -23,14 +23,6 @@ task :install => [:submodule_init, :submodules] do
   install_homebrew if $is_macos
 
   if $is_linux
-    if linux_variant[:distro] == 'Ubuntu' || linux_variant[:distro] == 'Debian'
-      # Running on Debian/Ubuntu
-      run %{sudo apt update -y}
-      run %{sudo apt install -y build-essential python3-pip ruby-dev}
-    elsif linux_variant[:family] == 'Redhat'
-      run %{yum update -y}
-      run %{yum groups install "Development Tools"}
-    end
     install_zsh if want_to_install?('zsh (shell, enhancements))')
     install_from_github('bat', 'https://github.com/sharkdp/bat/releases/download/v0.24.0/bat-v0.24.0-i686-unknown-linux-musl.tar.gz')
     install_from_github('nvim', 'https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz')
