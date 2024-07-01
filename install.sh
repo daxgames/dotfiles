@@ -29,7 +29,6 @@ if [ ! -d "$HOME/.yadr" ]; then
             PLATFORM_VERSION=$(cat /etc/os-release | grep -i ^version_id= | cut -d = -f2 | sed 's/"//g')
             echo "PLATFORM: '${PLATFORM}'"
 
-            [ "${PLATFORM}" = "arch" ] && PLATFORM_FAMILY=arch
             [ "${PLATFORM}" = "centos" ] && PLATFORM_FAMILY=rhel
             [ "${PLATFORM}" = "fedora" ] && PLATFORM_FAMILY=rhel
             [ "${PLATFORM}" = "debian" ] && PLATFORM_FAMILY=debian

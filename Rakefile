@@ -22,8 +22,32 @@ task :install => [:submodule_init, :submodules] do
   ENV['PATH'] = "#{File.join(ENV['HOME'], 'bin')}:#{ENV['PATH']}"
   install_homebrew if $is_macos
 
+  linux = nil
   if $is_linux
+    linux = linux_variant
+
+    if linux["PLATFORM_FAMILY"] == "arch"
+        run %{sudo pacman -Syu%}
+        run %{sudo pacman -S bat \
+          fzf \
+          git \
+          github-cli \
+          neovim \
+          python3 \
+          python-neovim \
+          ripgrep}
+    elsif linux["PLATFORM_FAMILY"] == "debian"
+        run %{sudo apt update -y}
+        run %{sudo apt install -y build-essential \
+            python3-pip}
+
+    elsif linux["PLATFORM_FAMILY"] == "rhel"
+        run %{ sudo #{linux['PACKAGE_MANAGER']} update -y}
+        run %{ sudo #{linux['PACKAGE_MANAGER']} groups install -y "Development Tools"}
+    end
+
     install_zsh if want_to_install?('zsh (shell, enhancements))')
+
     install_from_github('bat', 'https://github.com/sharkdp/bat/releases/download/v0.24.0/bat-v0.24.0-i686-unknown-linux-musl.tar.gz')
     install_from_github('nvim', 'https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz')
     install_from_github('rg', 'https://github.com/BurntSushi/ripgrep/releases/download/14.1.0/ripgrep-14.1.0-x86_64-unknown-linux-musl.tar.gz')
@@ -219,25 +243,50 @@ end
 
 
 def linux_variant
-  r = { :distro => nil, :family => nil }
+  linux = {
+    :PLATFORM => nil,
+    :PLATFORM_FAMILY => nil,
+    :PLATFORM_VERSION => nil,
+    :PACKAGE_MANGER => nil
+  }
 
-  if File.exist?('/etc/lsb-release')
-    File.open('/etc/lsb-release', 'r').read.each_line do |line|
-      r = { :distro => $1 } if line =~ /^DISTRIB_ID=(.*)/
+  if File.exist?("/etc/os-release")
+    puts "Determining Linux OS using '/etc/os-release'..."
+    File.open('/etc/os-release', 'r').read.each_line do |line|
+      (key, value) = line.strip.gsub('"', '').split('=')
+      if key.casecmp("id") == 0
+        linux["PLATFORM"] = value
+      elsif key.casecmp("id_like") == 0
+        linux["PLATFORM_FAMILY"] = value
+      elsif key.casecmp("version_id") == 0
+        linux["PLATFORM_VERSION"] = value
+      end
+    end
+
+    linux["PLATFORM_FAMILY"] = "rhel"   if linux["PLATFORM"] == "centos"
+    linux["PLATFORM_FAMILY"] = "rhel"   if linux["PLATFORM"] == "fedora"
+    linux["PLATFORM_FAMILY"] = "debian" if linux["PLATFORM"] == "debian"
+  elsif File.exist?("/etc/redhat-release")
+    linux["PLATFORM"] => "redhat"
+    linux["PLATFORM_FAMILY"] => "rhel"
+  end
+
+  if linux["PLATFORM_FAMILY"] == "arch"
+    linux["PACKAGE_MANAGER"] = "pacman"
+  elsif linux["PLATFORM_FAMILY"] == "debian"
+    linux["PACKAGE_MANAGER"] = "apt"
+  elsif linux["PLATFORM_FAMILY"] == "rhel"
+    linux["PACKAGE_MANAGER"] = "dnf"
+    if linux["PLATFORM_VERSION"].to_i < 8
+      linux["PACKAGE_MANAGER"] = "yum"
     end
   end
 
-  if File.exist?('/etc/debian_version')
-    r[:distro] = 'Debian' if r[:distro].nil?
-    r[:family] = 'Debian' if r[:variant].nil?
-  elsif File.exist?('/etc/redhat-release') or File.exist?('/etc/centos-release')
-    r[:family] = 'RedHat' if r[:family].nil?
-    r[:distro] = 'CentOS' if File.exist?('/etc/centos-release')
-  elsif File.exist?('/etc/SuSE-release')
-    r[:distro] = 'SLES' if r[:distro].nil?
-  end
+  # linux.each do |key, value|
+  #   puts "#{key}: #{value}"
+  # end
 
-  return r
+  return linux
 end
 
 def run_bundle_config
@@ -269,14 +318,11 @@ def install_zsh
     puts "installed, this will do nothing."
     puts "======================================================"
 
-    if ENV['PLATFORM_FAMILY'] == 'debian'
-      run %{ sudo apt install -y zsh }
-    elsif ENV['PLATFORM_FAMILY'] == 'rhel'
-      if ENV['PLATFORM_VERSION'].to_i < 8
-        run %{ sudo yum install -y zsh }
-      else
-        run %{ sudo dnf install -y zsh }
-      end
+    if ENV["PLATFORM_FAMILY"] == "arch"
+        run %{sudo pacman -S zsh}
+        run %{sudo apt update -y}
+    else
+      run %{ sudo #{linux["PACKAGE_MANAGER"]} install -y zsh }
     end
   end
 end
