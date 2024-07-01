@@ -92,7 +92,7 @@ task :install => [:submodule_init, :submodules] do
     Rake::Task["install_vundle"].execute
 
     # run %{pip3 install tmuxp}
-    if ENV['PLATFORM_FAMILY'] != "arch"
+    if linux['PLATFORM_FAMILY'] != "arch" || is_macos?
       run %{pip3 install --user neovim} # For NeoVim plugins
       run %{pip3 install --user pynvim} # For NeoVim plugins
     end
