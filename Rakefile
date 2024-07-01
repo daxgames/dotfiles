@@ -6,6 +6,10 @@ require File.join(File.dirname(__FILE__), 'bin', 'yadr', 'vimplug')
 
 $is_macos = RUBY_PLATFORM.downcase.include?('darwin')
 $is_linux = RUBY_PLATFORM.downcase.include?('linux')
+$linux = nil
+if $is_linux
+  $linux = linux_variant
+end
 
 desc 'Hook our dotfiles into system-standard positions.'
 task :install => [:submodule_init, :submodules] do
@@ -22,11 +26,13 @@ task :install => [:submodule_init, :submodules] do
   ENV['PATH'] = "#{File.join(ENV['HOME'], 'bin')}:#{ENV['PATH']}"
   install_homebrew if $is_macos
 
-  linux = nil
   if $is_linux
-    linux = linux_variant
+    run %{which brew}
+    if $?.success?
+      install_homebrew
+    end
 
-    if linux["PLATFORM_FAMILY"] == "arch"
+    if $linux["PLATFORM_FAMILY"] == "arch"
         run %{sudo pacman -Syu%}
         run %{sudo pacman -Sy bat \
           fzf \
@@ -36,14 +42,14 @@ task :install => [:submodule_init, :submodules] do
           python3 \
           python-neovim \
           ripgrep}
-    elsif linux["PLATFORM_FAMILY"] == "debian"
+    elsif $linux["PLATFORM_FAMILY"] == "debian"
         run %{sudo apt update -y}
         run %{sudo apt install -y build-essential \
             python3-pip}
 
-    elsif linux["PLATFORM_FAMILY"] == "rhel"
-        run %{ sudo #{linux['PACKAGE_MANAGER']} update -y}
-        run %{ sudo #{linux['PACKAGE_MANAGER']} groups install -y "Development Tools"}
+    elsif $linux["PLATFORM_FAMILY"] == "rhel"
+        run %{ sudo #{$linux['PACKAGE_MANAGER']} update -y}
+        run %{ sudo #{$linux['PACKAGE_MANAGER']} groups install -y "Development Tools"}
     end
 
     install_zsh if want_to_install?('zsh (shell, enhancements))')
@@ -92,7 +98,7 @@ task :install => [:submodule_init, :submodules] do
     Rake::Task["install_vundle"].execute
 
     # run %{pip3 install tmuxp}
-    if linux['PLATFORM_FAMILY'] != "arch" || is_macos?
+    if $is_macos || $linux['PLATFORM_FAMILY'] != "arch"
       run %{pip3 install --user neovim} # For NeoVim plugins
       run %{pip3 install --user pynvim} # For NeoVim plugins
     end
