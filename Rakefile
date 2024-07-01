@@ -28,7 +28,7 @@ task :install => [:submodule_init, :submodules] do
 
     if linux["PLATFORM_FAMILY"] == "arch"
         run %{sudo pacman -Syu%}
-        run %{sudo pacman -S bat \
+        run %{sudo pacman -Sy bat \
           fzf \
           git \
           github-cli \
@@ -319,8 +319,7 @@ def install_zsh
     puts "======================================================"
 
     if ENV["PLATFORM_FAMILY"] == "arch"
-        run %{sudo pacman -S zsh}
-        run %{sudo apt update -y}
+        run %{sudo pacman -Sy zsh}
     else
       run %{ sudo #{linux["PACKAGE_MANAGER"]} install -y zsh }
     end
