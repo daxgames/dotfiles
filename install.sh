@@ -39,14 +39,11 @@ if [ ! -d "$HOME/.yadr" ]; then
         export PLATFORM PLATFORM_FAMILY PLATFORM_VERSION
         [ -z "${__YADR_DEBUG}" ] && env | grep PLATFORM | sort
 
-	read -p "Before[Is rake installed]: '$(command -v rake)'"
         if [ -z "$(command -v rake)" ] ; then
             echo "Installing 'rake' in '${PLATFORM_FAMILY}'..."
-	    read -p "Before[Installing rake on: '${PLATFORM_FAMILY}'"
             if [ "${PLATFORM_FAMILY}" == "arch" ] ; then
-	          read -p "Installing rake on: '${PLATFORM_FAMILY}'"
-                  $(command -v sudo) pacman -Syu
-                  $(command -v sudo) pacman -S ruby-rake
+                $(command -v sudo) pacman -Syu
+                $(command -v sudo) pacman -S ruby-rake
             elif [ "${PLATFORM_FAMILY}" = "debian" ]; then
                 $(command -v sudo) apt update -y
                 $(command -v sudo) apt install -y rake \
@@ -57,10 +54,19 @@ if [ ! -d "$HOME/.yadr" ]; then
                 [ "${PLATFORM_VERSION}" -gt 7 ] && PACKAGE_MANAGER=dnf
                 $(command -v sudo) ${PACKAGE_MANAGER} update -y
                 $(command -v sudo) ${PACKAGE_MANAGER} groups install -y "Development Tools"
-		$(command -v sudo) ${PACKAGE_MANAGER} install -y rubygem-rake zsh
-
+                $(command -v sudo) ${PACKAGE_MANAGER} install -y rubygem-rake zsh
             fi
         fi
+
+        if [ -z "$(command -v nvm)" ] && [ -z "$(command -v npm)" ] ; then
+            echo "Installing 'Node Version Manager and Node'..."
+            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+            export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
+            nvm install v18
+            nvm use v18
+        fi
+
     elif [ "${PLATFORM}" = "Darwin" ] ; then
         PLATFORM_FAMILY=$(echo ${PLATFORM} | tr [A-Z] [a-z])
     fi
