@@ -46,21 +46,10 @@ if [ ! -d "$HOME/.yadr" ]; then
             if [ "${PLATFORM_FAMILY}" == "arch" ] ; then
 	          read -p "Installing rake on: '${PLATFORM_FAMILY}'"
                   $(command -v sudo) pacman -Syu
-                  $(command -v sudo) pacman -S bat \
-                    fzf \
-                    git \
-                    github-cli \
-                    neovim \
-                    python3 \
-                    python-neovim \
-                    ruby-rake \
-                    ripgrep \
-                    zsh
+                  $(command -v sudo) pacman -S ruby-rake
             elif [ "${PLATFORM_FAMILY}" = "debian" ]; then
                 $(command -v sudo) apt update -y
                 $(command -v sudo) apt install -y rake \
-                  build-essential \
-                  python3-pip \
                   ruby-dev
 
             elif [ "${PLATFORM_FAMILY}" = "rhel" ] ; then

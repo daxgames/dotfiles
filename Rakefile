@@ -7,9 +7,6 @@ require File.join(File.dirname(__FILE__), 'bin', 'yadr', 'vimplug')
 $is_macos = RUBY_PLATFORM.downcase.include?('darwin')
 $is_linux = RUBY_PLATFORM.downcase.include?('linux')
 $linux = nil
-if $is_linux
-  $linux = linux_variant
-end
 
 desc 'Hook our dotfiles into system-standard positions.'
 task :install => [:submodule_init, :submodules] do
@@ -18,6 +15,10 @@ task :install => [:submodule_init, :submodules] do
   puts 'Welcome to YADR Installation.'
   puts '======================================================'
   puts
+
+  if $is_linux
+    $linux = linux_variant
+  end
 
   if ! File.exist?("#{ENV['HOME']}/bin")
     run %{ mkdir -p $HOME/bin }
@@ -46,7 +47,6 @@ task :install => [:submodule_init, :submodules] do
         run %{sudo apt update -y}
         run %{sudo apt install -y build-essential \
             python3-pip}
-
     elsif $linux["PLATFORM_FAMILY"] == "rhel"
         run %{ sudo #{$linux['PACKAGE_MANAGER']} update -y}
         run %{ sudo #{$linux['PACKAGE_MANAGER']} groups install -y "Development Tools"}
