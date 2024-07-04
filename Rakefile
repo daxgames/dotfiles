@@ -42,7 +42,10 @@ task :install => [:submodule_init, :submodules] do
           neovim \
           python3 \
           python-neovim \
-          ripgrep}
+          ripgrep \
+          rustup
+        }
+        run %{rustup default stable}
     elsif $linux["PLATFORM_FAMILY"] == "debian"
         run %{sudo apt update -y}
         run %{sudo apt install -y build-essential \
@@ -90,6 +93,17 @@ task :install => [:submodule_init, :submodules] do
 
   if want_to_install?('vim configuration (highly recommended)')
     run %{ ln -nfs "$HOME/.yadr/nvim" "$HOME/.config/nvim" }
+
+    run %{which gradle}
+    unless $?.success?
+      run %{sdk install gradle}
+    end
+
+    run %{which java}
+    unless $?.success?
+      sdk install java 17.0.11-amzn
+    end
+
     if File.exist?(File.join('/opt/nvim-linux64/bin/nvim')) && $is_linux
       run %{ ln -nsf "/opt/nvim-linux64/bin/nvim" "$HOME/bin/nvim" }
     end

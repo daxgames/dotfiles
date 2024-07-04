@@ -43,30 +43,19 @@ if [ ! -d "$HOME/.yadr" ]; then
             echo "Installing 'rake' in '${PLATFORM_FAMILY}'..."
             if [ "${PLATFORM_FAMILY}" == "arch" ] ; then
                 $(command -v sudo) pacman -Syu
-                $(command -v sudo) pacman -S ruby-rake
+                $(command -v sudo) pacman -S ruby-rake zip
             elif [ "${PLATFORM_FAMILY}" = "debian" ]; then
                 $(command -v sudo) apt update -y
-                $(command -v sudo) apt install -y rake \
-                  ruby-dev
+                $(command -v sudo) apt install -y rake ruby-dev zip
 
             elif [ "${PLATFORM_FAMILY}" = "rhel" ] ; then
                 [ "${PLATFORM_VERSION}" -lt 8 ] && PACKAGE_MANAGER=yum
                 [ "${PLATFORM_VERSION}" -gt 7 ] && PACKAGE_MANAGER=dnf
                 $(command -v sudo) ${PACKAGE_MANAGER} update -y
                 $(command -v sudo) ${PACKAGE_MANAGER} groups install -y "Development Tools"
-                $(command -v sudo) ${PACKAGE_MANAGER} install -y rubygem-rake zsh
+                $(command -v sudo) ${PACKAGE_MANAGER} install -y rubygem-rake zip
             fi
         fi
-
-        if [ -z "$(command -v nvm)" ] && [ -z "$(command -v npm)" ] ; then
-            echo "Installing 'Node Version Manager and Node'..."
-            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
-            export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
-            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
-            nvm install v18
-            nvm use v18
-        fi
-
     elif [ "${PLATFORM}" = "Darwin" ] ; then
         PLATFORM_FAMILY=$(echo ${PLATFORM} | tr [A-Z] [a-z])
     fi
@@ -74,6 +63,18 @@ if [ ! -d "$HOME/.yadr" ]; then
     # Enable persistent undo
     mkdir -p $HOME/.vim/backups > /dev/null 2>&1
     mkdir -p $HOME/.share/nvim/backups > /dev/null 2>&1
+
+    if [ -z "$(command -v nvm)" ] && [ -z "$(command -v npm)" ] ; then
+        echo "Installing 'Node Version Manager and Node'..."
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+        export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
+    fi
+
+    if [ -z "$(command -v sdkman)" ] ; then
+        curl -s "https://get.sdkman.io?rcupdate=false" | bash
+        source "$HOME/.sdkman/bin/sdkman-init.sh"
+    fi
 
     rake install
 else
