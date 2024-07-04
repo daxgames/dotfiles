@@ -27,7 +27,6 @@ if [ ! -d "$HOME/.yadr" ]; then
             PLATFORM=$(cat /etc/os-release | grep -i ^id= | cut -d = -f2 | sed 's/"//g')
             PLATFORM_FAMILY=$(cat /etc/os-release | grep -i ^id_like= | cut -d = -f2 | sed 's/"//g')
             PLATFORM_VERSION=$(cat /etc/os-release | grep -i ^version_id= | cut -d = -f2 | sed 's/"//g')
-            echo "PLATFORM: '${PLATFORM}'"
 
             [ "${PLATFORM}" = "centos" ] && PLATFORM_FAMILY=rhel
             [ "${PLATFORM}" = "fedora" ] && PLATFORM_FAMILY=rhel
@@ -40,33 +39,36 @@ if [ ! -d "$HOME/.yadr" ]; then
         export PLATFORM PLATFORM_FAMILY PLATFORM_VERSION
         [ -z "${__YADR_DEBUG}" ] && env | grep PLATFORM | sort
 
+	read -p "Before[Is rake installed]: '$(command -v rake)'"
         if [ -z "$(command -v rake)" ] ; then
             echo "Installing 'rake' in '${PLATFORM_FAMILY}'..."
+	    read -p "Before[Installing rake on: '${PLATFORM_FAMILY}'"
             if [ "${PLATFORM_FAMILY}" == "arch" ] ; then
-                `which sudo 2>/dev/null` pacman -Syu \
-                `which sudo 2>/dev/null` pacman -S bat \
-                  fzf \
-                  git \
-                  github-cli \
-                  neovim \
-                  python3 \
-                  python-neovim \
-                  ruby-rake \
-                  ripgrep \
-                  zsh
+	          read -p "Installing rake on: '${PLATFORM_FAMILY}'"
+                  $(command -v sudo) pacman -Syu
+                  $(command -v sudo) pacman -S bat \
+                    fzf \
+                    git \
+                    github-cli \
+                    neovim \
+                    python3 \
+                    python-neovim \
+                    ruby-rake \
+                    ripgrep \
+                    zsh
             elif [ "${PLATFORM_FAMILY}" = "debian" ]; then
-                `which sudo 2>/dev/null` apt update -y
-                `which sudo 2>/dev/null` apt install -y rake \
-                    build-essential \
-                    python3-pip \
-                    ruby-dev
+                $(command -v sudo) apt update -y
+                $(command -v sudo) apt install -y rake \
+                  build-essential \
+                  python3-pip \
+                  ruby-dev
 
             elif [ "${PLATFORM_FAMILY}" = "rhel" ] ; then
                 [ "${PLATFORM_VERSION}" -lt 8 ] && PACKAGE_MANAGER=yum
                 [ "${PLATFORM_VERSION}" -gt 7 ] && PACKAGE_MANAGER=dnf
-                `which sudo 2>/dev/null` ${PACKAGE_MANAGER} update -y
-                `which sudo 2>/dev/null` ${PACKAGE_MANAGER} groups install -y "Development Tools"
-                `which sudo 2>/dev/null` ${PACKAGE_MANAGER} install -y rubygem-rake zsh
+                $(command -v sudo) ${PACKAGE_MANAGER} update -y
+                $(command -v sudo) ${PACKAGE_MANAGER} groups install -y "Development Tools"
+		$(command -v sudo) ${PACKAGE_MANAGER} install -y rubygem-rake zsh
 
             fi
         fi
