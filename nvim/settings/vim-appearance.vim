@@ -13,7 +13,7 @@ set background=dark
 if has("gui_running")
   set lines=60
   set columns=190
-  
+
   " Show tab number (useful for Cmd-1, Cmd-2.. mapping)
   " For some reason this doesn't work as a regular set command,
   " (the numbers don't show up) so I made it a VimEnter event
@@ -31,12 +31,12 @@ if has("gui_running")
       let g:solarized_termcolors=256
       let g:solarized_termtrans=1
     end
-    
+
     set guifont=Fira\ Code:h12
   end
 endif
 
-colorscheme solarized
+colorscheme onehalfdark
 
 " Highlight VCS conflict markers
 match ErrorMsg '^\(<\|=\|>\)\{7\}\([^=].\+\)\?$'
