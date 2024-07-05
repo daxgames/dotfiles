@@ -101,7 +101,7 @@ task :install => [:submodule_init, :submodules] do
 
     run %{which java}
     unless $?.success?
-      sdk install java 17.0.11-amzn
+      run %{sdk install java 17.0.11-amzn}
     end
 
     if File.exist?(File.join('/opt/nvim-linux64/bin/nvim')) && $is_linux
