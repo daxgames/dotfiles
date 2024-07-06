@@ -43,6 +43,7 @@ task :install => [:submodule_init, :submodules] do
           python3 \
           python-neovim \
           ripgrep \
+          rubocop \
           rustup
         }
         run %{rustup default stable}

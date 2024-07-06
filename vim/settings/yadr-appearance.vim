@@ -31,8 +31,6 @@ if has("gui_running")
   end
 endif
 
-colorscheme onehalfdark
-
 " Highlight VCS conflict markers
 match ErrorMsg '^\(<\|=\|>\)\{7\}\([^=].\+\)\?$'
 " Hide ~ for blank lines
