@@ -34,8 +34,7 @@ task :install => [:submodule_init, :submodules] do
     end
 
     if $linux["PLATFORM_FAMILY"] == "arch"
-        run %{sudo pacman -Syu%}
-        run %{sudo pacman -Sy bat \
+        run %{sudo pacman -S --noconfirm bat \
           fzf \
           git \
           github-cli \
@@ -44,7 +43,8 @@ task :install => [:submodule_init, :submodules] do
           python-neovim \
           ripgrep \
           rubocop \
-          rustup
+          rustup \
+          vim
         }
         run %{rustup default stable}
     elsif $linux["PLATFORM_FAMILY"] == "debian"
@@ -97,12 +97,22 @@ task :install => [:submodule_init, :submodules] do
 
     run %{which gradle}
     unless $?.success?
-      run %{sdk install gradle}
+      run %{source "${HOME}/.yadr/zsh/sdkman.zsh" ; sdk install gradle}
     end
 
     run %{which java}
     unless $?.success?
-      run %{sdk install java 17.0.11-amzn}
+      run %{source "${HOME}/.yadr/zsh/sdkman.zsh" ; sdk install java 17.0.11-amzn}
+    end
+
+    run %{which node}
+    unless $?.success?
+      run %{which nvm}
+      unless $?.success?
+        run %{curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash}
+        run %{source ${HOME}/.yadr/zsh/nvm.zsh}
+      end
+      nvm install v18
     end
 
     if File.exist?(File.join('/opt/nvim-linux64/bin/nvim')) && $is_linux
@@ -340,7 +350,7 @@ def install_zsh
     puts "======================================================"
 
     if ENV["PLATFORM_FAMILY"] == "arch"
-        run %{sudo pacman -Sy zsh}
+        run %{sudo pacman -S --noconfirm zsh}
     else
       run %{ sudo #{linux["PACKAGE_MANAGER"]} install -y zsh }
     end

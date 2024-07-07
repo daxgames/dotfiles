@@ -13,6 +13,7 @@ require("mason-lspconfig").setup({
   ensure_installed = {
     "lua_ls",
     "tsserver",
+    "gradle_ls",
     "groovyls",
     "yamlls",
     "jinja_lsp",
