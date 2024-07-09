@@ -110,9 +110,7 @@ task :install => [:submodule_init, :submodules] do
       run %{which nvm}
       unless $?.success?
         run %{curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash}
-        run %{source ${HOME}/.yadr/zsh/nvm.zsh}
       end
-      nvm install v18
     end
 
     if File.exist?(File.join('/opt/nvim-linux64/bin/nvim')) && $is_linux
