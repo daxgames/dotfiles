@@ -49,8 +49,17 @@ task :install => [:submodule_init, :submodules] do
         run %{rustup default stable}
     elsif $linux["PLATFORM_FAMILY"] == "debian"
         run %{sudo apt update -y}
-        run %{sudo apt install -y build-essential \
-            python3-pip}
+        run %{sudo apt install -y bat \
+          build-essential \
+          cargo \
+          fzf \
+          git\
+          gradle \
+          openjdk-17-jdk \
+          python3-pip \
+          rubocop
+        }
+        run %{sudo ln -sf /bin/batcat /bin/bat}
     elsif $linux["PLATFORM_FAMILY"] == "rhel"
         run %{ sudo #{$linux['PACKAGE_MANAGER']} update -y}
         run %{ sudo #{$linux['PACKAGE_MANAGER']} groups install -y "Development Tools"}
@@ -95,14 +104,21 @@ task :install => [:submodule_init, :submodules] do
   if want_to_install?('vim configuration (highly recommended)')
     run %{ ln -nfs "$HOME/.yadr/nvim" "$HOME/.config/nvim" }
 
-    run %{which gradle}
-    unless $?.success?
-      run %{source "${HOME}/.yadr/zsh/sdkman.zsh" ; sdk install gradle}
-    end
+    if $linux['PLATFORM_FAMILY'] != 'debian'
+      run %{which sdk}
+      unless $?.success?
+        run %{curl -s "https://get.sdkman.io" | bash}
+      end
 
-    run %{which java}
-    unless $?.success?
-      run %{source "${HOME}/.yadr/zsh/sdkman.zsh" ; sdk install java 17.0.11-amzn}
+      run %{which gradle}
+      unless $?.success?
+        run %{source "${HOME}/.yadr/zsh/sdkman.zsh" ; sdk install gradle}
+      end
+
+      run %{which java}
+      unless $?.success?
+        run %{source "${HOME}/.yadr/zsh/sdkman.zsh" ; sdk install java 17.0.11-amzn}
+      end
     end
 
     run %{which node}
@@ -347,10 +363,12 @@ def install_zsh
     puts "installed, this will do nothing."
     puts "======================================================"
 
-    if ENV["PLATFORM_FAMILY"] == "arch"
+    if $linux["PLATFORM_FAMILY"] == "arch"
+        puts "Installing 'zsh' on 'arch'..."
         run %{sudo pacman -S --noconfirm zsh}
     else
-      run %{ sudo #{linux["PACKAGE_MANAGER"]} install -y zsh }
+      puts "Installing 'zsh' on '#{$linux['PLATFORM_FAMILY']}'..."
+      run %{ sudo #{$linux['PACKAGE_MANAGER']} install -y zsh }
     end
   end
 end
