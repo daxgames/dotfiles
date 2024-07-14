@@ -44,6 +44,7 @@ task :install => [:submodule_init, :submodules] do
           ripgrep \
           rubocop \
           rustup \
+          shellcheck \
           vim
         }
         run %{[[ -n "$(command -v rustup)" ]] && rustup default stable}
@@ -59,7 +60,8 @@ task :install => [:submodule_init, :submodules] do
           openjdk-17-jdk \
           python3-pip \
           rubocop \
-          ruby-dev
+          ruby-dev \
+          shellcheck
         }
         run %{sudo ln -sf /bin/batcat /bin/bat}
     elsif $linux["PLATFORM_FAMILY"] == "rhel"
@@ -72,7 +74,8 @@ task :install => [:submodule_init, :submodules] do
           ripgrep \
           vim-enhanced \
           ruby-devel \
-          rustup
+          rustup \
+          shellcheck
         }
         run %{[[ -n "$(command -v rustup-init)" ]] && rustup-init -y}
     end
