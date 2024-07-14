@@ -53,11 +53,13 @@ task :install => [:submodule_init, :submodules] do
           build-essential \
           cargo \
           fzf \
+          gh \
           git\
           gradle \
           openjdk-17-jdk \
           python3-pip \
-          rubocop
+          rubocop \
+          ruby-dev
         }
         run %{sudo ln -sf /bin/batcat /bin/bat}
     elsif $linux["PLATFORM_FAMILY"] == "rhel"
