@@ -46,7 +46,7 @@ task :install => [:submodule_init, :submodules] do
           rustup \
           vim
         }
-        run %{rustup default stable}
+        run %{[[ -n "$(command -v rustup)" ]] && rustup default stable}
     elsif $linux["PLATFORM_FAMILY"] == "debian"
         run %{sudo apt update -y}
         run %{sudo apt install -y bat \
@@ -63,6 +63,16 @@ task :install => [:submodule_init, :submodules] do
     elsif $linux["PLATFORM_FAMILY"] == "rhel"
         run %{ sudo #{$linux['PACKAGE_MANAGER']} update -y}
         run %{ sudo #{$linux['PACKAGE_MANAGER']} groups install -y "Development Tools"}
+        run %{ sudo #{$linux['PACKAGE_MANAGER']} install -y bat \
+          fzf \
+          gh \
+          neovim \
+          ripgrep \
+          vim-enhanced \
+          ruby-devel \
+          rustup
+        }
+        run %{[[ -n "$(command -v rustup-init)" ]] && rustup-init -y}
     end
 
     install_zsh if want_to_install?('zsh (shell, enhancements))')
