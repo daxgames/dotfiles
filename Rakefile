@@ -119,7 +119,7 @@ task :install => [:submodule_init, :submodules] do
   if want_to_install?('vim configuration (highly recommended)')
     run %{ ln -nfs "$HOME/.yadr/nvim" "$HOME/.config/nvim" }
 
-    if $linux['PLATFORM_FAMILY'] != 'debian'
+    if $is_macos || ($is_linux && $linux['PLATFORM_FAMILY'] != 'debian')
       run %{which sdk}
       unless $?.success?
         run %{curl -s "https://get.sdkman.io" | bash}
