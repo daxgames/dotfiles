@@ -1,2 +1,1 @@
-lua require('settings/plugin-none-ls')
 lua require('settings/plugins-neovim-lsp-config')
