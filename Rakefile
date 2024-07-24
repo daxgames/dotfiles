@@ -6,6 +6,7 @@ require File.join(File.dirname(__FILE__), 'bin', 'yadr', 'vimplug')
 
 $is_macos = RUBY_PLATFORM.downcase.include?('darwin')
 $is_linux = RUBY_PLATFORM.downcase.include?('linux')
+$linux = nil
 
 desc 'Hook our dotfiles into system-standard positions.'
 task :install => [:submodule_init, :submodules] do
@@ -15,6 +16,10 @@ task :install => [:submodule_init, :submodules] do
   puts '======================================================'
   puts
 
+  if $is_linux
+    $linux = linux_variant
+  end
+
   if ! File.exist?("#{ENV['HOME']}/bin")
     run %{ mkdir -p $HOME/bin }
   end
@@ -23,16 +28,62 @@ task :install => [:submodule_init, :submodules] do
   install_homebrew if $is_macos
 
   if $is_linux
-    if linux_variant[:distro] == 'Ubuntu' || linux_variant[:distro] == 'Debian'
-      # Running on Debian/Ubuntu
-      run %{sudo apt update -y}
-      run %{sudo apt install -y build-essential python3-pip ruby-dev}
-    elsif linux_variant[:family] == 'Redhat'
-      run %{yum update -y}
-      run %{yum groups install "Development Tools"}
+    run %{which brew}
+    if $?.success?
+      install_homebrew
     end
+
+    if $linux["PLATFORM_FAMILY"] == "arch"
+        run %{sudo pacman -S --noconfirm bat \
+          fzf \
+          git \
+          github-cli \
+          neovim \
+          python3 \
+          python-neovim \
+          ripgrep \
+          rubocop \
+          rustup \
+          shellcheck \
+          vim
+        }
+        run %{[[ -n "$(command -v rustup)" ]] && rustup default stable}
+    elsif $linux["PLATFORM_FAMILY"] == "debian"
+        run %{sudo apt update -y}
+        run %{sudo apt install -y bat \
+          build-essential \
+          cargo \
+          fzf \
+          gh \
+          git\
+          gradle \
+          openjdk-17-jdk \
+          python3-pip \
+          rubocop \
+          ruby-dev \
+          shellcheck
+        }
+        run %{sudo ln -sf /bin/batcat /bin/bat}
+    elsif $linux["PLATFORM_FAMILY"] == "rhel"
+        run %{ sudo #{$linux['PACKAGE_MANAGER']} update -y}
+        run %{ sudo #{$linux['PACKAGE_MANAGER']} groups install -y "Development Tools"}
+        run %{ sudo #{$linux['PACKAGE_MANAGER']} install -y bat \
+          fzf \
+          gh \
+          neovim \
+          ripgrep \
+          vim-enhanced \
+          ruby-devel \
+          rustup \
+          shellcheck
+        }
+        run %{[[ -n "$(command -v rustup-init)" ]] && rustup-init -y}
+    end
+
     install_zsh if want_to_install?('zsh (shell, enhancements))')
+
     install_from_github('bat', 'https://github.com/sharkdp/bat/releases/download/v0.24.0/bat-v0.24.0-i686-unknown-linux-musl.tar.gz')
+    install_from_github('fzf', 'https://github.com/junegunn/fzf/releases/download/v0.54.1/fzf-0.54.1-linux_amd64.tar.gz', false)
     install_from_github('nvim', 'https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz')
     install_from_github('rg', 'https://github.com/BurntSushi/ripgrep/releases/download/14.1.0/ripgrep-14.1.0-x86_64-unknown-linux-musl.tar.gz')
     install_from_github('delta', 'https://github.com/dandavison/delta/releases/download/0.15.0/delta-0.15.0-x86_64-unknown-linux-musl.tar.gz')
@@ -67,12 +118,45 @@ task :install => [:submodule_init, :submodules] do
   install_bash if want_to_install?('bash configs (color, aliases)')
 
   if want_to_install?('vim configuration (highly recommended)')
+    run %{ ln -nfs "$HOME/.yadr/nvim" "$HOME/.config/nvim" }
+
+    if $is_macos || ($is_linux && $linux['PLATFORM_FAMILY'] != 'debian')
+      run %{which sdk}
+      unless $?.success?
+        run %{curl -s "https://get.sdkman.io" | bash}
+      end
+
+      run %{which gradle}
+      unless $?.success?
+        run %{source "${HOME}/.yadr/zsh/sdkman.zsh" ; sdk install gradle}
+      end
+
+      run %{which java}
+      unless $?.success?
+        run %{source "${HOME}/.yadr/zsh/sdkman.zsh" ; sdk install java 17.0.11-amzn}
+      end
+    end
+
+    run %{which node}
+    unless $?.success?
+      run %{which nvm}
+      unless $?.success?
+        run %{curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash}
+      end
+    end
+
+    if File.exist?(File.join('/opt/nvim-linux64/bin/nvim')) && $is_linux
+      run %{ ln -nsf "/opt/nvim-linux64/bin/nvim" "$HOME/bin/nvim" }
+    end
+
     install_files(Dir.glob('{vim,vimrc}'))
     Rake::Task["install_vundle"].execute
 
     # run %{pip3 install tmuxp}
-    run %{pip3 install --user neovim} # For NeoVim plugins
-    run %{pip3 install --user pynvim} # For NeoVim plugins
+    if $is_macos || $linux['PLATFORM_FAMILY'] != "arch"
+      run %{pip3 install --user neovim} # For NeoVim plugins
+      run %{pip3 install --user pynvim} # For NeoVim plugins
+    end
     run %{gem install neovim --user-install} # For NeoVim plugins
 
     if File.exist?(File.join(ENV['HOME'], '.vimrc.before'))
@@ -83,14 +167,8 @@ task :install => [:submodule_init, :submodules] do
       run %{ ln -sf "$HOME/.vimrc.after" "$HOME/.config/nvim/settings/after/zzz-userconfig-vimrc.after.vim" }
     end
 
-    if File.exist?(File.join('/opt/nvim-linux64/bin/nvim')) && $is_linux
-      run %{ mkdir -p "$HOME/bin" }
-      run %{ ln -sf "/opt/nvim-linux64/bin/nvim" "$HOME/bin/nvim" }
-    end
+    Rake::Task["install_vimplug"].execute
   end
-
-  run %{ ln -nfs "$HOME/.yadr/nvim" "$HOME/.config/nvim" }
-  Rake::Task["install_vimplug"].execute
 
   run %{ mkdir -p ~/.config/ranger }
   run %{ ln -nfs ~/.yadr/ranger ~/.config/ranger }
@@ -226,25 +304,50 @@ end
 
 
 def linux_variant
-  r = { :distro => nil, :family => nil }
+  linux = {
+    :PLATFORM => nil,
+    :PLATFORM_FAMILY => nil,
+    :PLATFORM_VERSION => nil,
+    :PACKAGE_MANGER => nil
+  }
 
-  if File.exist?('/etc/lsb-release')
-    File.open('/etc/lsb-release', 'r').read.each_line do |line|
-      r = { :distro => $1 } if line =~ /^DISTRIB_ID=(.*)/
+  if File.exist?("/etc/os-release")
+    puts "Determining Linux OS using '/etc/os-release'..."
+    File.open('/etc/os-release', 'r').read.each_line do |line|
+      (key, value) = line.strip.gsub('"', '').split('=')
+      if key.casecmp("id") == 0
+        linux["PLATFORM"] = value
+      elsif key.casecmp("id_like") == 0
+        linux["PLATFORM_FAMILY"] = value
+      elsif key.casecmp("version_id") == 0
+        linux["PLATFORM_VERSION"] = value
+      end
+    end
+
+    linux["PLATFORM_FAMILY"] = "rhel"   if linux["PLATFORM"] == "centos"
+    linux["PLATFORM_FAMILY"] = "rhel"   if linux["PLATFORM"] == "fedora"
+    linux["PLATFORM_FAMILY"] = "debian" if linux["PLATFORM"] == "debian"
+  elsif File.exist?("/etc/redhat-release")
+    linux["PLATFORM"] => "redhat"
+    linux["PLATFORM_FAMILY"] => "rhel"
+  end
+
+  if linux["PLATFORM_FAMILY"] == "arch"
+    linux["PACKAGE_MANAGER"] = "pacman"
+  elsif linux["PLATFORM_FAMILY"] == "debian"
+    linux["PACKAGE_MANAGER"] = "apt"
+  elsif linux["PLATFORM_FAMILY"] == "rhel"
+    linux["PACKAGE_MANAGER"] = "dnf"
+    if linux["PLATFORM_VERSION"].to_i < 8
+      linux["PACKAGE_MANAGER"] = "yum"
     end
   end
 
-  if File.exist?('/etc/debian_version')
-    r[:distro] = 'Debian' if r[:distro].nil?
-    r[:family] = 'Debian' if r[:variant].nil?
-  elsif File.exist?('/etc/redhat-release') or File.exist?('/etc/centos-release')
-    r[:family] = 'RedHat' if r[:family].nil?
-    r[:distro] = 'CentOS' if File.exist?('/etc/centos-release')
-  elsif File.exist?('/etc/SuSE-release')
-    r[:distro] = 'SLES' if r[:distro].nil?
-  end
+  # linux.each do |key, value|
+  #   puts "#{key}: #{value}"
+  # end
 
-  return r
+  return linux
 end
 
 def run_bundle_config
@@ -276,19 +379,17 @@ def install_zsh
     puts "installed, this will do nothing."
     puts "======================================================"
 
-    if ENV['PLATFORM_FAMILY'] == 'debian'
-      run %{ sudo apt install -y zsh }
-    elsif ENV['PLATFORM_FAMILY'] == 'rhel'
-      if ENV['PLATFORM_VERSION'].to_i < 8
-        run %{ sudo yum install -y zsh }
-      else
-        run %{ sudo dnf install -y zsh }
-      end
+    if $linux["PLATFORM_FAMILY"] == "arch"
+        puts "Installing 'zsh' on 'arch'..."
+        run %{sudo pacman -S --noconfirm zsh}
+    else
+      puts "Installing 'zsh' on '#{$linux['PLATFORM_FAMILY']}'..."
+      run %{ sudo #{$linux['PACKAGE_MANAGER']} install -y zsh }
     end
   end
 end
 
-def install_from_github(app_name, download_url)
+def install_from_github(app_name, download_url, strip = true)
   run %{which #{app_name}}
   unless $?.success?
     download_path = File.join('/tmp',"#{app_name}.tar.gz")
@@ -301,7 +402,11 @@ def install_from_github(app_name, download_url)
     run %{ curl -Lo #{download_path} #{download_url} }
     run %{ rm -rf #{install_path} }
     run %{ mkdir -p #{install_path} }
-    run %{ tar -C #{install_path} --strip-components=1 -xzf #{download_path} }
+    if strip
+      run %{ tar -C #{install_path} --strip-components=1 -xzf #{download_path} }
+    else
+      run %{ tar -C #{install_path} -xzf #{download_path} }
+    end
     run %{ rm -f #{download_path} }
     run %{ ln -sf $(find #{install_path} -type f -name '#{app_name}') #{link_path} }
   end
