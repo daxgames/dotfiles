@@ -80,7 +80,7 @@ if [ ! -d "$HOME/.yadr" ]; then
     rake install
 else
     echo "YADR is already installed"
-    pushd "$HOME/.yadr" >>/dev/null 3>&1
+    pushd $HOME/.yadr >>/dev/null 2>&1
     git pull --rebase
     rake update
     popd >>/dev/null 2>&1
