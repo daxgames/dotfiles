@@ -10,7 +10,7 @@
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;![PRs Welcome][prs-badge]&nbsp;![macos supported][apple-logo]&nbsp;![linux supported][linux-logo]
 
 ```bash
-sh -c "`curl -fsSL https://raw.githubusercontent.com/maximus-codeshuttle/dotfiles/main/install.sh`"
+sh -c "`curl -fsSL https://raw.githubusercontent.com/daxgames/dotfiles/main/install.sh`"
 ```
 ---
 
@@ -45,13 +45,13 @@ _Note: Install on Linux has been verified on Ubuntu and Fedora derivatives. Othe
 To get started please run:
 
 ```bash
-sh -c "`curl -fsSL https://raw.githubusercontent.com/maximus-codeshuttle/dotfiles/main/install.sh`"
+sh -c "`curl -fsSL https://raw.githubusercontent.com/daxgames/dotfiles/main/install.sh`"
 ```
 
 **Note:** YADR will automatically install all of its subcomponents. If you want to be asked about each one, use:
 
 ```bash
-sh -c "`curl -fsSL https://raw.githubusercontent.com/maximus-codeshuttle/dotfiles/main/install.sh`" -s ask
+sh -c "`curl -fsSL https://raw.githubusercontent.com/daxgames/dotfiles/main/install.sh`" -s ask
 ```
 
 ### Instructions for Linux
@@ -99,7 +99,6 @@ This is the Maximus fork of the great work done by:
 
 - Yan (@skwp), [Yadr - skwp](https://github.com/skwp/dotfiles)
 - Luiz (@lfilho), [Yadr - lfilho](https://github.com/lfilho/dotfiles)
-- Dax (@daxgames), [Yadr - daxgames](https://github.com/daxgames/dotfiles)
 
 Luiz and I have been using YADR for a long time and we have been contributing to it as well. We both decided to fork it and make it our own for a few reasons.
 
