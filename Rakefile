@@ -49,8 +49,8 @@ task :install => [:submodule_init, :submodules] do
         }
         run %{[[ -n "$(command -v rustup)" ]] && rustup default stable}
     elsif $linux["PLATFORM_FAMILY"] == "debian"
-        run %{sudo apt update -y}
-        run %{sudo apt install -y bat \
+        run %{sudo apt-get update -y}
+        run %{sudo apt-get install -y bat \
           build-essential \
           cargo \
           fzf \
@@ -58,6 +58,7 @@ task :install => [:submodule_init, :submodules] do
           git\
           gradle \
           openjdk-17-jdk \
+          nvim \
           python3-pip \
           rubocop \
           ruby-dev \
@@ -326,16 +327,19 @@ def linux_variant
 
     linux["PLATFORM_FAMILY"] = "rhel"   if linux["PLATFORM"] == "centos"
     linux["PLATFORM_FAMILY"] = "rhel"   if linux["PLATFORM"] == "fedora"
-    linux["PLATFORM_FAMILY"] = "debian" if linux["PLATFORM"] == "debian"
+    linux["PLATFORM_FAMILY"] = "debian" if linux["PLATFORM"] =~ /debian/
+    linux["PLATFORM_FAMILY"] = "debian" if linux["PLATFORM_FAMILY"] =~ /debian/
+    linux["PLATFORM_FAMILY"] = "debian" if linux["PLATFORM_FAMILY"] =~ /ubuntu/
+
   elsif File.exist?("/etc/redhat-release")
-    linux["PLATFORM"] => "redhat"
-    linux["PLATFORM_FAMILY"] => "rhel"
+    linux["PLATFORM"] = "redhat"
+    linux["PLATFORM_FAMILY"] = "rhel"
   end
 
   if linux["PLATFORM_FAMILY"] == "arch"
     linux["PACKAGE_MANAGER"] = "pacman"
   elsif linux["PLATFORM_FAMILY"] == "debian"
-    linux["PACKAGE_MANAGER"] = "apt"
+    linux["PACKAGE_MANAGER"] = "apt-get"
   elsif linux["PLATFORM_FAMILY"] == "rhel"
     linux["PACKAGE_MANAGER"] = "dnf"
     if linux["PLATFORM_VERSION"].to_i < 8
@@ -343,9 +347,9 @@ def linux_variant
     end
   end
 
-  # linux.each do |key, value|
-  #   puts "#{key}: #{value}"
-  # end
+  linux.each do |key, value|
+    puts "#{key}: #{value}"
+  end
 
   return linux
 end
@@ -420,7 +424,7 @@ def install_python_modules
     puts "installed, this will do nothing."
     puts "======================================================"
     if ENV['PLATFORM_FAMILY'] == 'debian'
-      run %{ sudo apt install -y pip }
+      run %{ sudo apt-get install -y pip }
     elsif ENV['PLATFORM_FAMILY'] == 'rhel'
       if ENV['PLATFORM_VERSION'].to_i < 8
         run %{ sudo yum install -y python3-pip }

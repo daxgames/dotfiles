@@ -45,8 +45,8 @@ if [ ! -d "$HOME/.yadr" ]; then
                 $(command -v sudo) pacman -Syu
                 $(command -v sudo) pacman -S ruby-rake zip
             elif [ "${PLATFORM_FAMILY}" == "debian" ]; then
-                $(command -v sudo) apt update -y
-                $(command -v sudo) apt install -y rake ruby-dev zip
+                $(command -v sudo) apt-get update -y
+                $(command -v sudo) apt-get install -y rake ruby-dev zip
 
             elif [ "${PLATFORM_FAMILY}" == "rhel" ] ; then
                 [ "${PLATFORM_VERSION}" -lt 8 ] && PACKAGE_MANAGER=yum
