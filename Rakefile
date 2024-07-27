@@ -4,14 +4,6 @@ require 'fileutils'
 require File.join(File.dirname(__FILE__), 'bin', 'yadr', 'vundle')
 require File.join(File.dirname(__FILE__), 'bin', 'yadr', 'vimplug')
 
-def linux?
-  RUBY_PLATFORM.downcase.include?('linux')
-end
-
-def macos?
-  RUBY_PLATFORM.downcase.include?('darwin')
-end
-
 desc 'Hook our dotfiles into system-standard positions.'
 task :install => [:submodule_init, :submodules] do
   puts
@@ -234,14 +226,13 @@ task :submodules do
   end
 end
 
-desc "Runs Vundle installer in a clean vim environment"
+desc 'Runs Vundle installer in a clean vim environment'
 task :install_vundle do
-  puts "======================================================"
-  puts "Installing and updating vundles."
-  puts "The installer will now proceed to run PluginInstall to install vundles."
-  puts "======================================================"
-
-  puts ""
+  puts '======================================================'
+  puts 'Installing and updating vundles.'
+  puts 'The installer will now proceed to run PluginInstall to install vundles.'
+  puts '======================================================'
+  puts ''
 
   vundle_path = File.join('vim','bundle', 'vundle')
   unless File.exist?(vundle_path)
@@ -251,17 +242,16 @@ task :install_vundle do
     }
   end
 
-  Vundle::update_vundle
+  Vundle.update_vundle
 end
 
-desc "Runs Plug installer in a clean vim environment"
+desc 'Runs Plug installer in a clean vim environment'
 task :install_vimplug do
-  puts "======================================================"
-  puts "Installing and updating Neovim plugins."
-  puts "The installer will now proceed to run PluginInstall to install plugs."
-  puts "======================================================"
-
-  puts ""
+  puts '======================================================'
+  puts 'Installing and updating Neovim plugins.'
+  puts 'The installer will now proceed to run PluginInstall to install plugs.'
+  puts '======================================================'
+  puts ''
 
   vimplug_path = File.join(ENV['HOME'], '.local', 'share', 'nvim', 'site', 'autoload', 'plug.vim')
   unless File.exist?(vimplug_path)
@@ -270,16 +260,25 @@ task :install_vimplug do
     }
   end
 
-  if "#{ENV['__YADR_UPDATE']}" == "y"
-    VimPlug::update_plugins
+  if ENV['__YADR_UPDATE'] == 'y'
+    VimPlug.update_plugins
   else
-    VimPlug::install_plugins
+    VimPlug.install_plugins
   end
 end
 
 task :default => 'install'
 
 private
+
+def linux?
+  RUBY_PLATFORM.downcase.include?('linux')
+end
+
+def macos?
+  RUBY_PLATFORM.downcase.include?('darwin')
+end
+
 def run(cmd)
   puts "[Running] #{cmd}"
   if RUBY_PLATFORM.downcase.include?("cygwin")
@@ -372,22 +371,22 @@ def linux_variant
 end
 
 def run_bundle_config
-  return unless system("which bundle")
+  return unless system('which bundle')
 
   bundler_jobs = number_of_cores - 1
-  puts "======================================================"
-  puts "Configuring Bundlers for parallel gem installation"
-  puts "======================================================"
+  puts '======================================================'
+  puts 'Configuring Bundlers for parallel gem installation'
+  puts '======================================================'
   run %{ bundle config --global jobs #{bundler_jobs} }
   puts
 end
 
 def install_rvm_binstubs
-  puts "======================================================"
-  puts "Installing RVM Bundler support. Never have to type"
-  puts "bundle exec again! Please use bundle --binstubs and RVM"
-  puts "will automatically use those bins after cd'ing into dir."
-  puts "======================================================"
+  puts '======================================================'
+  puts 'Installing RVM Bundler support. Never have to type'
+  puts 'bundle exec again! Please use bundle --binstubs and RVM'
+  puts 'will automatically use those bins after changing into dir.'
+  puts '======================================================'
   run %{ chmod +x $rvm_path/hooks/after_cd_bundler }
   puts
 end
@@ -396,15 +395,12 @@ def install_zsh
   run %{which zsh}
   unless $?.success?
     puts "======================================================"
-    puts "Installing Zsh...If it's already"
-    puts "installed, this will do nothing."
+    puts "Installing Zsh...If it's already installed, this will do nothing."
     puts "======================================================"
 
     if linux["PLATFORM_FAMILY"] == "arch"
-        puts "Installing 'zsh' on 'arch'..."
         run %{sudo pacman -S --noconfirm zsh}
     else
-      puts "Installing 'zsh' on '#{linux['PLATFORM_FAMILY']}'..."
       run %{ sudo #{linux['PACKAGE_MANAGER']} install -y zsh }
     end
   end
