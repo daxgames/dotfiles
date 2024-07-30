@@ -23,5 +23,6 @@ pathDeDup() {
 
 pathDeDup
 
+[[ -d ~/bin ]] && pathPrepend "$HOME/bin"
 pathAppend "$HOME/.yadr/bin"
 pathAppend "$HOME/.yadr/bin/yadr"
