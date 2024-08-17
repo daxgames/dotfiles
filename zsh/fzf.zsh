@@ -1,7 +1,7 @@
 if [[ -n "$(command -v fzf)" ]] ; then
   alias -g F='| fzf'
-  alias nvf='nvim $(fzf)'
-  alias vf='vim $(fzf)'
+  alias nvf='nvim $(fzf --preview "bat --color=always --style=numbers --line-range=:500 {}")'
+  alias vf='vim $(fzf --preview "bat --color=always --style=numbers --line-range=:500 {}")'
 
   if [[ -n "$(command -v brew)" ]] ; then
     # Auto-completion
@@ -20,7 +20,7 @@ if [[ -n "$(command -v fzf)" ]] ; then
   fi
 
   # fasd & fzf change directory - jump using `fasd` if given argument, filter output of `fasd` using `fzf` else
-  unalias z #removing fasd's alias for z first
+  [[ -n "$(alias z)" ]] && unalias z #removing fasd's alias for z first
 
   function z() {
     [ $# -gt 0 ] && fasd_cd -d "$*" && return
