@@ -19,7 +19,9 @@ pathDeDup() {
   PATH=$(echo "$PATH" | awk -v RS=':' -v ORS=":" '!a[$1]++{if (NR > 1) printf ORS; printf $a[$1]}')
 }
 
-[[ "$OSTYPE" == linux* ]] && [[ -f /home/linuxbrew/.linuxbrew/bin/brew ]] && eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
+[[ "$(uname)" == (Linux) ]] && [[ -f /home/linuxbrew/.linuxbrew/bin/brew ]] && eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
+[[ "$(uname)" == "Darwin" ]] && [[ -f /opt/homebrew/bin/brew ]] && eval "$(/opt/homebrew/bin/brew shellenv)"
+[[ "$(uname)" == "Darwin" ]] && [[ -f /usr/homebrew/bin/brew ]] && eval "$(/usr/homebrew/bin/brew shellenv)"
 
 pathDeDup
 
