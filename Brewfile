@@ -15,14 +15,14 @@ if OS.mac?
     cask 'font-fira-code-nerd-font'
     cask 'font-fira-mono-nerd-font'
     # cask 'google-chrome'
-    # cask 'inkscape'
+    cask 'inkscape', args: { appdir: "~/Applications" }
     brew 'reattach-to-user-namespace'
-    # cask 'iterm2'
+    cask 'iterm2', args: { appdir: "~/Applications" }
     # cask 'karabiner-elements'
-    # cask 'qlmarkdown'
-    # cask 'vlc'
-    # cask 'steam'
-    # cask 'visual-studio-code'
+    cask 'qlmarkdown', args: { appdir: "~/Applications" }
+    cask 'vlc', args: { appdir: "~/Applications" }
+    cask 'steam', args: { appdir: "~/Applications" }
+    cask 'visual-studio-code', args: { appdir: "~/Applications" }
 end
 
 brew 'automake'
