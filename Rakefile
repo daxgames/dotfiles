@@ -491,11 +491,7 @@ def install_homebrew
     # A minimal Brewfile to speed up CI Builds
     run %{brew bundle install --verbose --file=test/Brewfile_ci}
   else
-    if [[ is_macos ]]; then
-      run %{brew bundle install --verbose --app-dir ~/Applications}
-    else
-      run %{brew bundle install --verbose}
-    end
+    run %{brew bundle install --verbose}
   end
   puts
   puts
