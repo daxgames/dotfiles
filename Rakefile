@@ -154,11 +154,14 @@ task :install => [:submodule_init, :submodules] do
     Rake::Task["install_vundle"].execute
 
     # run %{pip3 install tmuxp}
-    if $is_macos || $linux['PLATFORM_FAMILY'] != "arch"
+    if $is_macos
+      run %{pipx install neovim} # For NeoVim plugins
+      run %{pipx install pynvim} # For NeoVim plugins
+    elsif $linux['PLATFORM_FAMILY'] != "arch"
       run %{pip3 install --user neovim} # For NeoVim plugins
       run %{pip3 install --user pynvim} # For NeoVim plugins
+      run %{gem install neovim --user-install} # For NeoVim plugins
     end
-    run %{gem install neovim --user-install} # For NeoVim plugins
 
     if File.exist?(File.join(ENV['HOME'], '.vimrc.before'))
       run %{ ln -sf "$HOME/.vimrc.before" "$HOME/.config/nvim/settings/before/000-userconfig-vimrc.before.vim" }

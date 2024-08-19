@@ -21,7 +21,7 @@ if OS.mac?
     # cask 'inkscape', args: { appdir: "~/Applications" }
     brew 'reattach-to-user-namespace'
     cask 'iterm2', args: { appdir: "~/Applications" }
-    # cask 'karabiner-elements'
+    cask 'karabiner-elements'
     cask 'rectangle', args: { appdir: "~/Applications" }
     cask 'qlmarkdown', args: { appdir: "~/Applications" }
     cask 'vlc', args: { appdir: "~/Applications" }
