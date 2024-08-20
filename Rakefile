@@ -99,7 +99,6 @@ task :install => [:submodule_init, :submodules] do
 
   if want_to_install?('tmux config')
     install_files(Dir.glob('tmux/*'))
-    if !File.exist?(File.join(ENV['HOME'], '.tmux', 'plugins', 'tpm').to_s)
       run %{ git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm }
     else
       run %{

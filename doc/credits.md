@@ -26,6 +26,5 @@ Yadr is made possible by many awesome people, too many to list :) But here are a
  * The sources of this fork:
    * @[skwp](https://github.com/skwp)
    * @[lfilho](https://github.com/lfilho)
-   * @[daxgames](https://github.com/daxgames)
- * This fork: @[296951](https://github.com/296951)
- * And everyone listed here: https://github.com/maximus-codeshuttle/dotfiles/graphs/contributors
+ * This fork: @[daxgames](https://github.com/daxgames)
+ * And everyone listed here: https://github.com/daxgames/dotfiles/graphs/contributors
