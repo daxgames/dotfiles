@@ -634,7 +634,6 @@ def install_prezto
     # The prezto runcoms are only going to be installed if zprezto has never been installed
     install_files(Dir.glob('zsh/prezto/runcoms/zlogin'), :symlink)
     install_files(Dir.glob('zsh/prezto/runcoms/zlogout'), :symlink)
-    install_files(Dir.glob('zsh/prezto-override/zpreztorc'), :symlink)
     install_files(Dir.glob('zsh/prezto/runcoms/zprofile'), :symlink)
     install_files(Dir.glob('zsh/prezto/runcoms/zshenv'), :symlink)
 
