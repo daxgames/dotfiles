@@ -152,13 +152,16 @@ task :install => [:submodule_init, :submodules] do
     Rake::Task['install_vundle'].execute
 
     # run %{pip3 install tmuxp}
+    # For NeoVim plugins
     if macos?
-      run %{pipx install neovim} # For NeoVim plugins
-      run %{pipx install pynvim} # For NeoVim plugins
-      run %{pip3 install --user neovim} # For NeoVim plugins
-      run %{pip3 install --user pynvim} # For NeoVim plugins
-    end
-      run %{gem install neovim --user-install} # For NeoVim plugins
+      run %{[[ ! -d $HOME/.virtualenvs/default ]] && python3 -m venv ~/.virtualenvs/default}
+      run %{source $HOME/.virtualenvs/default/bin/activate}
+      run %{pip install neovim}
+      run %{pip install pynvim}
+    elsif $linux['PLATFORM_FAMILY'] != "arch"
+      run %{pip3 install --user neovim}
+      run %{pip3 install --user pynvim}
+      run %{gem install neovim --user-install}
     end
 
     if File.exist?(File.join(ENV['HOME'], '.vimrc.before'))
@@ -493,7 +496,7 @@ def install_homebrew
   puts "======================================================"
   puts "Updating Homebrew."
   puts "======================================================"
-  run %{brew update}
+  run %{brew update --verbose}
   puts
   puts
   puts "======================================================"
