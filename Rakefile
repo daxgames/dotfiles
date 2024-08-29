@@ -174,9 +174,10 @@ task :install => [:submodule_init, :submodules] do
 
     Rake::Task["install_vimplug"].execute
   end
-  run %( mkdir -p ~/.config/ranger )
-  run %( ln -nfs ~/.yadr/ranger ~/.config/ranger )
-  run %( touch ~/.hushlogin )
+
+  run %{ mkdir -p ~/.config/ranger }
+  run %{ ln -nfs ~/.yadr/ranger ~/.config/ranger }
+  run %{ touch ~/.hushlogin }
 
   install_fonts
 
