@@ -2,6 +2,8 @@ if [[ -n "$(command -v fzf)" ]] ; then
   alias -g F='| fzf'
   alias nvf='nvim $(fzf --preview "bat --color=always --style=numbers --line-range=:500 {}")'
   alias vf='vim $(fzf --preview "bat --color=always --style=numbers --line-range=:500 {}")'
+  alias cf='code -w $(fzf --preview "bat --color=always --style=numbers --line-range=:500 {}")'
+  alias fzfp='fzf --preview "bat --color=always --style=numbers --line-range=:500 {}"'
 
   if [[ -n "$(command -v brew)" ]] ; then
     # Auto-completion
