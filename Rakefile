@@ -158,7 +158,7 @@ task :install => [:submodule_init, :submodules] do
       run %{source $HOME/.virtualenvs/default/bin/activate}
       run %{pip install neovim}
       run %{pip install pynvim}
-    elsif $linux['PLATFORM_FAMILY'] != "arch"
+    elsif linux['PLATFORM_FAMILY'] != "arch"
       run %{pip3 install --user neovim}
       run %{pip3 install --user pynvim}
       run %{gem install neovim --user-install}
