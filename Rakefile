@@ -634,9 +634,11 @@ def install_bash
     puts
     puts "Preserving existing '~/.bashrc' file..."
     source_file=File.join(ENV['HOME'], '.bashrc')
+    source_file = `cygpath -u "#{source_file}"`.strip if windows?
     dest_file=File.join(ENV['HOME'], '.bash.after', '001_bashrc.sh')
+    dest_file = `cygpath -u "#{dest_file}"`.strip if windows?
 
-    FileUtils.mv(File.join(ENV['HOME'], '.bashrc'), File.join(ENV['HOME'], '.bash.after', '001_bashrc.sh'))
+    FileUtils.mv(source_file, dest_file)
   end
 
   install_files(Dir.glob('bash/bashrc'), :symlink)
