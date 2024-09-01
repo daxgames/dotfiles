@@ -54,13 +54,21 @@ if [ ! -d "$HOME/.yadr" ]; then
     if [ -z "$(command -v rake)" ] ; then
         echo "Installing YADR Pre-Reqs in '${PLATFORM_FAMILY}'..."
         if [ "${PLATFORM_FAMILY}" = "windows" ] ; then
-            if [ -f "${__YADR_SCRIPT_DIR}/bin/install-windows-pre.ps1" ]; then
-                echo "Running '${__YADR_SCRIPT_DIR}/bin/install-windows-pre.ps1'..."
-                powershell -File "${__YADR_SCRIPT_DIR}/bin/install-windows-pre.ps1"
-                # MSYS use iWindows native symlinks
-                MSYS=winsymlinks:nativestict
-                CYGWIN=winsymlinks:nativestrict
-                export MSYS CYGWIN
+            if [ ! -f "${__YADR_SCRIPT_DIR}/bin/install-windows-pre.ps1" ]; then
+                echo "ERROR: '${__YADR_SCRIPT_DIR}/bin/install-windows-pre.ps1' not found!"
+                curl -o "${TEMP}/install-windows-pre.ps1" https://raw.githubusercontent.com/daxgames/dotfiles/main/bin/install-windows-pre.ps1
+                __YADR_INSTALLER_WINDWS_PRE="${TEMP}/install-windows-pre.ps1"
+            else
+                __YADR_INSTALLER_WINDWS_PRE="${__YADR_SCRIPT_DIR}/bin/install-windows-pre.ps1"
+            fi
+
+            echo "Running '${__YADR_INSTALLER_WINDWS_PRE}'..."
+            powershell -File "${__YADR_INSTALLER_WINDWS_PRE}"
+
+            # MSYS use iWindows native symlinks
+            MSYS=winsymlinks:nativestict
+            CYGWIN=winsymlinks:nativestrict
+            export MSYS CYGWIN
             fi
         elif [ "${PLATFORM_FAMILY}" = "arch" ] ; then
             $(command -v sudo) pacman -Syu
@@ -77,9 +85,15 @@ if [ ! -d "$HOME/.yadr" ]; then
             $(command -v sudo) "${PACKAGE_MANAGER}" install -y rubygem-rake zip
         fi
     fi
-    # Enable persistent undo
-    mkdir -p "$HOME/.vim/backups" > /dev/null 2>&1
-    mkdir -p "$HOME/.share/nvim/backups" > /dev/null 2>&1
+
+    # Enable vim/nvim persistent undo
+    if [[ -d "$HOME/.vim" ]]; then
+        mkdir -p "$HOME/.vim/backups" > /dev/null 2>&1
+    fi
+
+    if [[ -d "$HOME/.config/nvim" ]]; then
+        mkdir -p "$HOME/.config/nvim/backups" > /dev/null 2>&1
+    fi
 
     if [ "${OS}" = "Linux" ] ; then
         if [ -z "$(command -v nvm)" ] && [ -z "$(command -v npm)" ] ; then
@@ -91,9 +105,9 @@ if [ ! -d "$HOME/.yadr" ]; then
         fi
     fi
 
-    # until rake is in the path loop
+    # until rake is in the path loop and wait
     until [ -n "$(command -v rake)" ] ; do
-        echo "Waiting for rake to be in the path..."
+        echo "Waiting '5' seconds for rake to be in the path..."
         sleep 5
     done
     rake install
