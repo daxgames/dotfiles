@@ -14,6 +14,11 @@ task :install => [:submodule_init, :submodules] do
 
   linux = linux_variant if linux?
 
+  if windows?
+      ENV['MSYS'] = "winsymlinks:nativestict"
+      ENV['CYGWIN'] = "winsymlinks:nativestict"
+  end
+
   run %( mkdir -p $HOME/bin ) unless File.exist?("#{ENV['HOME']}/bin")
 
   ENV['PATH'] = "#{File.join(ENV['HOME'], 'bin')}:#{ENV['PATH']}"
@@ -102,6 +107,8 @@ task :install => [:submodule_init, :submodules] do
     if !File.exist?(File.join(ENV['HOME'], '.tmux', 'plugins', 'tpm').to_s)
       run %{ git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm }
     else
+      if windows?
+          cd_filepath=
       run %{
         cd "#{File.join(ENV['HOME'], '.tmux', 'plugins', 'tpm')}"
         git pull --rebase
@@ -282,9 +289,13 @@ def macos?
   RUBY_PLATFORM.downcase.include?('darwin')
 end
 
+def windows?
+  RUBY_PLATFORM.downcase.include?('cygwin')
+end
+
 def run(cmd)
   puts "[Running] #{cmd}"
-  if RUBY_PLATFORM.downcase.include?("cygwin")
+  if windows?
     system(cmd) unless ENV['DEBUG']
   else
     `#{cmd}` unless ENV['DEBUG']
@@ -625,7 +636,7 @@ def install_prezto
     puts
     puts "Installing Prezto (ZSH Enhancements)..."
 
-    if RUBY_PLATFORM.downcase.include?("cygwin")
+    if windows?
       run %{ cmd /c "mklink /d "%USERPROFILE%\.zprezto" "%USERPROFILE%\.yadr\zsh\prezto"" }
     else
       run %{ ln -nfs "$HOME/.yadr/zsh/prezto" "${ZDOTDIR:-$HOME}/.zprezto" }
@@ -705,7 +716,7 @@ def install_files(files, method = :symlink)
     source = "#{ENV["PWD"]}/#{f}"
     target = "#{ENV["HOME"]}/.#{file}"
 
-    if RUBY_PLATFORM.downcase.include?("cygwin")
+    if windows?
       source=`cygpath -d "#{source}"`
       target=`cygpath -d "#{target}"`
     end
@@ -720,7 +731,7 @@ def install_files(files, method = :symlink)
     end
 
     if method == :symlink
-      if RUBY_PLATFORM.downcase.include?("cygwin")
+      if windows?
         if Dir.exist?(target)
           run %{ cmd /c "mklink /d "#{target}" "#{source}"" }
         else

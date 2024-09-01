@@ -65,7 +65,7 @@ if [ ! -d "$HOME/.yadr" ]; then
             echo "Running '${__YADR_INSTALLER_WINDWS_PRE}'..."
             powershell -File "${__YADR_INSTALLER_WINDWS_PRE}"
 
-            # MSYS use iWindows native symlinks
+            # MSYS use Windows native symlinks
             MSYS=winsymlinks:nativestict
             CYGWIN=winsymlinks:nativestrict
             export MSYS CYGWIN
