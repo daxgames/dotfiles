@@ -248,6 +248,8 @@ task :install_vundle do
   puts ''
 
   vundle_path = File.join('vim','bundle', 'vundle')
+  vundle_filepath = `cygpath -u "#{vundle_filepath}"`.strip if windows?
+
   unless File.exist?(vundle_path)
     cd_filepath = File.join(ENV['HOME'], '.yadr')
     cd_filepath = `cygpath -u "#{cd_filepath}"`.strip if windows?
@@ -619,16 +621,21 @@ def install_bash
   run %{ mkdir -p $HOME/.bash.before }
   run %{ mkdir -p $HOME/.bash.after }
 
-  if ! File.exist?("#{ENV['HOME']}/.bash-git-prompt")
-    puts
-    puts "Configuring Git aware prompt..."
-    run %{ git clone "https://github.com/maximus-codeshuttle/bash-git-prompt.git" "#{ENV['HOME']}/.bash-git-prompt" }
+  if ! windows?
+    if ! File.exist?("#{ENV['HOME']}/.bash-git-prompt")
+      puts
+      puts "Configuring Git aware prompt..."
+      run %{ git clone "https://github.com/maximus-codeshuttle/bash-git-prompt.git" "#{ENV['HOME']}/.bash-git-prompt" }
+    end
   end
 
   # Preserve pre-existing ~/.bashrc
   if File.exist?(File.join(ENV['HOME'], '.bashrc')) && ! File.exist?( File.join(ENV['HOME'], '.bash.after', '001_bashrc.sh'))
     puts
-    puts "Preserving existing '~/.bashrc' filw..."
+    puts "Preserving existing '~/.bashrc' file..."
+    source_file=File.join(ENV['HOME'], '.bashrc')
+    dest_file=File.join(ENV['HOME'], '.bash.after', '001_bashrc.sh')
+
     FileUtils.mv(File.join(ENV['HOME'], '.bashrc'), File.join(ENV['HOME'], '.bash.after', '001_bashrc.sh'))
   end
 
