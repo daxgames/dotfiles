@@ -107,10 +107,11 @@ task :install => [:submodule_init, :submodules] do
     if !File.exist?(File.join(ENV['HOME'], '.tmux', 'plugins', 'tpm').to_s)
       run %{ git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm }
     else
-      if windows?
-          cd_filepath=
+      cd_filepath = File.join(ENV['HOME'], '.tmux', 'plugins', 'tpm')
+      cd_filepath = `cygpath -u "#{cd_filepath}"`.strip if windows?
+
       run %{
-        cd "#{File.join(ENV['HOME'], '.tmux', 'plugins', 'tpm')}"
+        cd "#{cd_filepath}"
         git pull --rebase
       }
     end
@@ -227,8 +228,10 @@ task :submodules do
     puts "Downloading YADR submodules...please wait"
     puts "======================================================"
 
+    cd_filepath = File.join(ENV['HOME'], '.yadr')
+    cd_filepath = `cygpath -u "#{cd_filepath}"`.strip if windows?
     run %{
-      cd "#{File.join(ENV['HOME'], '.yadr')}"
+      cd "#{cd_filepath}"
       git submodule update --recursive
       git clean -df
     }
@@ -246,8 +249,10 @@ task :install_vundle do
 
   vundle_path = File.join('vim','bundle', 'vundle')
   unless File.exist?(vundle_path)
+    cd_filepath = File.join(ENV['HOME'], '.yadr')
+    cd_filepath = `cygpath -u "#{cd_filepath}"`.strip if windows?
     run %{
-      cd $HOME/.yadr
+      cd "#{cd_filepath}"
       git clone https://github.com/gmarik/vundle.git #{vundle_path}
     }
   end
@@ -631,16 +636,15 @@ def install_bash
 end
 
 def install_prezto
+  return if windows?
+
   run %{which zsh}
   if $?.success?
     puts
     puts "Installing Prezto (ZSH Enhancements)..."
 
-    if windows?
-      run %{ cmd /c "mklink /d "%USERPROFILE%\.zprezto" "%USERPROFILE%\.yadr\zsh\prezto"" }
-    else
-      run %{ ln -nfs "$HOME/.yadr/zsh/prezto" "${ZDOTDIR:-$HOME}/.zprezto" }
-    end
+    prezto_filepath = File.join(ENV['HOME'], '.yadr', 'zsh', 'prezto')
+    run %{ ln -nfs "#{prezto_filepath}" "${ZDOTDIR:-$HOME}/.zprezto" }
 
     # The prezto runcoms are only going to be installed if zprezto has never been installed
     install_files(Dir.glob('zsh/prezto/runcoms/zlogin'), :symlink)
@@ -717,8 +721,8 @@ def install_files(files, method = :symlink)
     target = "#{ENV["HOME"]}/.#{file}"
 
     if windows?
-      source=`cygpath -d "#{source}"`
-      target=`cygpath -d "#{target}"`
+      source=`cygpath -u "#{source}"`
+      target=`cygpath -u "#{target}"`
     end
 
     puts "======================#{file}=============================="
@@ -731,15 +735,7 @@ def install_files(files, method = :symlink)
     end
 
     if method == :symlink
-      if windows?
-        if Dir.exist?(target)
-          run %{ cmd /c "mklink /d "#{target}" "#{source}"" }
-        else
-          run %{ cmd /c "mklink "#{target}" "#{source}"" }
-        end
-      else
-        run %{ ln -nfs "#{source}" "#{target}" }
-      end
+      run %{ ln -nfs "#{source}" "#{target}" }
     else
       run %{ cp -f "#{source}" "#{target}" }
     end
