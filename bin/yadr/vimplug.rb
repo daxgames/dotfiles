@@ -1,7 +1,15 @@
 require 'fileutils'
 
 module VimPlug
+
   @vundles_path = File.expand_path File.join(ENV['HOME'], '.config', 'nvim', 'plugins', 'userplugins.vim')
+
+  private
+  def self.windows?
+      RUBY_PLATFORM.downcase.include?('cygwin') || RUBY_PLATFORM.downcase.include?('mingw')
+  end
+
+  @vundles_path = `cygpath -u "#{@vundles_path}"`.strip if windows?
 
   def self.add_plugin_to_vundle(plugin_repo)
     return if contains_vundle? plugin_repo

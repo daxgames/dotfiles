@@ -14,6 +14,7 @@ task :install => [:submodule_init, :submodules] do
 
   linux = linux_variant if linux?
 
+
   if windows?
       ENV['MSYS'] = "winsymlinks:nativestict"
       ENV['CYGWIN'] = "winsymlinks:nativestict"
@@ -104,21 +105,18 @@ task :install => [:submodule_init, :submodules] do
 
   if want_to_install?('tmux config')
     install_files(Dir.glob('tmux/*'))
-    if !File.exist?(File.join(ENV['HOME'], '.tmux', 'plugins', 'tpm').to_s)
-      run %{ git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm }
-    else
-      cd_filepath = File.join(ENV['HOME'], '.tmux', 'plugins', 'tpm')
-      cd_filepath = `cygpath -u "#{cd_filepath}"`.strip if windows?
+    tpm_filepath = File.join(ENV['HOME'], '.tmux', 'plugins', 'tpm')
+    tpm_filepath = `cygpath -u "#{tpm_filepath}"`.strip if windows?
 
+    if !File.exist?(File.join(ENV['HOME'], '.tmux', 'plugins', 'tpm').to_s)
+      run %{ git clone https://github.com/tmux-plugins/tpm #{tpm_filepath} }
+    else
       run %{
-        cd "#{cd_filepath}"
+        cd "#{tpm_filepath}"
         git pull --rebase
       }
     end
   end
-
-  install_files(Dir.glob('tmux/*')) if want_to_install?('tmux config')
-  install_files(Dir.glob('vimify/*')) if want_to_install?('vimification of command line tools')
 
   Rake::Task['install_prezto'].execute
 
@@ -126,6 +124,8 @@ task :install => [:submodule_init, :submodules] do
 
   if want_to_install?('vim configuration (highly recommended)')
     run %{ ln -nfs "$HOME/.yadr/nvim" "$HOME/.config/nvim" }
+
+    install_files(Dir.glob('vimify/*')) if want_to_install?('vimification of command line tools')
 
     if macos? || (linux? && linux['PLATFORM_FAMILY'] != 'debian')
       run %{which sdk}
@@ -166,7 +166,7 @@ task :install => [:submodule_init, :submodules] do
       run %{source $HOME/.virtualenvs/default/bin/activate}
       run %{pip install neovim}
       run %{pip install pynvim}
-    elsif linux['PLATFORM_FAMILY'] != "arch"
+    elsif linux? && linux['PLATFORM_FAMILY'] != "arch"
       run %{pip3 install --user neovim}
       run %{pip3 install --user pynvim}
       run %{gem install neovim --user-install}
@@ -248,8 +248,7 @@ task :install_vundle do
   puts ''
 
   vundle_path = File.join('vim','bundle', 'vundle')
-  vundle_filepath = `cygpath -u "#{vundle_filepath}"`.strip if windows?
-
+  vundle_path = `cygpath -u "#{vundle_path}"`.strip if windows?
   unless File.exist?(vundle_path)
     cd_filepath = File.join(ENV['HOME'], '.yadr')
     cd_filepath = `cygpath -u "#{cd_filepath}"`.strip if windows?
@@ -271,6 +270,7 @@ task :install_vimplug do
   puts ''
 
   vimplug_path = File.join(ENV['HOME'], '.local', 'share', 'nvim', 'site', 'autoload', 'plug.vim')
+  vimplug_path = `cygpath -u "#{vimplug_path}"`.strip if windows?
   unless File.exist?(vimplug_path)
     run %{
       curl -fLo #{vimplug_path} --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
@@ -297,7 +297,7 @@ def macos?
 end
 
 def windows?
-  RUBY_PLATFORM.downcase.include?('cygwin')
+  RUBY_PLATFORM.downcase.include?('cygwin') || RUBY_PLATFORM.downcase.include?('mingw')
 end
 
 def run(cmd)
@@ -625,18 +625,18 @@ def install_bash
     if ! File.exist?("#{ENV['HOME']}/.bash-git-prompt")
       puts
       puts "Configuring Git aware prompt..."
-      run %{ git clone "https://github.com/maximus-codeshuttle/bash-git-prompt.git" "#{ENV['HOME']}/.bash-git-prompt" }
+      run %{ git clone "https://github.com/daxgames/bash-git-prompt.git" "#{ENV['HOME']}/.bash-git-prompt" }
     end
   end
 
   # Preserve pre-existing ~/.bashrc
-  if File.exist?(File.join(ENV['HOME'], '.bashrc')) && ! File.exist?( File.join(ENV['HOME'], '.bash.after', '001_bashrc.sh'))
+  source_file=File.join(ENV['HOME'], '.bashrc')
+  source_file = `cygpath -u "#{source_file}"`.strip if windows?
+  dest_file=File.join(ENV['HOME'], '.bash.after', '001_bashrc.sh')
+  dest_file = `cygpath -u "#{dest_file}"`.strip if windows?
+  if File.exist?(source_file) && ! File.exist?(dest_file)
     puts
     puts "Preserving existing '~/.bashrc' file..."
-    source_file=File.join(ENV['HOME'], '.bashrc')
-    source_file = `cygpath -u "#{source_file}"`.strip if windows?
-    dest_file=File.join(ENV['HOME'], '.bash.after', '001_bashrc.sh')
-    dest_file = `cygpath -u "#{dest_file}"`.strip if windows?
 
     FileUtils.mv(source_file, dest_file)
   end
@@ -730,8 +730,8 @@ def install_files(files, method = :symlink)
     target = "#{ENV["HOME"]}/.#{file}"
 
     if windows?
-      source=`cygpath -u "#{source}"`
-      target=`cygpath -u "#{target}"`
+      source=`cygpath -u "#{source}"`.strip
+      target=`cygpath -u "#{target}"`.strip
     end
 
     puts "======================#{file}=============================="
