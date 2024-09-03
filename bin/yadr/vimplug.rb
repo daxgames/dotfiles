@@ -9,7 +9,11 @@ module VimPlug
       RUBY_PLATFORM.downcase.include?('cygwin') || RUBY_PLATFORM.downcase.include?('mingw')
   end
 
-  @vundles_path = `cygpath -u "#{@vundles_path}"`.strip if windows?
+  @home_path = ENV['HOME']
+  if windows?
+    @home_path = `cygpath -w "#{@home_path}"`.strip
+    @vundles_path = `cygpath -u "#{@vundles_path}"`.strip
+  end
 
   def self.add_plugin_to_vundle(plugin_repo)
     return if contains_vundle? plugin_repo
@@ -35,11 +39,11 @@ module VimPlug
   end
 
   def self.install_plugins
-    system "nvim --noplugin -u #{ENV['HOME']}/.config/nvim/plugins/main.vim -N \"+set hidden\" \"+syntax on\" +PlugClean +PlugInstall! +qall"
+    system "nvim --noplugin -u #{@home_path}/.config/nvim/plugins/main.vim -N \"+set hidden\" \"+syntax on\" +PlugClean +PlugInstall! +qall"
   end
 
   def self.update_plugins
-    system "nvim --noplugin -u #{ENV['HOME']}/.config/nvim/plugins/main.vim -N \"+set hidden\" \"+syntax on\" +PlugClean +PlugUpdate! +qall"
+    system "nvim --noplugin -u #{@home_path}/.config/nvim/plugins/main.vim -N \"+set hidden\" \"+syntax on\" +PlugClean +PlugUpdate! +qall"
   end
 
   private

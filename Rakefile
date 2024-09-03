@@ -14,18 +14,22 @@ task :install => [:submodule_init, :submodules] do
 
   linux = linux_variant if linux?
 
-
   if windows?
-      ENV['MSYS'] = "winsymlinks:nativestict"
-      ENV['CYGWIN'] = "winsymlinks:nativestict"
+    ENV['MSYS'] = "winsymlinks:nativestict"
+    ENV['CYGWIN'] = "winsymlinks:nativestict"
   end
 
-  run %( mkdir -p $HOME/bin ) unless File.exist?("#{ENV['HOME']}/bin")
+  run %{ mkdir #{osFilePath(ENV['HOME'])}/bin) } unless File.exist?("#{ENV['HOME']}/bin")
 
   ENV['PATH'] = "#{File.join(ENV['HOME'], 'bin')}:#{ENV['PATH']}"
   install_homebrew if macos?
 
-  if linux?
+  install_zsh if want_to_install?('zsh (shell, enhancements))')
+
+  if windows?
+    windows_install = osFilePath(File.join(File.dirname(__FILE__), 'bin', 'install-windows-pre.ps1'))
+    run %{ powershell -File "#{windows_install}" }
+  elsif linux?
     run %( which brew )
     install_homebrew if $?.success?
 
@@ -103,18 +107,20 @@ task :install => [:submodule_init, :submodules] do
   install_files(Dir.glob('ruby/*')) if want_to_install?('rubygems config (faster/no docs)')
   install_files(Dir.glob('ctags/*')) if want_to_install?('ctags config (better js/ruby support)')
 
-  if want_to_install?('tmux config')
-    install_files(Dir.glob('tmux/*'))
-    tpm_filepath = File.join(ENV['HOME'], '.tmux', 'plugins', 'tpm')
-    tpm_filepath = `cygpath -u "#{tpm_filepath}"`.strip if windows?
+  run %{ which tmux >/dev/null }
+  unless $?.success?
+    if want_to_install?('tmux config')
+      install_files(Dir.glob('tmux/*'))
+      tpm_filepath = File.join(ENV['HOME'], '.tmux', 'plugins', 'tpm').to_s
 
-    if !File.exist?(File.join(ENV['HOME'], '.tmux', 'plugins', 'tpm').to_s)
-      run %{ git clone https://github.com/tmux-plugins/tpm #{tpm_filepath} }
-    else
-      run %{
-        cd "#{tpm_filepath}"
-        git pull --rebase
-      }
+      if !File.exist?(tpm_filepath)
+        run %{ git clone https://github.com/tmux-plugins/tpm #{osFilePath(tpm_filepath)} }
+      else
+        run %{
+          cd "#{osFilePath(tpm_filepath)}"
+          git pull --rebase
+        }
+      end
     end
   end
 
@@ -123,7 +129,14 @@ task :install => [:submodule_init, :submodules] do
   install_bash if want_to_install?('bash configs (color, aliases)')
 
   if want_to_install?('vim configuration (highly recommended)')
-    run %{ ln -nfs "$HOME/.yadr/nvim" "$HOME/.config/nvim" }
+    nvim_settings_source = osFilePath(ENV['HOME'] + "/.yadr/nvim", '-u')
+    nvim_settings_dest = osFilePath(ENV['HOME'] + "/.config/nvim", '-u')
+    run %{ ln -nfs "#{nvim_settings_source}" "#{nvim_settings_dest}" }
+    if windows?
+      nvim_settings_dest = osFilePath(ENV['HOME'] + "/AppData/Local/nvim", '-u')
+      run %{ ln -nfs "#{nvim_settings_source}" "#{nvim_settings_dest}" }
+    end
+
 
     install_files(Dir.glob('vimify/*')) if want_to_install?('vimification of command line tools')
 
@@ -140,7 +153,7 @@ task :install => [:submodule_init, :submodules] do
 
       run %{which java}
       unless $?.success?
-        run %{source "${HOME}/.yadr/zsh/sdkman.zsh" ; sdk install java 17.0.11-amzn}
+        run %{ source "#{osFilePath(ENV['HOME'] + "/.yadr/zsh/sdkman.zsh", '-u')}" ; sdk install java 17.0.11-amzn }
       end
     end
 
@@ -153,7 +166,7 @@ task :install => [:submodule_init, :submodules] do
     end
 
     if File.exist?(File.join('/opt/nvim-linux64/bin/nvim')) && linux?
-      run %{ ln -nsf '/opt/nvim-linux64/bin/nvim' '$HOME/bin/nvim' }
+      run %{ ln -nsf '/opt/nvim-linux64/bin/nvim' "#{osFilePath(ENV['HOME'] + "/bin/nvim", '-u')}" }
     end
 
     install_files(Dir.glob('{vim,vimrc}'))
@@ -162,8 +175,8 @@ task :install => [:submodule_init, :submodules] do
     # run %{pip3 install tmuxp}
     # For NeoVim plugins
     if macos?
-      run %{[[ ! -d $HOME/.virtualenvs/default ]] && python3 -m venv ~/.virtualenvs/default}
-      run %{source $HOME/.virtualenvs/default/bin/activate}
+      run %{[[ ! -d #{ENV['HOME']}/.virtualenvs/default ]] && python3 -m venv ~/.virtualenvs/default}
+      run %{source #{ENV['HOME']}/.virtualenvs/default/bin/activate}
       run %{pip install neovim}
       run %{pip install pynvim}
     elsif linux? && linux['PLATFORM_FAMILY'] != "arch"
@@ -173,17 +186,21 @@ task :install => [:submodule_init, :submodules] do
     end
 
     if File.exist?(File.join(ENV['HOME'], '.vimrc.before'))
-      run %{ ln -sf "$HOME/.vimrc.before" "$HOME/.config/nvim/settings/before/000-userconfig-vimrc.before.vim" }
+      run %{ ln -sf "#{osFilePath(ENV['HOME'] + "/.vimrc.before", '-u')}" "#{osFilePath(ENV['HOME'] + "/.config/nvim/settings/before/000-userconfig-vimrc.before.vim", '-u')}" }
     end
 
     if File.exist?(File.join(ENV['HOME'], '.vimrc.after'))
-      run %{ ln -sf "$HOME/.vimrc.after" "$HOME/.config/nvim/settings/after/zzz-userconfig-vimrc.after.vim" }
+      run %{ ln -sf "#{osFilePath(ENV['HOME'] + "/.vimrc.after", '-u')}" "#{osFilePath(ENV['HOME'] + "/.config/nvim/settings/after/zzz-userconfig-vimrc.after.vim", '-u')}" }
     end
 
     Rake::Task["install_vimplug"].execute
   end
 
-  run %{ mkdir -p ~/.config/ranger }
+  if windows?
+    run %{ mkdir ~/.config/ranger }
+  else
+    run %{ mkdir -p ~/.config/ranger }
+  end
   run %{ ln -nfs ~/.yadr/ranger ~/.config/ranger }
   run %{ touch ~/.hushlogin }
 
@@ -229,7 +246,7 @@ task :submodules do
     puts "======================================================"
 
     cd_filepath = File.join(ENV['HOME'], '.yadr')
-    cd_filepath = `cygpath -u "#{cd_filepath}"`.strip if windows?
+    cd_filepath = `cygpath -m "#{cd_filepath}"`.strip if windows?
     run %{
       cd "#{cd_filepath}"
       git submodule update --recursive
@@ -248,10 +265,10 @@ task :install_vundle do
   puts ''
 
   vundle_path = File.join('vim','bundle', 'vundle')
-  vundle_path = `cygpath -u "#{vundle_path}"`.strip if windows?
+  vundle_path = `cygpath -m "#{vundle_path}"`.strip if windows?
   unless File.exist?(vundle_path)
     cd_filepath = File.join(ENV['HOME'], '.yadr')
-    cd_filepath = `cygpath -u "#{cd_filepath}"`.strip if windows?
+    cd_filepath = `cygpath -m "#{cd_filepath}"`.strip if windows?
     run %{
       cd "#{cd_filepath}"
       git clone https://github.com/gmarik/vundle.git #{vundle_path}
@@ -265,23 +282,27 @@ desc 'Runs Plug installer in a clean vim environment'
 task :install_vimplug do
   puts '======================================================'
   puts 'Installing and updating Neovim plugins.'
-  puts 'The installer will now proceed to run PluginInstall to install plugs.'
+  puts 'The installer will now proceed to run PlugInstall to install plugs.'
   puts '======================================================'
   puts ''
 
-  vimplug_path = File.join(ENV['HOME'], '.local', 'share', 'nvim', 'site', 'autoload', 'plug.vim')
-  vimplug_path = `cygpath -u "#{vimplug_path}"`.strip if windows?
+  if windows?
+    vimplug_path = "C:/tools/neovim/nvim-win64/share/nvim/runtime/autoload/plug.vim"
+  else
+    vimplug_path = File.join(ENV['HOME'], '.local', 'share', 'nvim', 'site', 'autoload', 'plug.vim')
+  end
+
   unless File.exist?(vimplug_path)
     run %{
       curl -fLo #{vimplug_path} --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
     }
   end
 
-  if ENV['__YADR_UPDATE'] == 'y'
-    VimPlug.update_plugins
-  else
+  # if ENV['__YADR_UPDATE'] == 'y'
+  #   VimPlug.update_plugins
+  # else
     VimPlug.install_plugins
-  end
+  # end
 end
 
 task :default => 'install'
@@ -298,6 +319,14 @@ end
 
 def windows?
   RUBY_PLATFORM.downcase.include?('cygwin') || RUBY_PLATFORM.downcase.include?('mingw')
+end
+
+def osFilePath(filePath, type = '-w')
+  if windows?
+    filePath = `cygpath #{type} #{filePath}`.strip
+  end
+
+  filePath
 end
 
 def run(cmd)
@@ -413,6 +442,7 @@ def install_rvm_binstubs
 end
 
 def install_zsh
+  return if windows?
   run %{which zsh}
   unless $?.success?
     puts "======================================================"
@@ -420,33 +450,49 @@ def install_zsh
     puts "======================================================"
 
     if linux["PLATFORM_FAMILY"] == "arch"
-        run %{sudo pacman -S --noconfirm zsh}
+      run %{sudo pacman -S --noconfirm zsh}
     else
       run %{ sudo #{linux['PACKAGE_MANAGER']} install -y zsh }
     end
   end
 end
 
-def install_from_github(app_name, download_url, strip = true)
+def install_from_github(app_name, download_url, strip_folder = true)
   run %{which #{app_name}}
   unless $?.success?
-    download_path = File.join('/tmp',"#{app_name}.tar.gz")
-    install_path = File.join(ENV['HOME'], '.local', app_name)
-    link_path = File.join(ENV['HOME'], 'bin', app_name)
+    if windows?
+      app_binary = app_name + ".exe"
+    else
+      app_binary = app_name
+    end
+
+    download_path = osFilePath(File.join('/tmp',"#{app_name}.tar.gz"), '-u')
+    install_path = osFilePath(File.join(ENV['HOME'], '.local', app_name), '-u')
+    link_path = osFilePath(File.join(ENV['HOME'], 'bin', app_name), '-u')
+
     puts "======================================================"
     puts "Installing/Updating '#{app_name}' to '#{install_path}'..."
     puts "======================================================"
     puts "Downloading #{download_url}"
-    run %{ curl -Lo #{download_path} #{download_url} }
-    run %{ rm -rf #{install_path} }
-    run %{ mkdir -p #{install_path} }
-    if strip
-      run %{ tar -C #{install_path} --strip-components=1 -xzf #{download_path} }
+    run %{ curl -Lo "#{download_path}" "#{download_url}" }
+    run %{ rm -rf "#{install_path}" }
+    run %{ mkdir -p "#{install_path}" }
+
+    if strip_folder
+      if windows?
+        run %{ unzip -d "#{install_path}" "#{download_path}" && f=("#{install_path}"/*) && mv "#{install_path}"/*/* "#{install_path}" && rmdir "${f[@]}" }
+      else
+        run %{ tar -C "#{install_path}" --strip-components=1 -xzf "#{download_path}" }
+      end
     else
-      run %{ tar -C #{install_path} -xzf #{download_path} }
+      if windows?
+        run %{ unzip -d "#{install_path}" "#{download_path}" }
+      else
+        run %{ tar -C "#{install_path}" -xzf "#{download_path}" }
+      end
     end
     run %{ rm -f #{download_path} }
-    run %{ ln -sf $(find #{install_path} -type f -name '#{app_name}') #{link_path} }
+    run %{ ln -sf $(/usr/bin/find #{install_path} -type f -name '#{app_binary}') #{link_path} }
   end
 end
 
@@ -535,7 +581,7 @@ def install_fonts
   puts "======================================================"
   puts "Installing patched fonts for Powerline/Lightline."
   puts "======================================================"
-  run %{ cp -f $HOME/.yadr/fonts/* $HOME/Library/Fonts } if macos?
+  run %{ cp -f #{ENV['HOME']}/.yadr/fonts/* #{ENV['HOME']}/Library/Fonts } if macos?
   run %{ mkdir -p ~/.fonts && cp ~/.yadr/fonts/* ~/.fonts && fc-cache -vf ~/.fonts } if linux?
   puts
 end
@@ -618,8 +664,13 @@ def install_bash
 
   puts
   puts "Creating directories for your customizations..."
-  run %{ mkdir -p $HOME/.bash.before }
-  run %{ mkdir -p $HOME/.bash.after }
+  if windows?
+    run %{ mkdir #{ENV['HOME']}/.bash.before }
+    run %{ mkdir #{ENV['HOME']}/.bash.after }
+  else
+    run %{ mkdir -p #{ENV['HOME']}/.bash.before }
+    run %{ mkdir -p #{ENV['HOME']}/.bash.after }
+  end
 
   if ! windows?
     if ! File.exist?("#{ENV['HOME']}/.bash-git-prompt")
@@ -652,8 +703,8 @@ def install_prezto
     puts
     puts "Installing Prezto (ZSH Enhancements)..."
 
-    prezto_filepath = File.join(ENV['HOME'], '.yadr', 'zsh', 'prezto')
-    run %{ ln -nfs "#{prezto_filepath}" "${ZDOTDIR:-$HOME}/.zprezto" }
+    prezto_filepath = osFilePath(File.join(ENV['HOME'], '.yadr', 'zsh', 'prezto'), '-u')
+    run %{ ln -nfs "#{prezto_filepath}" "${ZDOTDIR:-#{ENV['HOME']}}/.zprezto" }
 
     # The prezto runcoms are only going to be installed if zprezto has never been installed
     install_files(Dir.glob('zsh/prezto/runcoms/zlogin'), :symlink)
@@ -663,8 +714,10 @@ def install_prezto
 
     puts
     puts "Overriding prezto ~/.zpreztorc with YADR's zpreztorc to enable additional modules..."
-    run %{ ln -nfs "$HOME/.yadr/zsh/prezto-override/zpreztorc" "${ZDOTDIR:-$HOME}/.zpreztorc" }
+    run %{ ln -nfs "#{osFilePath(ENV['HOME'] + "/.yadr/zsh/prezto-override/zpreztorc")}" "${osFilePath(ENV['ZDOTDIR'] || ENV['HOME'] + "/.zpreztorc") }" }
+
     # run %{ ln -s ~/.zprezto/modules/prompt/external/powerlevel9k/powerlevel9k.zsh-theme ~/.zprezto/modules/prompt/functions/prompt_powerlevel9k_setup }
+
     puts "Overriding prezto ~/.zshrc with YADR's zshrc to enable future customization..."
     install_files(Dir.glob('zsh/prezto-override/zshrc'), :symlink)
     puts "Overriding prezto ~/.zpreztorc with YADR's .zpreztorc to enable future customization..."
@@ -672,9 +725,9 @@ def install_prezto
 
     puts
     puts "Creating directories for your customizations"
-    run %{ mkdir -p $HOME/.zsh.before }
-    run %{ mkdir -p $HOME/.zsh.after }
-    run %{ mkdir -p $HOME/.zsh.prompts }
+    run %{ mkdir -p #{ENV['HOME']}/.zsh.before }
+    run %{ mkdir -p #{ENV['HOME']}/.zsh.after }
+    run %{ mkdir -p #{ENV['HOME']}/.zsh.prompts }
 
     if want_to_install?('zsh_default_shell (make zsh the default shell))')
       if "#{ENV['SHELL']}".include? 'zsh' then
@@ -726,21 +779,16 @@ end
 def install_files(files, method = :symlink)
   files.each do |f|
     file = f.split('/').last
-    source = "#{ENV["PWD"]}/#{f}"
-    target = "#{ENV["HOME"]}/.#{file}"
-
-    if windows?
-      source=`cygpath -u "#{source}"`.strip
-      target=`cygpath -u "#{target}"`.strip
-    end
 
     puts "======================#{file}=============================="
-    puts "Source: #{source}"
-    puts "Target: #{target}"
+
+    source = osFilePath("#{ENV["PWD"]}/#{f}", '-u')
+    target = osFilePath("#{ENV["HOME"]}/.#{file}", '-u')
 
     if File.exist?(target) && (!File.symlink?(target) || (File.symlink?(target) && File.readlink(target) != source))
-      puts "[Overwriting] #{target}...leaving original at #{target}.backup..."
-      run %{ mv "$HOME/.#{file}" "$HOME/.#{file}.backup" }
+      puts "[Overwriting] #{osFilePath(target)}...leaving original at #{osFilePath(target)}.backup..."
+    run %{ sleep 5 }
+      run %{ mv "#{osFilePath(ENV['HOME'] + "/." + file, '-u')}" "#{osFilePath(ENV['HOME'] + "/." + file + ".backup", '-u')}" }
     end
 
     if method == :symlink
@@ -748,7 +796,6 @@ def install_files(files, method = :symlink)
     else
       run %{ cp -f "#{source}" "#{target}" }
     end
-
     puts "=========================================================="
     puts
   end

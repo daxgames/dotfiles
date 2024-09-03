@@ -9,6 +9,12 @@ module Vundle
   end
 
   @vundles_path = `cygpath -u "#{@vundles_path}"`.strip if windows?
+  @home_path = ENV['HOME']
+  if windows?
+    @home_path = `cygpath -u "#{@home_path}"`.strip
+    @vundles_path = `cygpath -u "#{@vundles_path}"`.strip
+  end
+
 
   def self.add_plugin_to_vundle(plugin_repo)
     return if contains_vundle? plugin_repo
@@ -34,7 +40,7 @@ module Vundle
   end
 
   def self.update_vundle
-    system "vim --noplugin -u #{ENV['HOME']}/.vim/vundles.vim -N \"+set hidden\" \"+syntax on\" \"+let g:session_autosave = 'no'\" +BundleClean +BundleInstall! +qall"
+    system "vim --noplugin -u #{@home_path}/.vim/vundles.vim -N \"+set hidden\" \"+syntax on\" \"+let g:session_autosave = 'no'\" +BundleClean +BundleInstall! +qall"
   end
 
 

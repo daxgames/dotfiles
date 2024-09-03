@@ -17,7 +17,7 @@ call plug#begin('~/.local/share/nvim/site/plugged')
 let pluginPath = '~/.config/nvim/plugins'
 
 for fpath in split(globpath(pluginPath, '*.vim'), '\n')
-  if (fpath != expand(pluginPath) . "/main.vim") " skip main.vim (this file)
+  if (fpath != expand(pluginPath . "/main.vim")) " skip main.vim (this file)
     exe 'source' fpath
   endif
 endfor

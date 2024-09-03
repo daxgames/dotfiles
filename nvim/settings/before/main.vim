@@ -9,7 +9,7 @@
 let customSettingsPath = '~/.config/nvim/settings/before'
 
 for fpath in split(globpath(customSettingsPath, '*.vim'), '\n')
-  if (fpath != expand(customSettingsPath) . "/main.vim") " skip main.vim (this file)
+  if (substitute(fpath, '/', '\', '') != expand(customSettingsPath . "/main.vim")) " skip main.vim (this file)
     exe 'source' fpath
   endif
 endfor

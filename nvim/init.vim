@@ -7,5 +7,5 @@ source ~/.config/nvim/plugins/main.vim
 " Main Settings & Plugins Configuration
 source ~/.config/nvim/settings/main.vim
 
-" Custom Settings: AFTER
-source ~/.config/nvim/settings/after/main.vim
+" " Custom Settings: AFTER
+" source ~/.config/nvim/settings/after/main.vim
