@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Based on: https://github.com/mcgitty/pacman-for-git
+
 if [[ "$HOSTTYPE" == "i686" ]]; then
  pacman="
 pacman-6.0.0-4-i686.pkg.tar.zst
