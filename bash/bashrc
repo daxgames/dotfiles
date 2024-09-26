@@ -15,4 +15,3 @@ for config_file in ($HOME/.yadr/bash/*.sh) ; do
   [[ -n "${__YADR_DEBUG}" ]] && echo sourcing "$config_file"
   source "$config_file"
 done
-. "$HOME/.cargo/env"
