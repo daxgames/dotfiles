@@ -433,6 +433,11 @@ def install_from_github(app_name, download_url, strip = true)
 end
 
 def install_python_modules
+  if macos?
+    run %{ [[ ! -d $HOME/.virtualenvs/default ]] && python3 -m venv ~/.virtualenvs/default }
+    run %{ source $HOME/.virtualenvs/default/bin/activate }
+  end
+
   run %{which pip}
   unless $?.success?
     puts "======================================================"
