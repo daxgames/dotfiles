@@ -15,9 +15,3 @@ for config_file in ($HOME/.yadr/bash/*.sh) ; do
   [[ -n "${__YADR_DEBUG}" ]] && echo sourcing "$config_file"
   source "$config_file"
 done
-alias awssso='/Users/DG296951/bin/awssso.sh'
-alias awssso-build-config='/Users/DG296951/bin/awssso-build-config.sh'
-echo PATH='$PATH:/Users/daxgames/bin
-echo PATH='$PATH:/Users/daxgames/bin
-echo PATH='$PATH:/Users/daxgames/bin
-echo PATH='$PATH:/Users/daxgames/bin
