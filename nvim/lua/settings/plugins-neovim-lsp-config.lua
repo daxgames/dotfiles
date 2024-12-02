@@ -34,7 +34,7 @@ local servers = {
   lua_ls = {},
   rubocop = {},
   ruby_lsp = {},
-  tsserver = {},
+  ts_ls = {},
   yamlls = {},
 }
 
