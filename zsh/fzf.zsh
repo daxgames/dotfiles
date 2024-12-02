@@ -15,7 +15,7 @@ if [[ -n "$(command -v fzf)" ]] ; then
     # Key bindings
     # ------------
     if [[ -n "$(command -v brew)" ]] ; then
-      source "$(brew --prefix)/opt/fzf/shell/key-bindings.zsh"
+      [[ -f "$(brew --prefix)/opt/fzf/shell/key-bindings.zsh" ]] && source "$(brew --prefix)/opt/fzf/shell/key-bindings.zsh"
     fi
   else
     source <(fzf --zsh)
