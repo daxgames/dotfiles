@@ -437,6 +437,11 @@ def install_from_github(app_name, download_url, strip = true)
 end
 
 def install_python_modules
+  if macos?
+    run %{ [[ ! -d $HOME/.virtualenvs/default ]] && python3 -m venv ~/.virtualenvs/default }
+    run %{ source $HOME/.virtualenvs/default/bin/activate }
+  end
+
   run %{which pip}
   unless $?.success?
     puts "======================================================"
@@ -610,7 +615,7 @@ def install_bash
   if ! File.exist?("#{ENV['HOME']}/.bash-git-prompt")
     puts
     puts "Configuring Git aware prompt..."
-    run %{ git clone "https://github.com/daxgames/bash-git-prompt.git" "#{ENV['HOME']}/.bash-git-prompt" }
+    run %{ git clone "https://github.com/magicmonty/bash-git-prompt.git" "#{ENV['HOME']}/.bash-git-prompt" }
   end
 
   # Preserve pre-existing ~/.bashrc
