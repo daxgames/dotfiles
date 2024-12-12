@@ -325,14 +325,18 @@ def linux_variant
   if File.exist?('/etc/os-release')
     puts 'Determining Linux OS using /etc/os-release...'
     File.open('/etc/os-release', 'r').read.each_line do |line|
-      (key, value) = line.strip.gsub('"', '').split('=')
+      puts "-" + line
+      key = line.strip.gsub('"', '').split('=')[0].to_s
+      value = line.strip.gsub('"', '').split('=')[1].to_s
+      puts "key: #{key}"
+      puts "value: #{value}"
       case key.downcase
-      when 'id'
-        linux['PLATFORM'] = value
-      when 'id_like'
-        linux['PLATFORM_FAMILY'] = value
-      when 'version_id'
-        linux['PLATFORM_VERSION'] = value
+      	when 'id'
+      	  linux['PLATFORM'] = value
+      	when 'id_like'
+      	  linux['PLATFORM_FAMILY'] = value
+      	when 'version_id'
+      	  linux['PLATFORM_VERSION'] = value
       end
     end
 
@@ -606,7 +610,7 @@ def install_bash
   if ! File.exist?("#{ENV['HOME']}/.bash-git-prompt")
     puts
     puts "Configuring Git aware prompt..."
-    run %{ git clone "https://github.com/maximus-codeshuttle/bash-git-prompt.git" "#{ENV['HOME']}/.bash-git-prompt" }
+    run %{ git clone "https://github.com/daxgames/bash-git-prompt.git" "#{ENV['HOME']}/.bash-git-prompt" }
   end
 
   # Preserve pre-existing ~/.bashrc
