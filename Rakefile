@@ -19,6 +19,9 @@ task :install => [:submodule_init, :submodules] do
   ENV['PATH'] = "#{File.join(ENV['HOME'], 'bin')}:#{ENV['PATH']}"
   install_homebrew if macos?
 
+  puts linux
+  sleep 5
+
   if linux?
     run %( which brew )
     install_homebrew if $?.success?
@@ -29,7 +32,6 @@ task :install => [:submodule_init, :submodules] do
         fzf \
         git \
         github-cli \
-        neovim \
         python3 \
         python-neovim \
         ripgrep \
@@ -49,20 +51,18 @@ task :install => [:submodule_init, :submodules] do
         git\
         gradle \
         openjdk-17-jdk \
-        nvim \
         python3-pip \
         rubocop \
         ruby-dev \
         shellcheck
       )
       run %(sudo ln -sf /bin/batcat /bin/bat)
-    when 'rhel'
+    when 'fedora'
       run %{ sudo #{linux['PACKAGE_MANAGER']} update -y}
       run %{ sudo #{linux['PACKAGE_MANAGER']} groups install -y "Development Tools"}
       run %{ sudo #{linux['PACKAGE_MANAGER']} install -y bat \
         fzf \
         gh \
-        neovim \
         ripgrep \
         vim-enhanced \
         ruby-devel \
@@ -80,7 +80,7 @@ task :install => [:submodule_init, :submodules] do
                         'https://github.com/junegunn/fzf/releases/download/v0.54.1/fzf-0.54.1-linux_amd64.tar.gz',
                         false)
     install_from_github('nvim',
-                        'https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz')
+                        'https://github.com/neovim/neovim-releases/releases/download/v0.10.2/nvim-linux64.tar.gz')
     install_from_github('rg',
                         'https://github.com/BurntSushi/ripgrep/releases/download/14.1.0/ripgrep-14.1.0-x86_64-unknown-linux-musl.tar.gz')
     install_from_github('delta',
@@ -159,8 +159,8 @@ task :install => [:submodule_init, :submodules] do
       run %{pip install neovim}
       run %{pip install pynvim}
     elsif linux['PLATFORM_FAMILY'] != "arch"
-      run %{pip3 install --user neovim}
-      run %{pip3 install --user pynvim}
+      run %{pip3 install neovim}
+      run %{pip3 install pynvim}
       run %{gem install neovim --user-install}
     end
 
@@ -316,20 +316,21 @@ end
 
 def linux_variant
   linux = {
-    :PLATFORM => nil,
-    :PLATFORM_FAMILY => nil,
-    :PLATFORM_VERSION => nil,
-    :PACKAGE_MANGER => nil
+    'PLATFORM' => nil,
+    'PLATFORM_FAMILY' => nil,
+    'PLATFORM_VERSION' => nil,
+    'PACKAGE_MANAGER' => nil
   }
 
   if File.exist?('/etc/os-release')
     puts 'Determining Linux OS using /etc/os-release...'
     File.open('/etc/os-release', 'r').read.each_line do |line|
-      puts "-" + line
       key = line.strip.gsub('"', '').split('=')[0].to_s
       value = line.strip.gsub('"', '').split('=')[1].to_s
-      puts "key: #{key}"
-      puts "value: #{value}"
+
+      # puts "- " + line
+      # puts "  key: #{key}"
+      # puts "  value: #{value}"
       case key.downcase
       	when 'id'
       	  linux['PLATFORM'] = value
@@ -342,7 +343,7 @@ def linux_variant
 
     case linux['PLATFORM']
     when 'centos', 'fedora'
-      linux['PLATFORM_FAMILY'] = 'rhel'
+      linux['PLATFORM_FAMILY'] = 'fedora'
     when /debian/
       linux['PLATFORM_FAMILY'] = 'debian'
     end
@@ -354,7 +355,7 @@ def linux_variant
 
   elsif File.exist?('/etc/redhat-release')
     linux['PLATFORM'] = 'redhat'
-    linux['PLATFORM_FAMILY'] = 'rhel'
+    linux['PLATFORM_FAMILY'] = 'fedora'
   end
 
   case linux['PLATFORM_FAMILY']
@@ -362,7 +363,7 @@ def linux_variant
     linux['PACKAGE_MANAGER'] = 'pacman'
   when 'debian'
     linux['PACKAGE_MANAGER'] = 'apt-get'
-  when 'rhel'
+  when 'fedora'
     linux['PACKAGE_MANAGER'] = if linux['PLATFORM_VERSION'].to_i < 8
                                  'yum'
                                else
