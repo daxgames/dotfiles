@@ -5,7 +5,3 @@ Bundle "thoughtbot/vim-rspec"
 Bundle "dougireton/vim-chef"
 Bundle "vim-scripts/groovy.vim"
 Bundle "juneedahamed/vc.vim"
-Bundle "github/copilot.vim"
-Bundle "vim-scripts/Tango-colour-scheme"
-Bundle "sonph/onehalf", {"rtp": "vim"}
-Bundle "ku1ik/vim-monokai.git"
