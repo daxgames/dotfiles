@@ -19,3 +19,6 @@ else
     source "$config_file"
   done
 fi
+alias awssso='${HOME}/bin/awssso.sh'
+alias awssso-configure='${HOME}/bin/awssso-configure.sh'
+alias awssso-build-config='${HOME}/bin/awssso-build-config.sh'
