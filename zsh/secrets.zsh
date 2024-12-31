@@ -10,7 +10,7 @@ if [[ $(uname) == Linux ]]; then
     }
 
     if [[ $- == *i* ]]; then  # Only run in interactive mode
-      if [[ -z "${XDG_CURRENT_DESKTOP}" ]]; then
+      if [[ -z "${XDG_CURRENT_DESKTOP}" ]] && [[ -n "$(command -v dbus-run-session)" ]]; then
         if test -z "$DBUS_SESSION_BUS_ADDRESS" ; then
           exec dbus-run-session -- $SHELL
         fi

@@ -372,14 +372,16 @@ def linux_variant
   if File.exist?('/etc/os-release')
     puts 'Determining Linux OS using /etc/os-release...'
     File.open('/etc/os-release', 'r').read.each_line do |line|
-      (key, value) = line.strip.gsub('"', '').split('=')
+      key = line.strip.gsub('"', '').split('=')[0].to_s
+      value = line.strip.gsub('"', '').split('=')[1].to_s
+
       case key.downcase
-      when 'id'
-        linux['PLATFORM'] = value
-      when 'id_like'
-        linux['PLATFORM_FAMILY'] = value
-      when 'version_id'
-        linux['PLATFORM_VERSION'] = value
+      	when 'id'
+      	  linux['PLATFORM'] = value
+      	when 'id_like'
+      	  linux['PLATFORM_FAMILY'] = value
+      	when 'version_id'
+      	  linux['PLATFORM_VERSION'] = value
       end
     end
 
@@ -497,6 +499,11 @@ def install_from_github(app_name, download_url, strip_folder = true)
 end
 
 def install_python_modules
+  if macos?
+    run %{ [[ ! -d $HOME/.virtualenvs/default ]] && python3 -m venv ~/.virtualenvs/default }
+    run %{ source $HOME/.virtualenvs/default/bin/activate }
+  end
+
   run %{which pip}
   unless $?.success?
     puts "======================================================"
