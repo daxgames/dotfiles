@@ -170,6 +170,7 @@ task :install => [:submodule_init, :submodules] do
     end
 
     install_files(Dir.glob('{vim,vimrc}'))
+
     Rake::Task['install_vundle'].execute
 
     # run %{pip3 install tmuxp}
@@ -794,7 +795,7 @@ def install_files(files, method = :symlink)
 
     if File.exist?(target) && (!File.symlink?(target) || (File.symlink?(target) && File.readlink(target) != source))
       puts "[Overwriting] #{osFilePath(target)}...leaving original at #{osFilePath(target)}.backup..."
-    run %{ sleep 5 }
+      run %{ sleep 5 }
       run %{ mv "#{osFilePath(ENV['HOME'] + "/." + file, '-u')}" "#{osFilePath(ENV['HOME'] + "/." + file + ".backup", '-u')}" }
     end
 
@@ -803,6 +804,7 @@ def install_files(files, method = :symlink)
     else
       run %{ cp -f "#{source}" "#{target}" }
     end
+
     puts "=========================================================="
     puts
   end
