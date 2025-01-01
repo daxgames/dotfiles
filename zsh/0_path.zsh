@@ -19,9 +19,20 @@ pathDeDup() {
   PATH=$(echo "$PATH" | awk -v RS=':' -v ORS=":" '!a[$1]++{if (NR > 1) printf ORS; printf $a[$1]}')
 }
 
-[[ "$(uname)" == "Linux" ]] && [[ -f /home/linuxbrew/.linuxbrew/bin/brew ]] && eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
-[[ "$(uname)" == "Darwin" ]] && [[ -f /usr/homebrew/bin/brew ]] && eval "$(/usr/homebrew/bin/brew shellenv)"
-[[ "$(uname)" == "Darwin" ]] && [[ -f /opt/homebrew/bin/brew ]] && eval "$(/opt/homebrew/bin/brew shellenv)"
+if [[ "$(uname)" == "Linux" ]] ; then
+  [[ -f /home/linuxbrew/.linuxbrew/bin/brew ]] && eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
+elif [[ "$(uname)" == "Darwin" ]] ; then
+  if [[ -f ~/homebrew/bin/brew ]] ; then
+    eval "$(~/homebrew/bin/brew shellenv)"
+  elif [[ -f ~/brew/bin/brew ]] ; then
+    eval "$(~/brew/bin/brew shellenv)"
+  elif [[ -f /usr/homebrew/bin/brew ]] ; then
+    eval "$(/usr/homebrew/bin/brew shellenv)"
+  elif [[ -f /opt/homebrew/bin/brew ]] ; then
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+  fi
+fi
+
 [[ -d "$HOME/.virtualenvs/default/bin" ]] && pathPrepend "$HOME/.virtualenvs/default/bin"
 
 pathDeDup
