@@ -149,6 +149,7 @@ task :install => [:submodule_init, :submodules] do
     end
 
     install_files(Dir.glob('{vim,vimrc}'))
+
     Rake::Task['install_vundle'].execute
 
     # run %{pip3 install tmuxp}
@@ -702,7 +703,7 @@ end
 def install_files(files, method = :symlink)
   files.each do |f|
     file = f.split('/').last
-    source = "#{ENV["PWD"]}/#{f}"
+    source = "#{ENV["HOME"]}/.yadr/#{f}"
     target = "#{ENV["HOME"]}/.#{file}"
 
     if RUBY_PLATFORM.downcase.include?("cygwin")
