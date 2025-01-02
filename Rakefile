@@ -137,7 +137,6 @@ task :install => [:submodule_init, :submodules] do
       run %{ ln -nfs "#{nvim_settings_source}" "#{nvim_settings_dest}" }
     end
 
-
     install_files(Dir.glob('vimify/*')) if want_to_install?('vimification of command line tools')
 
     if macos? || (linux? && linux['PLATFORM_FAMILY'] != 'debian')
@@ -176,11 +175,11 @@ task :install => [:submodule_init, :submodules] do
     # run %{pip3 install tmuxp}
     # For NeoVim plugins
     if macos?
-      run %{ [[ ! -d #{ENV['HOME']}/.virtualenvs/default ]] && python3 -m venv ~/.virtualenvs/default }
-      run %{ source #{ENV['HOME']}/.virtualenvs/default/bin/activate }
+      run %{ [[ ! -d $HOME/.virtualenvs/default ]] && python3 -m venv ~/.virtualenvs/default}
+      run %{ source $HOME/.virtualenvs/default/bin/activate }
       run %{ pip install neovim }
       run %{ pip install pynvim }
-    elsif linux? && linux['PLATFORM_FAMILY'] != "arch"
+    elsif linux['PLATFORM_FAMILY'] != "arch"
       run %{ pip3 install --user neovim }
       run %{ pip3 install --user pynvim }
       run %{ gem install neovim --user-install }
