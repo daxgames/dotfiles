@@ -132,6 +132,7 @@ task :install => [:submodule_init, :submodules] do
     nvim_settings_source = osFilePath(ENV['HOME'] + "/.yadr/nvim", '-u')
     nvim_settings_dest = osFilePath(ENV['HOME'] + "/.config/nvim", '-u')
     run %{ ln -nfs "#{nvim_settings_source}" "#{nvim_settings_dest}" }
+    
     if windows?
       nvim_settings_dest = osFilePath(ENV['HOME'] + "/AppData/Local/nvim", '-u')
       run %{ ln -nfs "#{nvim_settings_source}" "#{nvim_settings_dest}" }
