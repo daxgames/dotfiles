@@ -15,6 +15,11 @@ task :install => [:submodule_init, :submodules] do
   linux = linux_variant if linux?
 
   if windows?
+    if ENV['SHELL'] !~ /bash/
+      puts "Please run this rake task from Git Bash on Windows."
+      exit 1
+    end
+
     ENV['MSYS'] = "winsymlinks:nativestict"
     ENV['CYGWIN'] = "winsymlinks:nativestict"
   end
@@ -298,11 +303,13 @@ task :install_vimplug do
     }
   end
 
-  # if ENV['__YADR_UPDATE'] == 'y'
-  #   VimPlug.update_plugins
-  # else
+  if ENV['__YADR_UPDATE'] == 'y'
+    puts 'Updating Neovim plugins...'
+    VimPlug.update_plugins
+  else
+    puts 'Installing Neovim plugins...'
     VimPlug.install_plugins
-  # end
+  end
 end
 
 task :default => 'install'
