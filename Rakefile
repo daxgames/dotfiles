@@ -15,7 +15,7 @@ task :install => [:submodule_init, :submodules] do
   linux = linux_variant if linux?
 
   if windows?
-    if ENV['TEMP'] =~ /\\temp/
+    if ENV['MSYSTEM_PREFIX'].nil?
       puts "Please run this rake task from Git Bash on Windows."
       exit 1
     end
@@ -137,11 +137,11 @@ task :install => [:submodule_init, :submodules] do
     nvim_settings_source = osFilePath(ENV['HOME'] + "/.yadr/nvim", '-u')
     nvim_settings_dest = osFilePath(ENV['HOME'] + "/.config/nvim", '-u')
     run %{ ln -nfs "#{nvim_settings_source}" "#{nvim_settings_dest}" }
+
     if windows?
       nvim_settings_dest = osFilePath(ENV['HOME'] + "/AppData/Local/nvim", '-u')
       run %{ ln -nfs "#{nvim_settings_source}" "#{nvim_settings_dest}" }
     end
-
 
     install_files(Dir.glob('vimify/*')) if want_to_install?('vimification of command line tools')
 
@@ -380,11 +380,9 @@ def linux_variant
   if File.exist?('/etc/os-release')
     puts 'Determining Linux OS using /etc/os-release...'
     File.open('/etc/os-release', 'r').read.each_line do |line|
-      puts "-" + line
       key = line.strip.gsub('"', '').split('=')[0].to_s
       value = line.strip.gsub('"', '').split('=')[1].to_s
-      puts "key: #{key}"
-      puts "value: #{value}"
+
       case key.downcase
       	when 'id'
       	  linux['PLATFORM'] = value
@@ -804,7 +802,7 @@ def install_files(files, method = :symlink)
 
     if File.exist?(target) && (!File.symlink?(target) || (File.symlink?(target) && File.readlink(target) != source))
       puts "[Overwriting] #{osFilePath(target)}...leaving original at #{osFilePath(target)}.backup..."
-    run %{ sleep 5 }
+      run %{ sleep 5 }
       run %{ mv "#{osFilePath(ENV['HOME'] + "/." + file, '-u')}" "#{osFilePath(ENV['HOME'] + "/." + file + ".backup", '-u')}" }
     end
 
@@ -813,6 +811,7 @@ def install_files(files, method = :symlink)
     else
       run %{ cp -f "#{source}" "#{target}" }
     end
+
     puts "=========================================================="
     puts
   end
