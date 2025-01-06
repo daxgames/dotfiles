@@ -15,7 +15,7 @@ task :install => [:submodule_init, :submodules] do
   linux = linux_variant if linux?
 
   if windows?
-    if ENV['SHELL'] !~ /bash/
+    if ENV['TEMP'] =~ /\\temp/
       puts "Please run this rake task from Git Bash on Windows."
       exit 1
     end
@@ -175,19 +175,20 @@ task :install => [:submodule_init, :submodules] do
     end
 
     install_files(Dir.glob('{vim,vimrc}'))
+
     Rake::Task['install_vundle'].execute
 
     # run %{pip3 install tmuxp}
     # For NeoVim plugins
     if macos?
-      run %{[[ ! -d #{ENV['HOME']}/.virtualenvs/default ]] && python3 -m venv ~/.virtualenvs/default}
-      run %{source #{ENV['HOME']}/.virtualenvs/default/bin/activate}
-      run %{pip install neovim}
-      run %{pip install pynvim}
+      run %{ [[ ! -d #{ENV['HOME']}/.virtualenvs/default ]] && python3 -m venv ~/.virtualenvs/default }
+      run %{ source #{ENV['HOME']}/.virtualenvs/default/bin/activate }
+      run %{ pip install neovim }
+      run %{ pip install pynvim }
     elsif linux? && linux['PLATFORM_FAMILY'] != "arch"
-      run %{pip3 install --user neovim}
-      run %{pip3 install --user pynvim}
-      run %{gem install neovim --user-install}
+      run %{ pip3 install --user neovim }
+      run %{ pip3 install --user pynvim }
+      run %{ gem install neovim --user-install }
     end
 
     if File.exist?(File.join(ENV['HOME'], '.vimrc.before'))
@@ -379,14 +380,18 @@ def linux_variant
   if File.exist?('/etc/os-release')
     puts 'Determining Linux OS using /etc/os-release...'
     File.open('/etc/os-release', 'r').read.each_line do |line|
-      (key, value) = line.strip.gsub('"', '').split('=')
+      puts "-" + line
+      key = line.strip.gsub('"', '').split('=')[0].to_s
+      value = line.strip.gsub('"', '').split('=')[1].to_s
+      puts "key: #{key}"
+      puts "value: #{value}"
       case key.downcase
-      when 'id'
-        linux['PLATFORM'] = value
-      when 'id_like'
-        linux['PLATFORM_FAMILY'] = value
-      when 'version_id'
-        linux['PLATFORM_VERSION'] = value
+      	when 'id'
+      	  linux['PLATFORM'] = value
+      	when 'id_like'
+      	  linux['PLATFORM_FAMILY'] = value
+      	when 'version_id'
+      	  linux['PLATFORM_VERSION'] = value
       end
     end
 
