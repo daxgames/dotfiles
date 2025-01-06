@@ -24,7 +24,7 @@ task :install => [:submodule_init, :submodules] do
     ENV['CYGWIN'] = "winsymlinks:nativestict"
   end
 
-  run %{ mkdir #{osFilePath(ENV['HOME'])}/bin) } unless File.exist?("#{ENV['HOME']}/bin")
+  run %{ mkdir #{osFilePath(File.join(ENV['HOME'], 'bin'))} } unless File.exist?("#{ENV['HOME']}/bin")
 
   ENV['PATH'] = "#{File.join(ENV['HOME'], 'bin')}:#{ENV['PATH']}"
   install_homebrew if macos?
@@ -181,8 +181,8 @@ task :install => [:submodule_init, :submodules] do
     # run %{pip3 install tmuxp}
     # For NeoVim plugins
     if macos?
-      run %{ [[ ! -d #{ENV['HOME']}/.virtualenvs/default ]] && python3 -m venv ~/.virtualenvs/default }
-      run %{ source #{ENV['HOME']}/.virtualenvs/default/bin/activate }
+      run %{ [[ ! -d $HOME/.virtualenvs/default ]] && python3 -m venv ~/.virtualenvs/default}
+      run %{ source $HOME/.virtualenvs/default/bin/activate }
       run %{ pip install neovim }
       run %{ pip install pynvim }
     elsif linux? && linux['PLATFORM_FAMILY'] != "arch"
@@ -679,13 +679,13 @@ def install_bash
 
   puts
   puts "Creating directories for your customizations..."
-  if windows?
-    run %{ mkdir #{ENV['HOME']}/.bash.before }
-    run %{ mkdir #{ENV['HOME']}/.bash.after }
-  else
-    run %{ mkdir -p #{ENV['HOME']}/.bash.before }
-    run %{ mkdir -p #{ENV['HOME']}/.bash.after }
-  end
+  # if windows?
+    run %{ mkdir #{osFilePath(File.join(ENV['HOME'], '.bash.before'))} }
+    run %{ mkdir #{osFilePath(File.join(ENV['HOME'], '.bash.after'))} }
+  # else
+  #   run %{ mkdir -p #{ENV['HOME']}/.bash.before }
+  #   run %{ mkdir -p #{ENV['HOME']}/.bash.after }
+  # end
 
   if ! windows?
     if ! File.exist?("#{ENV['HOME']}/.bash-git-prompt")
