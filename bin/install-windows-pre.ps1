@@ -11,8 +11,8 @@ $myWindowsPrincipal=new-object System.Security.Principal.WindowsPrincipal($myWin
 # Get the security principal for the Administrator role
 $adminRole=[System.Security.Principal.WindowsBuiltInRole]::Administrator
 
-setx MSYS winsymlinks:nativestict
-setx CYGWIN winsymlinks:nativestrict
+env:MSYS = "winsymlinks:nativestict"
+env:CYGWIN = "winsymlinks:nativestrict"
 
 if ($myWindowsPrincipal.IsInRole($adminRole))
 {

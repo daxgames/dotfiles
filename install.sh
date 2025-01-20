@@ -27,6 +27,11 @@ if [ ! -d "$HOME/.yadr" ]; then
     if [[ "${OS}" =~ (MSYS) ]] || [[ "${OS}" =~ (MINGW) ]]; then
         PLATFORM=windows
         PLATFORM_FAMILY=windows
+ 
+        # MSYS use Windows native symlinks
+        MSYS=winsymlinks:nativestict
+        CYGWIN=winsymlinks:nativestrict
+        export MSYS CYGWIN
         export PLATFORM PLATFORM_FAMILY
         [ -z "${__YADR_DEBUG}" ] && env | grep PLATFORM | sort
     elif [ "${OS}" = "Linux" ] ; then
@@ -64,11 +69,6 @@ if [ ! -d "$HOME/.yadr" ]; then
 
             echo "Running '${__YADR_INSTALLER_WINDWS_PRE}'..."
             powershell -File "${__YADR_INSTALLER_WINDWS_PRE}"
-
-            # MSYS use Windows native symlinks
-            MSYS=winsymlinks:nativestict
-            CYGWIN=winsymlinks:nativestrict
-            export MSYS CYGWIN
         elif [ "${PLATFORM_FAMILY}" = "arch" ] ; then
             $(command -v sudo) pacman -Syu
             $(command -v sudo) pacman -S ruby-rake zip
