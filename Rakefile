@@ -270,13 +270,9 @@ task :install_vundle do
   puts '======================================================'
   puts ''
 
-  vundle_path = File.join('vim','bundle', 'vundle')
-  vundle_path = `cygpath -m "#{vundle_path}"`.strip if windows?
+  vundle_path = osFilePath(File.join(ENV['HOME'], '.yadr', 'vim','bundle', 'vundle'))
   unless File.exist?(vundle_path)
-    cd_filepath = File.join(ENV['HOME'], '.yadr')
-    cd_filepath = `cygpath -m "#{cd_filepath}"`.strip if windows?
     run %{
-      cd "#{cd_filepath}"
       git clone https://github.com/gmarik/vundle.git #{vundle_path}
     }
   end
@@ -293,15 +289,21 @@ task :install_vimplug do
   puts ''
 
   if windows?
-    vimplug_path = "C:/tools/neovim/nvim-win64/share/nvim/runtime/autoload/plug.vim"
+    vimplug_path = osFilePath(File.join(ENV["HOME"], "AppData", "Local", "nvim-data", "site", "autoload", "plug.vim"))
   else
-    vimplug_path = File.join(ENV['HOME'], '.local', 'share', 'nvim', 'site', 'autoload', 'plug.vim')
+    vimplug_path = osFilePath(File.join(ENV['HOME'], '.local', 'share', 'nvim', 'site', 'autoload', 'plug.vim'))
   end
 
   unless File.exist?(vimplug_path)
-    run %{
-      curl -fLo #{vimplug_path} --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-    }
+    if windows?
+      run %{
+        curl -fLo #{osFilePath(vimplug_path, '-m')} --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+      }
+    else
+      run %{
+        curl -fLo #{vimplug_path} --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+      }
+    end
   end
 
   if ENV['__YADR_UPDATE'] == 'y'
