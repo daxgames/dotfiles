@@ -8,13 +8,13 @@ if [[ -n "$(command -v fzf)" ]] ; then
   if [[ -n "$(command -v brew)" ]] ; then
     # Auto-completion
     # ---------------
-    if [[ -n "$(command -v brew)" ]] && [[ $- == *i* ]] ; then
+    if [[ -n "$(command -v brew)" ]] && [[ -f "${HOMEBREW_PREFIX}/opt/fzf/shell/completion.zsh" ]] && [[ $- == *i* ]] ; then
       source "${HOMEBREW_PREFIX}/opt/fzf/shell/completion.zsh" 2> /dev/null
     fi
 
     # Key bindings
     # ------------
-    if [[ -n "$(command -v brew)" ]] ; then
+    if [[ -n "$(command -v brew)" ]] && [[ -f "$(brew --prefix)/opt/fzf/shell/key-bindings.zsh" ]] ; then
       source "$(brew --prefix)/opt/fzf/shell/key-bindings.zsh"
     fi
   else
