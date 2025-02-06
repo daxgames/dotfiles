@@ -155,14 +155,14 @@ task :install => [:submodule_init, :submodules] do
     # run %{pip3 install tmuxp}
     # For NeoVim plugins
     if macos?
-      run %{[[ ! -d $HOME/.virtualenvs/default ]] && python3 -m venv ~/.virtualenvs/default}
-      run %{source $HOME/.virtualenvs/default/bin/activate}
-      run %{pip install neovim}
-      run %{pip install pynvim}
+      run %{ [[ ! -d $HOME/.virtualenvs/default ]] && python3 -m venv ~/.virtualenvs/default}
+      run %{ source $HOME/.virtualenvs/default/bin/activate }
+      run %{ pip install neovim }
+      run %{ pip install pynvim }
     elsif linux['PLATFORM_FAMILY'] != "arch"
-      run %{pip3 install --user neovim}
-      run %{pip3 install --user pynvim}
-      run %{gem install neovim --user-install}
+      run %{ pip3 install --user neovim }
+      run %{ pip3 install --user pynvim }
+      run %{ gem install neovim --user-install }
     end
 
     if File.exist?(File.join(ENV['HOME'], '.vimrc.before'))
