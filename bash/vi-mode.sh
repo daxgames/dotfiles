@@ -1,1 +1,0 @@
-../zsh/vi-mode.zsh

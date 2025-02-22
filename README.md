@@ -7,12 +7,11 @@
      _____| / ___ ( (_| | |        @daxgames's Version
     (_______\_____|\____|_|
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[![Build Status](https://travis-ci.org/daxgames/dotfiles.svg?branch=main)](https://travis-ci.org/daxgames/dotfiles)&nbsp;![PRs Welcome][prs-badge]&nbsp;![macos supported][apple-logo]&nbsp;![linux supported][linux-logo]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;![PRs Welcome][prs-badge]&nbsp;![macos supported][apple-logo]&nbsp;![linux supported][linux-logo]
 
 ```bash
 sh -c "`curl -fsSL https://raw.githubusercontent.com/daxgames/dotfiles/main/install.sh`"
 ```
-
 ---
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
@@ -150,7 +149,7 @@ Head to [test/README.md](./test/README.md) for more details.
 
 ## Screenshot
 
-Here's how my zsh prompt looks like on iTerm with tmux:
+Here's how the zsh prompt looks on iTerm with tmux:
 
 ![](./doc/screenshot-iterm-onehalfdark.png)
 

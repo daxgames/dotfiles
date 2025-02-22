@@ -1,10 +1,13 @@
-#!/bin/sh
+#!/usr/bin/env bash
+
+__YADR_SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
+export __YADR_SCRIPT_DIR
 
 if [ ! -d "$HOME/.yadr" ]; then
     echo "Installing daxgames's YADR for the first time"
 
-    git_repo=$(echo ${__YADR_REPO_URL:-https://github.com/daxgames/dotfiles.git})
-    git_branch=$(echo ${__YADR_REPO_BRANCH:-main})
+    git_repo="${__YADR_REPO_URL:-https://github.com/daxgames/dotfiles.git}"
+    git_branch="${__YADR_REPO_BRANCH:-main}"
 
     if [ -n "${__YADR_DEBUG}" ] ; then
       git_repo=$(git ls-remote --get-url 2>/dev/null)
@@ -15,19 +18,23 @@ if [ ! -d "$HOME/.yadr" ]; then
     echo "git_repo: ${git_repo}"
     echo "git_branch: ${git_branch}"
 
-    echo git clone -b ${git_branch} --depth=1 ${git_repo} "$HOME/.yadr"
-    git clone -b ${git_branch} --depth=1 ${git_repo} "$HOME/.yadr"
-    cd "$HOME/.yadr"
+    echo git clone -b "${git_branch}" --depth=1 "${git_repo}" "$HOME/.yadr"
+    git clone -b "${git_branch}" --depth=1 "${git_repo}" "$HOME/.yadr"
+    cd "$HOME/.yadr" || exit 1
     [ "$1" = "ask" ] && export ASK="true"
 
     OS=$(uname)
-    if [ "${OS}" = "Linux" ] ; then
+    if [[ "${OS}" =~ (MSYS) ]] || [[ "${OS}" =~ (MINGW) ]]; then
+        PLATFORM=windows
+        PLATFORM_FAMILY=windows
+        export PLATFORM PLATFORM_FAMILY
+        [ -z "${__YADR_DEBUG}" ] && env | grep PLATFORM | sort
+    elif [ "${OS}" = "Linux" ] ; then
         if [ -f /etc/os-release ] ; then
             echo "Determining Linux OS using '/etc/os-release'..."
-            PLATFORM=$(cat /etc/os-release | grep -i ^id= | cut -d = -f2 | sed 's/"//g')
-            PLATFORM_FAMILY=$(cat /etc/os-release | grep -i ^id_like= | cut -d = -f2 | sed 's/"//g')
-            PLATFORM_VERSION=$(cat /etc/os-release | grep -i ^version_id= | cut -d = -f2 | sed 's/"//g')
-            echo "PLATFORM: '${PLATFORM}'"
+            PLATFORM=$(grep -i ^id= /etc/os-release | cut -d = -f2 | sed 's/"//g')
+            PLATFORM_FAMILY=$(grep -i ^id_like= /etc/os-release | cut -d = -f2 | sed 's/"//g')
+            PLATFORM_VERSION=$(grep -i ^version_id= /etc/os-release | cut -d = -f2 | sed 's/"//g')
 
             [ "${PLATFORM}" = "centos" ] && PLATFORM_FAMILY=rhel
             [ "${PLATFORM}" = "fedora" ] && PLATFORM_FAMILY=rhel
@@ -40,28 +47,73 @@ if [ ! -d "$HOME/.yadr" ]; then
         export PLATFORM PLATFORM_FAMILY PLATFORM_VERSION
         [ -z "${__YADR_DEBUG}" ] && env | grep PLATFORM | sort
 
-        if [ -z "$(command -v rake)" ] ; then
-            echo "Installing 'rake' in '${PLATFORM_FAMILY}'..."
-            if [ "${PLATFORM_FAMILY}" = "debian" ]; then
-                `which sudo 2>/dev/null` apt install -y rake
-            elif [ "${PLATFORM_FAMILY}" = "rhel" ] ; then
-                [ "${PLATFORM_VERSION}" -lt 8 ] && `which sudo 2>/dev/null` yum install -y rubygem-rake
-                [ "${PLATFORM_VERSION}" -gt 7 ] && `which sudo 2>/dev/null` dnf install -y rubygem-rake
-            fi
-        fi
-    elif [ "${PLATFORM}" = "Darwin" ] ; then
-        PLATFORM_FAMILY=$(echo ${PLATFORM} | tr [A-Z] [a-z])
+    elif [ "${OS}" = "Darwin" ] ; then
+        PLATFORM_FAMILY="$(echo "${PLATFORM}" | tr  '[:upper:]' '[:lower:]')"
     fi
 
-    # Enable persistent undo
-    mkdir -p $HOME/.vim/backups > /dev/null 2>&1
-    mkdir -p $HOME/.share/nvim/backups > /dev/null 2>&1
+    if [ -z "$(command -v rake)" ] ; then
+        echo "Installing YADR Pre-Reqs in '${PLATFORM_FAMILY}'..."
+        if [ "${PLATFORM_FAMILY}" = "windows" ] ; then
+            if [ ! -f "${__YADR_SCRIPT_DIR}/bin/install-windows-pre.ps1" ]; then
+                echo "ERROR: '${__YADR_SCRIPT_DIR}/bin/install-windows-pre.ps1' not found!"
+                curl -o "${TEMP}/install-windows-pre.ps1" https://raw.githubusercontent.com/daxgames/dotfiles/main/bin/install-windows-pre.ps1
+                __YADR_INSTALLER_WINDWS_PRE="${TEMP}/install-windows-pre.ps1"
+            else
+                __YADR_INSTALLER_WINDWS_PRE="${__YADR_SCRIPT_DIR}/bin/install-windows-pre.ps1"
+            fi
 
+            echo "Running '${__YADR_INSTALLER_WINDWS_PRE}'..."
+            powershell -File "${__YADR_INSTALLER_WINDWS_PRE}"
+
+            # MSYS use Windows native symlinks
+            MSYS=winsymlinks:nativestict
+            CYGWIN=winsymlinks:nativestrict
+            export MSYS CYGWIN
+        elif [ "${PLATFORM_FAMILY}" = "arch" ] ; then
+            $(command -v sudo) pacman -Syu
+            $(command -v sudo) pacman -S ruby-rake zip
+        elif [ "${PLATFORM_FAMILY}" = "debian" ]; then
+            $(command -v sudo) apt-get update -y
+            $(command -v sudo) apt-get install -y rake ruby-dev zip
+        elif [ "${PLATFORM_FAMILY}" = "rhel" ] ; then
+            [ "${PLATFORM_VERSION}" -lt 8 ] && PACKAGE_MANAGER=yum
+            [ "${PLATFORM_VERSION}" -gt 7 ] && PACKAGE_MANAGER=dnf
+            $(command -v sudo) "${PACKAGE_MANAGER}" update -y
+            $(command -v sudo) "${PACKAGE_MANAGER}" groups install -y "Development Tools"
+            $(command -v sudo) "${PACKAGE_MANAGER}" install -y rubygem-rake zip
+        fi
+    fi
+
+    # Enable vim/nvim persistent undo
+    if [[ -d "$HOME/.vim" ]]; then
+        mkdir -p "$HOME/.vim/backups" > /dev/null 2>&1
+    fi
+
+    if [[ -d "$HOME/.config/nvim" ]]; then
+        mkdir -p "$HOME/.config/nvim/backups" > /dev/null 2>&1
+    fi
+
+    if [ "${OS}" = "Linux" ] ; then
+        if [ -z "$(command -v nvm)" ] && [ -z "$(command -v npm)" ] ; then
+            echo "Installing 'Node Version Manager and Node'..."
+            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+            NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
+            export NVM_DIR
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
+        fi
+    fi
+
+    # until rake is in the path loop and wait
+    until [ -n "$(command -v rake)" ] ; do
+        echo "Waiting '5' seconds for rake to be in the path..."
+        sleep 5
+    done
     rake install
 else
     echo "YADR is already installed"
-    pushd $HOME/.yadr >>/dev/null 2>&1
+    current_dir=$(pwd)
+    cd "$HOME/.yadr" >>/dev/null 2>&1 || exit 1
     git pull --rebase
     rake update
-    popd >>/dev/null 2>&1
+    cd "$current_dir" >>/dev/null 2>&1 || exit 1
 fi

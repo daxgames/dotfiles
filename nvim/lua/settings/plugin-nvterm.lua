@@ -6,16 +6,16 @@ nvterm.setup({
     list = {},
     type_opts = {
       float = {
-        relative = 'editor',
+        relative = "editor",
         row = 0.3,
         col = 0.25,
         width = 0.5,
         height = 0.4,
         border = "single",
       },
-      horizontal = { location = "rightbelow", split_ratio = .3, },
-      vertical = { location = "rightbelow", split_ratio = .5 },
-    }
+      horizontal = { location = "rightbelow", split_ratio = 0.3 },
+      vertical = { location = "rightbelow", split_ratio = 0.5 },
+    },
   },
   behavior = {
     autoclose_on_quit = {
@@ -25,14 +25,26 @@ nvterm.setup({
     close_on_exit = true,
     auto_insert = true,
   },
-});
+})
 
 local terminal = require("nvterm.terminal")
 
-local toggle_modes = {'n', 't'}
+local toggle_modes = { "n", "t" }
 local mappings = {
-  { toggle_modes, '<leader>h', function () terminal.toggle('horizontal') end },
-  { toggle_modes, '<leader>v', function () terminal.toggle('vertical') end },
+  {
+    toggle_modes,
+    "<leader>h",
+    function()
+      terminal.toggle("horizontal")
+    end,
+  },
+  {
+    toggle_modes,
+    "<leader>v",
+    function()
+      terminal.toggle("vertical")
+    end,
+  },
 }
 local opts = { noremap = true, silent = true }
 for _, mapping in ipairs(mappings) do

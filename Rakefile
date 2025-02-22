@@ -4,9 +4,6 @@ require 'fileutils'
 require File.join(File.dirname(__FILE__), 'bin', 'yadr', 'vundle')
 require File.join(File.dirname(__FILE__), 'bin', 'yadr', 'vimplug')
 
-$is_macos = RUBY_PLATFORM.downcase.include?('darwin')
-$is_linux = RUBY_PLATFORM.downcase.include?('linux')
-
 desc 'Hook our dotfiles into system-standard positions.'
 task :install => [:submodule_init, :submodules] do
   puts
@@ -15,32 +12,85 @@ task :install => [:submodule_init, :submodules] do
   puts '======================================================'
   puts
 
-  if ! File.exist?("#{ENV['HOME']}/bin")
-    run %{ mkdir -p $HOME/bin }
-  end
+  linux = linux_variant if linux?
+
+  run %( mkdir -p $HOME/bin ) unless File.exist?("#{ENV['HOME']}/bin")
 
   ENV['PATH'] = "#{File.join(ENV['HOME'], 'bin')}:#{ENV['PATH']}"
-  install_homebrew if $is_macos
+  install_homebrew if macos?
 
-  if $is_linux
-    if linux_variant[:distro] == 'Ubuntu' || linux_variant[:distro] == 'Debian'
-      # Running on Debian/Ubuntu
-      run %{sudo apt update -y}
-      run %{sudo apt install -y build-essential python3-pip ruby-dev}
-    elsif linux_variant[:family] == 'Redhat'
-      run %{yum update -y}
-      run %{yum groups install "Development Tools"}
+  if linux?
+    run %( which brew )
+    install_homebrew if $?.success?
+
+    case linux['PLATFORM_FAMILY']
+    when 'arch'
+      run %(sudo pacman -S --noconfirm bat \
+        fzf \
+        git \
+        github-cli \
+        neovim \
+        python3 \
+        python-neovim \
+        ripgrep \
+        rubocop \
+        rustup \
+        shellcheck \
+        vim
+      )
+      run %{[[ -n "$(command -v rustup)" ]] && rustup default stable}
+    when 'debian'
+      run %(sudo apt-get update -y)
+      run %(sudo apt-get install -y bat \
+        build-essential \
+        cargo \
+        fzf \
+        gh \
+        git\
+        gradle \
+        openjdk-17-jdk \
+        nvim \
+        python3-pip \
+        rubocop \
+        ruby-dev \
+        shellcheck
+      )
+      run %(sudo ln -sf /bin/batcat /bin/bat)
+    when 'rhel'
+      run %{ sudo #{linux['PACKAGE_MANAGER']} update -y}
+      run %{ sudo #{linux['PACKAGE_MANAGER']} groups install -y "Development Tools"}
+      run %{ sudo #{linux['PACKAGE_MANAGER']} install -y bat \
+        fzf \
+        gh \
+        neovim \
+        ripgrep \
+        vim-enhanced \
+        ruby-devel \
+        rustup \
+        shellcheck
+      }
+      run %{[[ -n "$(command -v rustup-init)" ]] && rustup-init -y}
     end
+
     install_zsh if want_to_install?('zsh (shell, enhancements))')
-    install_from_github('bat', 'https://github.com/sharkdp/bat/releases/download/v0.24.0/bat-v0.24.0-i686-unknown-linux-musl.tar.gz')
-    install_from_github('nvim', 'https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz')
-    install_from_github('rg', 'https://github.com/BurntSushi/ripgrep/releases/download/14.1.0/ripgrep-14.1.0-x86_64-unknown-linux-musl.tar.gz')
-    install_from_github('delta', 'https://github.com/dandavison/delta/releases/download/0.15.0/delta-0.15.0-x86_64-unknown-linux-musl.tar.gz')
+
+    install_from_github('bat',
+                        'https://github.com/sharkdp/bat/releases/download/v0.24.0/bat-v0.24.0-i686-unknown-linux-musl.tar.gz')
+    install_from_github('fzf',
+                        'https://github.com/junegunn/fzf/releases/download/v0.54.1/fzf-0.54.1-linux_amd64.tar.gz',
+                        false)
+    install_from_github('nvim',
+                        'https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz')
+    install_from_github('rg',
+                        'https://github.com/BurntSushi/ripgrep/releases/download/14.1.0/ripgrep-14.1.0-x86_64-unknown-linux-musl.tar.gz')
+    install_from_github('delta',
+                        'https://github.com/dandavison/delta/releases/download/0.15.0/delta-0.15.0-x86_64-unknown-linux-musl.tar.gz')
   end
 
   install_python_modules
 
   install_rvm_binstubs
+
   # this has all the runcoms from this directory.
   install_files(Dir.glob('git/*')) if want_to_install?('git configs (color, aliases)')
   install_files(Dir.glob('irb/*')) if want_to_install?('irb pry configs (more colorful)')
@@ -49,7 +99,7 @@ task :install => [:submodule_init, :submodules] do
 
   if want_to_install?('tmux config')
     install_files(Dir.glob('tmux/*'))
-    if ! File::exist?("#{File.join(ENV['HOME'], '.tmux', 'plugins', 'tpm')}")
+    if !File.exist?(File.join(ENV['HOME'], '.tmux', 'plugins', 'tpm').to_s)
       run %{ git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm }
     else
       run %{
@@ -62,18 +112,58 @@ task :install => [:submodule_init, :submodules] do
   install_files(Dir.glob('tmux/*')) if want_to_install?('tmux config')
   install_files(Dir.glob('vimify/*')) if want_to_install?('vimification of command line tools')
 
-  Rake::Task["install_prezto"].execute
+  Rake::Task['install_prezto'].execute
 
   install_bash if want_to_install?('bash configs (color, aliases)')
 
   if want_to_install?('vim configuration (highly recommended)')
+    run %{ ln -nfs "$HOME/.yadr/nvim" "$HOME/.config/nvim" }
+
+    if macos? || (linux? && linux['PLATFORM_FAMILY'] != 'debian')
+      run %{which sdk}
+      unless $?.success?
+        run %{curl -s "https://get.sdkman.io" | bash}
+      end
+
+      run %{which gradle}
+      unless $?.success?
+        run %{source "${HOME}/.yadr/zsh/sdkman.zsh" ; sdk install gradle}
+      end
+
+      run %{which java}
+      unless $?.success?
+        run %{source "${HOME}/.yadr/zsh/sdkman.zsh" ; sdk install java 17.0.11-amzn}
+      end
+    end
+
+    run %{which node}
+    unless $?.success?
+      run %{which nvm}
+      unless $?.success?
+        run %{curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash}
+      end
+    end
+
+    if File.exist?(File.join('/opt/nvim-linux64/bin/nvim')) && linux?
+      run %{ ln -nsf '/opt/nvim-linux64/bin/nvim' '$HOME/bin/nvim' }
+    end
+
     install_files(Dir.glob('{vim,vimrc}'))
-    Rake::Task["install_vundle"].execute
+
+    Rake::Task['install_vundle'].execute
 
     # run %{pip3 install tmuxp}
-    run %{pip3 install --user neovim} # For NeoVim plugins
-    run %{pip3 install --user pynvim} # For NeoVim plugins
-    run %{gem install neovim --user-install} # For NeoVim plugins
+    # For NeoVim plugins
+    if macos?
+      run %{ [[ ! -d $HOME/.virtualenvs/default ]] && python3 -m venv ~/.virtualenvs/default}
+      run %{ source $HOME/.virtualenvs/default/bin/activate }
+      run %{ pip install neovim }
+      run %{ pip install pynvim }
+    elsif linux['PLATFORM_FAMILY'] != "arch"
+      run %{ pip3 install --user neovim }
+      run %{ pip3 install --user pynvim }
+      run %{ gem install neovim --user-install }
+    end
 
     if File.exist?(File.join(ENV['HOME'], '.vimrc.before'))
       run %{ ln -sf "$HOME/.vimrc.before" "$HOME/.config/nvim/settings/before/000-userconfig-vimrc.before.vim" }
@@ -83,23 +173,16 @@ task :install => [:submodule_init, :submodules] do
       run %{ ln -sf "$HOME/.vimrc.after" "$HOME/.config/nvim/settings/after/zzz-userconfig-vimrc.after.vim" }
     end
 
-    if File.exist?(File.join('/opt/nvim-linux64/bin/nvim')) && $is_linux
-      run %{ mkdir -p "$HOME/bin" }
-      run %{ ln -sf "/opt/nvim-linux64/bin/nvim" "$HOME/bin/nvim" }
-    end
+    Rake::Task["install_vimplug"].execute
   end
-
-  run %{ ln -nfs "$HOME/.yadr/nvim" "$HOME/.config/nvim" }
-  Rake::Task["install_vimplug"].execute
 
   run %{ mkdir -p ~/.config/ranger }
   run %{ ln -nfs ~/.yadr/ranger ~/.config/ranger }
-
   run %{ touch ~/.hushlogin }
 
   install_fonts
 
-  if $is_macos
+  if macos?
     install_term_theme
     run %{ ~/.yadr/iTerm2/bootstrap-iterm2.sh }
   end
@@ -147,14 +230,13 @@ task :submodules do
   end
 end
 
-desc "Runs Vundle installer in a clean vim environment"
+desc 'Runs Vundle installer in a clean vim environment'
 task :install_vundle do
-  puts "======================================================"
-  puts "Installing and updating vundles."
-  puts "The installer will now proceed to run PluginInstall to install vundles."
-  puts "======================================================"
-
-  puts ""
+  puts '======================================================'
+  puts 'Installing and updating vundles.'
+  puts 'The installer will now proceed to run PluginInstall to install vundles.'
+  puts '======================================================'
+  puts ''
 
   vundle_path = File.join('vim','bundle', 'vundle')
   unless File.exist?(vundle_path)
@@ -164,17 +246,16 @@ task :install_vundle do
     }
   end
 
-  Vundle::update_vundle
+  Vundle.update_vundle
 end
 
-desc "Runs Plug installer in a clean vim environment"
+desc 'Runs Plug installer in a clean vim environment'
 task :install_vimplug do
-  puts "======================================================"
-  puts "Installing and updating Neovim plugins."
-  puts "The installer will now proceed to run PluginInstall to install plugs."
-  puts "======================================================"
-
-  puts ""
+  puts '======================================================'
+  puts 'Installing and updating Neovim plugins.'
+  puts 'The installer will now proceed to run PluginInstall to install plugs.'
+  puts '======================================================'
+  puts ''
 
   vimplug_path = File.join(ENV['HOME'], '.local', 'share', 'nvim', 'site', 'autoload', 'plug.vim')
   unless File.exist?(vimplug_path)
@@ -183,16 +264,25 @@ task :install_vimplug do
     }
   end
 
-  if "#{ENV['__YADR_UPDATE']}" == "y"
-    VimPlug::update_plugins
+  if ENV['__YADR_UPDATE'] == 'y'
+    VimPlug.update_plugins
   else
-    VimPlug::install_plugins
+    VimPlug.install_plugins
   end
 end
 
 task :default => 'install'
 
 private
+
+def linux?
+  RUBY_PLATFORM.downcase.include?('linux')
+end
+
+def macos?
+  RUBY_PLATFORM.downcase.include?('darwin')
+end
+
 def run(cmd)
   puts "[Running] #{cmd}"
   if RUBY_PLATFORM.downcase.include?("cygwin")
@@ -215,7 +305,7 @@ def save_config
 end
 
 def number_of_cores
-  if $is_macos
+  if macos?
     cores = run %{ sysctl -n hw.ncpu }
   else
     cores = run %{ nproc }
@@ -226,44 +316,85 @@ end
 
 
 def linux_variant
-  r = { :distro => nil, :family => nil }
+  linux = {
+    :PLATFORM => nil,
+    :PLATFORM_FAMILY => nil,
+    :PLATFORM_VERSION => nil,
+    :PACKAGE_MANGER => nil
+  }
 
-  if File.exist?('/etc/lsb-release')
-    File.open('/etc/lsb-release', 'r').read.each_line do |line|
-      r = { :distro => $1 } if line =~ /^DISTRIB_ID=(.*)/
+  if File.exist?('/etc/os-release')
+    puts 'Determining Linux OS using /etc/os-release...'
+    File.open('/etc/os-release', 'r').read.each_line do |line|
+      puts "-" + line
+      key = line.strip.gsub('"', '').split('=')[0].to_s
+      value = line.strip.gsub('"', '').split('=')[1].to_s
+      puts "key: #{key}"
+      puts "value: #{value}"
+      case key.downcase
+      	when 'id'
+      	  linux['PLATFORM'] = value
+      	when 'id_like'
+      	  linux['PLATFORM_FAMILY'] = value
+      	when 'version_id'
+      	  linux['PLATFORM_VERSION'] = value
+      end
     end
+
+    case linux['PLATFORM']
+    when 'centos', 'fedora'
+      linux['PLATFORM_FAMILY'] = 'rhel'
+    when /debian/
+      linux['PLATFORM_FAMILY'] = 'debian'
+    end
+
+    case linux['PLATFORM_FAMILY']
+    when /debian/, /ubuntu/
+      linux['PLATFORM_FAMILY'] = 'debian'
+    end
+
+  elsif File.exist?('/etc/redhat-release')
+    linux['PLATFORM'] = 'redhat'
+    linux['PLATFORM_FAMILY'] = 'rhel'
   end
 
-  if File.exist?('/etc/debian_version')
-    r[:distro] = 'Debian' if r[:distro].nil?
-    r[:family] = 'Debian' if r[:variant].nil?
-  elsif File.exist?('/etc/redhat-release') or File.exist?('/etc/centos-release')
-    r[:family] = 'RedHat' if r[:family].nil?
-    r[:distro] = 'CentOS' if File.exist?('/etc/centos-release')
-  elsif File.exist?('/etc/SuSE-release')
-    r[:distro] = 'SLES' if r[:distro].nil?
+  case linux['PLATFORM_FAMILY']
+  when 'arch'
+    linux['PACKAGE_MANAGER'] = 'pacman'
+  when 'debian'
+    linux['PACKAGE_MANAGER'] = 'apt-get'
+  when 'rhel'
+    linux['PACKAGE_MANAGER'] = if linux['PLATFORM_VERSION'].to_i < 8
+                                 'yum'
+                               else
+                                 'dnf'
+                               end
   end
 
-  return r
+  linux.each do |key, value|
+    puts "#{key}: #{value}"
+  end
+
+  return linux
 end
 
 def run_bundle_config
-  return unless system("which bundle")
+  return unless system('which bundle')
 
   bundler_jobs = number_of_cores - 1
-  puts "======================================================"
-  puts "Configuring Bundlers for parallel gem installation"
-  puts "======================================================"
+  puts '======================================================'
+  puts 'Configuring Bundlers for parallel gem installation'
+  puts '======================================================'
   run %{ bundle config --global jobs #{bundler_jobs} }
   puts
 end
 
 def install_rvm_binstubs
-  puts "======================================================"
-  puts "Installing RVM Bundler support. Never have to type"
-  puts "bundle exec again! Please use bundle --binstubs and RVM"
-  puts "will automatically use those bins after cd'ing into dir."
-  puts "======================================================"
+  puts '======================================================'
+  puts 'Installing RVM Bundler support. Never have to type'
+  puts 'bundle exec again! Please use bundle --binstubs and RVM'
+  puts 'will automatically use those bins after changing into dir.'
+  puts '======================================================'
   run %{ chmod +x $rvm_path/hooks/after_cd_bundler }
   puts
 end
@@ -272,23 +403,18 @@ def install_zsh
   run %{which zsh}
   unless $?.success?
     puts "======================================================"
-    puts "Installing Zsh...If it's already"
-    puts "installed, this will do nothing."
+    puts "Installing Zsh...If it's already installed, this will do nothing."
     puts "======================================================"
 
-    if ENV['PLATFORM_FAMILY'] == 'debian'
-      run %{ sudo apt install -y zsh }
-    elsif ENV['PLATFORM_FAMILY'] == 'rhel'
-      if ENV['PLATFORM_VERSION'].to_i < 8
-        run %{ sudo yum install -y zsh }
-      else
-        run %{ sudo dnf install -y zsh }
-      end
+    if linux["PLATFORM_FAMILY"] == "arch"
+        run %{sudo pacman -S --noconfirm zsh}
+    else
+      run %{ sudo #{linux['PACKAGE_MANAGER']} install -y zsh }
     end
   end
 end
 
-def install_from_github(app_name, download_url)
+def install_from_github(app_name, download_url, strip = true)
   run %{which #{app_name}}
   unless $?.success?
     download_path = File.join('/tmp',"#{app_name}.tar.gz")
@@ -301,13 +427,22 @@ def install_from_github(app_name, download_url)
     run %{ curl -Lo #{download_path} #{download_url} }
     run %{ rm -rf #{install_path} }
     run %{ mkdir -p #{install_path} }
-    run %{ tar -C #{install_path} --strip-components=1 -xzf #{download_path} }
+    if strip
+      run %{ tar -C #{install_path} --strip-components=1 -xzf #{download_path} }
+    else
+      run %{ tar -C #{install_path} -xzf #{download_path} }
+    end
     run %{ rm -f #{download_path} }
     run %{ ln -sf $(find #{install_path} -type f -name '#{app_name}') #{link_path} }
   end
 end
 
 def install_python_modules
+  if macos?
+    run %{ [[ ! -d $HOME/.virtualenvs/default ]] && python3 -m venv ~/.virtualenvs/default }
+    run %{ source $HOME/.virtualenvs/default/bin/activate }
+  end
+
   run %{which pip}
   unless $?.success?
     puts "======================================================"
@@ -315,7 +450,7 @@ def install_python_modules
     puts "installed, this will do nothing."
     puts "======================================================"
     if ENV['PLATFORM_FAMILY'] == 'debian'
-      run %{ sudo apt install -y pip }
+      run %{ sudo apt-get install -y pip }
     elsif ENV['PLATFORM_FAMILY'] == 'rhel'
       if ENV['PLATFORM_VERSION'].to_i < 8
         run %{ sudo yum install -y python3-pip }
@@ -340,7 +475,7 @@ def install_homebrew
     puts "already installed, this will do nothing."
     puts "======================================================"
 
-    if $is_macos
+    if macos?
       run %{bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"}
     else
       puts "Running Homebrew 'install.sh' on Linux..."
@@ -372,7 +507,7 @@ def install_homebrew
   puts "======================================================"
   puts "Updating Homebrew."
   puts "======================================================"
-  run %{brew update}
+  run %{brew update --verbose}
   puts
   puts
   puts "======================================================"
@@ -392,19 +527,23 @@ def install_fonts
   puts "======================================================"
   puts "Installing patched fonts for Powerline/Lightline."
   puts "======================================================"
-  run %{ cp -f $HOME/.yadr/fonts/* $HOME/Library/Fonts } if $is_macos
-  run %{ mkdir -p ~/.fonts && cp ~/.yadr/fonts/* ~/.fonts && fc-cache -vf ~/.fonts } if $is_linux
+  run %{ cp -f $HOME/.yadr/fonts/* $HOME/Library/Fonts } if macos?
+  run %{ mkdir -p ~/.fonts && cp ~/.yadr/fonts/* ~/.fonts && fc-cache -vf ~/.fonts } if linux?
   puts
 end
 
 def install_term_theme
   puts "======================================================"
-  puts "Installing iTerm2 solarized theme."
+  puts "Installing iTerm2 Color Themes."
   puts "======================================================"
   run %{ /usr/libexec/PlistBuddy -c "Add :'Custom Color Presets':'Solarized Light' dict" ~/Library/Preferences/com.googlecode.iterm2.plist }
   run %{ /usr/libexec/PlistBuddy -c "Merge 'iTerm2/Solarized Light.itermcolors' :'Custom Color Presets':'Solarized Light'" ~/Library/Preferences/com.googlecode.iterm2.plist }
   run %{ /usr/libexec/PlistBuddy -c "Add :'Custom Color Presets':'Solarized Dark' dict" ~/Library/Preferences/com.googlecode.iterm2.plist }
   run %{ /usr/libexec/PlistBuddy -c "Merge 'iTerm2/Solarized Dark.itermcolors' :'Custom Color Presets':'Solarized Dark'" ~/Library/Preferences/com.googlecode.iterm2.plist }
+  run %{ /usr/libexec/PlistBuddy -c "Add :'Custom Color Presets':'OneHalfLight' dict" ~/Library/Preferences/com.googlecode.iterm2.plist }
+  run %{ /usr/libexec/PlistBuddy -c "Merge 'iTerm2/OneHalfLight.itermcolors' :'Custom Color Presets':'OneHalfLight'" ~/Library/Preferences/com.googlecode.iterm2.plist }
+  run %{ /usr/libexec/PlistBuddy -c "Add :'Custom Color Presets':'OneHalfDark' dict" ~/Library/Preferences/com.googlecode.iterm2.plist }
+  run %{ /usr/libexec/PlistBuddy -c "Merge 'iTerm2/OneHalfDark.itermcolors' :'Custom Color Presets':'OneHalfDark'" ~/Library/Preferences/com.googlecode.iterm2.plist }
 
   # If iTerm2 is not installed or has never run, we can't autoinstall the profile since the plist is not there
   if !File.exist?(File.join(ENV['HOME'], '/Library/Preferences/com.googlecode.iterm2.plist'))
@@ -426,7 +565,7 @@ def install_term_theme
 
   # Ask the user on which profile he wants to install the theme
   profiles = iTerm_profile_list
-  message = "I've found #{profiles.size} #{profiles.size>1 ? 'profiles': 'profile'} on your iTerm2 configuration, which one would you like to apply the Solarized theme to?"
+  message = "I've found #{profiles.size} #{profiles.size>1 ? 'profiles': 'profile'} on your iTerm2 configuration, which one would you like to apply your color scheme theme to?"
   profiles << 'All'
   selected = ask message, profiles
 
@@ -477,7 +616,7 @@ def install_bash
   if ! File.exist?("#{ENV['HOME']}/.bash-git-prompt")
     puts
     puts "Configuring Git aware prompt..."
-    run %{ git clone "https://github.com/daxgames/bash-git-prompt.git" "#{ENV['HOME']}/.bash-git-prompt" }
+    run %{ git clone "https://github.com/magicmonty/bash-git-prompt.git" "#{ENV['HOME']}/.bash-git-prompt" }
   end
 
   # Preserve pre-existing ~/.bashrc
@@ -508,20 +647,20 @@ def install_prezto
     install_files(Dir.glob('zsh/prezto/runcoms/zprofile'), :symlink)
     install_files(Dir.glob('zsh/prezto/runcoms/zshenv'), :symlink)
 
-  puts
-  puts "Overriding prezto ~/.zpreztorc with YADR's zpreztorc to enable additional modules..."
-  run %{ ln -nfs "$HOME/.yadr/zsh/prezto-override/zpreztorc" "${ZDOTDIR:-$HOME}/.zpreztorc" }
-  # run %{ ln -s ~/.zprezto/modules/prompt/external/powerlevel9k/powerlevel9k.zsh-theme ~/.zprezto/modules/prompt/functions/prompt_powerlevel9k_setup }
-  puts "Overriding prezto ~/.zshrc with YADR's zshrc to enable future customization..."
-  install_files(Dir.glob('zsh/prezto-override/zshrc'), :symlink)
-  puts "Overriding prezto ~/.zpreztorc with YADR's .zpreztorc to enable future customization..."
-  install_files(Dir.glob('zsh/prezto-override/zpreztorc'), :symlink)
+    puts
+    puts "Overriding prezto ~/.zpreztorc with YADR's zpreztorc to enable additional modules..."
+    run %{ ln -nfs "$HOME/.yadr/zsh/prezto-override/zpreztorc" "${ZDOTDIR:-$HOME}/.zpreztorc" }
+    # run %{ ln -s ~/.zprezto/modules/prompt/external/powerlevel9k/powerlevel9k.zsh-theme ~/.zprezto/modules/prompt/functions/prompt_powerlevel9k_setup }
+    puts "Overriding prezto ~/.zshrc with YADR's zshrc to enable future customization..."
+    install_files(Dir.glob('zsh/prezto-override/zshrc'), :symlink)
+    puts "Overriding prezto ~/.zpreztorc with YADR's .zpreztorc to enable future customization..."
+    install_files(Dir.glob('zsh/prezto-override/zpreztorc'), :symlink)
 
-  puts
-  puts "Creating directories for your customizations"
-  run %{ mkdir -p $HOME/.zsh.before }
-  run %{ mkdir -p $HOME/.zsh.after }
-  run %{ mkdir -p $HOME/.zsh.prompts }
+    puts
+    puts "Creating directories for your customizations"
+    run %{ mkdir -p $HOME/.zsh.before }
+    run %{ mkdir -p $HOME/.zsh.after }
+    run %{ mkdir -p $HOME/.zsh.prompts }
 
     if want_to_install?('zsh_default_shell (make zsh the default shell))')
       if "#{ENV['SHELL']}".include? 'zsh' then
@@ -573,7 +712,7 @@ end
 def install_files(files, method = :symlink)
   files.each do |f|
     file = f.split('/').last
-    source = "#{ENV["PWD"]}/#{f}"
+    source = "#{ENV["HOME"]}/.yadr/#{f}"
     target = "#{ENV["HOME"]}/.#{file}"
 
     if RUBY_PLATFORM.downcase.include?("cygwin")
