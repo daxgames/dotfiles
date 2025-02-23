@@ -72,6 +72,9 @@ alias ve='vim ~/.vimrc'
 alias ze='vim ~/.zshrc'
 
 # Git Aliases
+alias gcfg='git config'
+alias gcfgg='git config --global'
+alias gcfgu='git config -f ~/.gitconfig.user'
 alias gs='git status'
 alias gstsh='git stash'
 alias gst='git stash'

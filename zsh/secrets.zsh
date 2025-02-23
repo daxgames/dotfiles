@@ -1,7 +1,7 @@
-if [[ $(uname) == Linux ]]; then
+if [[ $(uname) == Linux ]] && [[ -n "$(command -v gnome-keyring-daemon)" ]]; then
     function unlock-keyring () {
-        stty -echo
         printf "Linux Keyring Password: "
+        stty -echo
         read pass
         stty echo
         printf "\n"
