@@ -98,6 +98,22 @@ if [[ -n "$(command -v kubectl)" ]] ; then
     export POD=`kubectl get pods | grep "$1" | awk '{ print $1}'`; kubectl logs $POD $2 -f
   }
 
+  # kubectl cordon pod node
+  function kcpn() {
+    pod=$1
+    pod_node=$(kgpn $pod)
+    kubectl cordon $pod_node
+    kubectl delete pod $pod
+    echo "Sleeping 10 seconds..."
+    sleep 10
+    # kubectl uncordon $pod_node
+  }
+
+  # kubectl get pod node name
+  function kgpn() {
+    kubectl describe pod $1 | grep -i Node: | awk '{print $2}' | cut -d / -f 1
+  }
+
   alias k='kubectl'
   alias kcq='echo -e "KUBECONFIG=${KUBECONFIG:-~/.kube/config}\nCurrent Context: $(kubectl config current-context)"'
   alias kcns='kcns_func $*'
@@ -129,4 +145,4 @@ if [[ -n "$(command -v kubectl)" ]] ; then
   alias kdelse='kubectl delete secrets'
   alias kdelno='kubectl delete nodes'
   alias kex='kubectl exec -it'
-}
+fi

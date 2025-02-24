@@ -15,7 +15,7 @@ if [[ $(uname) == Linux ]] && [[ -n "$(command -v gnome-keyring-daemon)" ]]; the
           exec dbus-run-session -- $SHELL
         fi
 
-        gnome-keyring-daemon --start --components=pkcs11,secrets,ssh
+        gnome-keyring-daemon --start --components=pkcs11,secrets,ssh >/dev/null
       fi
     fi
 fi
