@@ -129,4 +129,4 @@ if [[ -n "$(command -v kubectl)" ]] ; then
   alias kdelse='kubectl delete secrets'
   alias kdelno='kubectl delete nodes'
   alias kex='kubectl exec -it'
-}
+fi
