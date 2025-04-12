@@ -156,7 +156,8 @@ task :install => [:submodule_init, :submodules] do
 
     # run %{pip3 install tmuxp}
     # For NeoVim plugins
-    if macos?
+    run %( which brew )
+    if $?.success?
       run %{ [[ ! -d $HOME/.virtualenvs/default ]] && python3 -m venv ~/.virtualenvs/default}
       run %{ source $HOME/.virtualenvs/default/bin/activate }
       run %{ pip install neovim }
