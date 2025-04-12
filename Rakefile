@@ -21,70 +21,72 @@ task :install => [:submodule_init, :submodules] do
 
   if linux?
     run %( which brew )
-    install_homebrew if $?.success?
+    if $?.success?
+      install_homebrew
+    else
+      case linux['PLATFORM_FAMILY']
+      when 'arch'
+        run %(sudo pacman -S --noconfirm bat \
+          fzf \
+          git \
+          github-cli \
+          neovim \
+          python3 \
+          python-neovim \
+          ripgrep \
+          rubocop \
+          rustup \
+          shellcheck \
+          vim
+        )
+        run %{[[ -n "$(command -v rustup)" ]] && rustup default stable}
+      when 'debian'
+        run %(sudo apt-get update -y)
+        run %(sudo apt-get install -y bat \
+          build-essential \
+          cargo \
+          fzf \
+          gh \
+          git\
+          gradle \
+          openjdk-17-jdk \
+          nvim \
+          python3-pip \
+          rubocop \
+          ruby-dev \
+          shellcheck
+        )
+        run %(sudo ln -sf /bin/batcat /bin/bat)
+      when 'rhel'
+        run %{ sudo #{linux['PACKAGE_MANAGER']} update -y}
+        run %{ sudo #{linux['PACKAGE_MANAGER']} groups install -y "Development Tools"}
+        run %{ sudo #{linux['PACKAGE_MANAGER']} install -y bat \
+          fzf \
+          gh \
+          neovim \
+          ripgrep \
+          vim-enhanced \
+          ruby-devel \
+          rustup \
+          shellcheck
+        }
+        run %{[[ -n "$(command -v rustup-init)" ]] && rustup-init -y}
+      end
 
-    case linux['PLATFORM_FAMILY']
-    when 'arch'
-      run %(sudo pacman -S --noconfirm bat \
-        fzf \
-        git \
-        github-cli \
-        neovim \
-        python3 \
-        python-neovim \
-        ripgrep \
-        rubocop \
-        rustup \
-        shellcheck \
-        vim
-      )
-      run %{[[ -n "$(command -v rustup)" ]] && rustup default stable}
-    when 'debian'
-      run %(sudo apt-get update -y)
-      run %(sudo apt-get install -y bat \
-        build-essential \
-        cargo \
-        fzf \
-        gh \
-        git\
-        gradle \
-        openjdk-17-jdk \
-        nvim \
-        python3-pip \
-        rubocop \
-        ruby-dev \
-        shellcheck
-      )
-      run %(sudo ln -sf /bin/batcat /bin/bat)
-    when 'rhel'
-      run %{ sudo #{linux['PACKAGE_MANAGER']} update -y}
-      run %{ sudo #{linux['PACKAGE_MANAGER']} groups install -y "Development Tools"}
-      run %{ sudo #{linux['PACKAGE_MANAGER']} install -y bat \
-        fzf \
-        gh \
-        neovim \
-        ripgrep \
-        vim-enhanced \
-        ruby-devel \
-        rustup \
-        shellcheck
-      }
-      run %{[[ -n "$(command -v rustup-init)" ]] && rustup-init -y}
+      install_zsh if want_to_install?('zsh (shell, enhancements))')
+
+      install_from_github('bat',
+                          'https://github.com/sharkdp/bat/releases/download/v0.24.0/bat-v0.24.0-i686-unknown-linux-musl.tar.gz')
+      install_from_github('fzf',
+                          'https://github.com/junegunn/fzf/releases/download/v0.54.1/fzf-0.54.1-linux_amd64.tar.gz',
+                          false)
+      install_from_github('nvim',
+                          'https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz')
+      install_from_github('rg',
+                          'https://github.com/BurntSushi/ripgrep/releases/download/14.1.0/ripgrep-14.1.0-x86_64-unknown-linux-musl.tar.gz')
+      install_from_github('delta',
+                          'https://github.com/dandavison/delta/releases/download/0.15.0/delta-0.15.0-x86_64-unknown-linux-musl.tar.gz')
     end
-
-    install_zsh if want_to_install?('zsh (shell, enhancements))')
-
-    install_from_github('bat',
-                        'https://github.com/sharkdp/bat/releases/download/v0.24.0/bat-v0.24.0-i686-unknown-linux-musl.tar.gz')
-    install_from_github('fzf',
-                        'https://github.com/junegunn/fzf/releases/download/v0.54.1/fzf-0.54.1-linux_amd64.tar.gz',
-                        false)
-    install_from_github('nvim',
-                        'https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz')
-    install_from_github('rg',
-                        'https://github.com/BurntSushi/ripgrep/releases/download/14.1.0/ripgrep-14.1.0-x86_64-unknown-linux-musl.tar.gz')
-    install_from_github('delta',
-                        'https://github.com/dandavison/delta/releases/download/0.15.0/delta-0.15.0-x86_64-unknown-linux-musl.tar.gz')
   end
 
   install_python_modules
