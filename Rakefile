@@ -272,13 +272,11 @@ task :install_vundle do
   puts '======================================================'
   puts ''
 
-  vundle_path = File.join('vim','bundle', 'vundle')
-  vundle_path = `cygpath -m "#{vundle_path}"`.strip if windows?
+  vundle_path = File.join(ENV['HOME'], '.yadr', 'vim','bundle', 'vundle')
+  vundle_path = `cygpath -u "#{vundle_path}"`.strip if windows?
   unless File.exist?(vundle_path)
-    cd_filepath = File.join(ENV['HOME'], '.yadr')
-    cd_filepath = `cygpath -m "#{cd_filepath}"`.strip if windows?
+    vundle_path = `cygpath -w "#{vundle_path}"`.strip if windows?
     run %{
-      cd "#{cd_filepath}"
       git clone https://github.com/gmarik/vundle.git #{vundle_path}
     }
   end
