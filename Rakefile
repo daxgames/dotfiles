@@ -36,55 +36,57 @@ task :install => [:submodule_init, :submodules] do
     run %{ powershell -File "#{windows_install}" }
   elsif linux?
     run %( which brew )
-    install_homebrew if $?.success?
-
-    case linux['PLATFORM_FAMILY']
-    when 'arch'
-      run %(sudo pacman -S --noconfirm bat \
-        fzf \
-        git \
-        github-cli \
-        neovim \
-        python3 \
-        python-neovim \
-        ripgrep \
-        rubocop \
-        rustup \
-        shellcheck \
-        vim
-      )
-      run %{[[ -n "$(command -v rustup)" ]] && rustup default stable}
-    when 'debian'
-      run %(sudo apt-get update -y)
-      run %(sudo apt-get install -y bat \
-        build-essential \
-        cargo \
-        fzf \
-        gh \
-        git\
-        gradle \
-        openjdk-17-jdk \
-        nvim \
-        python3-pip \
-        rubocop \
-        ruby-dev \
-        shellcheck
-      )
-      run %(sudo ln -sf /bin/batcat /bin/bat)
-    when 'rhel'
-      run %{ sudo #{linux['PACKAGE_MANAGER']} update -y}
-      run %{ sudo #{linux['PACKAGE_MANAGER']} groups install -y "Development Tools"}
-      run %{ sudo #{linux['PACKAGE_MANAGER']} install -y bat \
-        fzf \
-        gh \
-        neovim \
-        ripgrep \
-        vim-enhanced \
-        ruby-devel \
-        rustup \
-        shellcheck
-      }
-      run %{[[ -n "$(command -v rustup-init)" ]] && rustup-init -y}
+    if $?.success?
+      install_homebrew
+    else
+      case linux['PLATFORM_FAMILY']
+      when 'arch'
+        run %(sudo pacman -S --noconfirm bat \
+          fzf \
+          git \
+          github-cli \
+          neovim \
+          python3 \
+          python-neovim \
+          ripgrep \
+          rubocop \
+          rustup \
+          shellcheck \
+          vim
+        )
+        run %{[[ -n "$(command -v rustup)" ]] && rustup default stable}
+      when 'debian'
+        run %(sudo apt-get update -y)
+        run %(sudo apt-get install -y bat \
+          build-essential \
+          cargo \
+          fzf \
+          gh \
+          git\
+          gradle \
+          openjdk-17-jdk \
+          nvim \
+          python3-pip \
+          rubocop \
+          ruby-dev \
+          shellcheck
+        )
+        run %(sudo ln -sf /bin/batcat /bin/bat)
+      when 'rhel'
+        run %{ sudo #{linux['PACKAGE_MANAGER']} update -y}
+        run %{ sudo #{linux['PACKAGE_MANAGER']} groups install -y "Development Tools"}
+        run %{ sudo #{linux['PACKAGE_MANAGER']} install -y bat \
+          fzf \
+          gh \
+          neovim \
+          ripgrep \
+          vim-enhanced \
+          ruby-devel \
+          rustup \
+          shellcheck
+        }
+        run %{[[ -n "$(command -v rustup-init)" ]] && rustup-init -y}
+      end
     end
 
     install_zsh if want_to_install?('zsh (shell, enhancements))')
