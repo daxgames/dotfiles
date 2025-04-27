@@ -272,10 +272,12 @@ task :install_vundle do
   puts '======================================================'
   puts ''
 
-  vundle_path = File.join(ENV['HOME'], '.yadr', 'vim','bundle', 'vundle')
-  vundle_path = `cygpath -u "#{vundle_path}"`.strip if windows?
+  # vundle_path = File.join(ENV['HOME'], '.yadr', 'vim','bundle', 'vundle')
+  # vundle_path = `cygpath -u "#{vundle_path}"`.strip if windows?
+  vundle_path = osFilePath(File.join(ENV['HOME'], '.yadr', 'vim','bundle', 'vundle'), '-u')
   unless File.exist?(vundle_path)
-    vundle_path = `cygpath -w "#{vundle_path}"`.strip if windows?
+    # vundle_path = `cygpath -w "#{vundle_path}"`.strip if windows?
+    vundle_path = osFilePath(File.join(ENV['HOME'], '.yadr', 'vim','bundle', 'vundle', '-w'))
     run %{
       git clone https://github.com/gmarik/vundle.git #{vundle_path}
     }
@@ -293,7 +295,11 @@ task :install_vimplug do
   puts ''
 
   if windows?
-    vimplug_path = "C:/tools/neovim/nvim-win64/share/nvim/runtime/autoload/plug.vim"
+    if File.exist?("C:/tools/neovim/nvim-win64")
+      vimplug_path = "C:/tools/neovim/nvim-win64/share/nvim/runtime/autoload/plug.vim"
+    else
+      vimplug_path = osFilePath(File.join(ENV["HOME"], "AppData", "Local", "nvim-data", "site", "autoload", "plug.vim"), '-u')
+    end
   else
     vimplug_path = File.join(ENV['HOME'], '.local', 'share', 'nvim', 'site', 'autoload', 'plug.vim')
   end

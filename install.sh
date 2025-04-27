@@ -28,6 +28,11 @@ if [ ! -d "$HOME/.yadr" ]; then
         PLATFORM=windows
         PLATFORM_FAMILY=windows
         export PLATFORM PLATFORM_FAMILY
+
+        # MSYS use Windows native symlinks
+        MSYS=winsymlinks:nativestict
+        CYGWIN=winsymlinks:nativestrict
+        export MSYS CYGWIN
         [ -z "${__YADR_DEBUG}" ] && env | grep PLATFORM | sort
     elif [ "${OS}" = "Linux" ] ; then
         if [ -f /etc/os-release ] ; then
