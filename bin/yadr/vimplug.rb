@@ -39,11 +39,19 @@ module VimPlug
   end
 
   def self.install_plugins
-    system "nvim --noplugin -u #{@home_path}/.config/nvim/plugins/main.vim -N \"+set hidden\" \"+syntax on\" +PlugClean +PlugInstall! +qall"
+    if windows?
+      system "nvim --noplugin -u #{@home_path}/.config/nvim/plugins/main.vim -N \"+set shell=cmd.exe\" \"+set hidden\" \"+syntax on\" +PlugClean +PlugInstall! +qall"
+    else
+      system "nvim --noplugin -u #{@home_path}/.config/nvim/plugins/main.vim -N \"+set hidden\" \"+syntax on\" +PlugClean +PlugInstall! +qall"
+    end
   end
 
   def self.update_plugins
-    system "nvim --noplugin -u #{@home_path}/.config/nvim/plugins/main.vim -N \"+set hidden\" \"+syntax on\" +PlugClean +PlugUpdate! +qall"
+    if windows?
+      system "nvim --noplugin -u #{@home_path}/.config/nvim/plugins/main.vim -N \"+set shell=cmd.exe\" \"+set hidden\" \"+syntax on\" +PlugClean +PlugUpdate! +qall"
+    else
+      system "nvim --noplugin -u #{@home_path}/.config/nvim/plugins/main.vim -N \"+set hidden\" \"+syntax on\" +PlugClean +PlugUpdate! +qall"
+    end
   end
 
   private

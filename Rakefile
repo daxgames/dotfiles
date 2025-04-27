@@ -12,6 +12,8 @@ task :install => [:submodule_init, :submodules] do
   puts '======================================================'
   puts
 
+  ENV['__YADR_PATH'] = "#{osFilePath(File.join(ENV['HOME'], '.yadr'), '-w')}"
+
   linux = linux_variant if linux?
 
   if windows?
@@ -87,21 +89,21 @@ task :install => [:submodule_init, :submodules] do
         }
         run %{[[ -n "$(command -v rustup-init)" ]] && rustup-init -y}
       end
+
+      install_zsh if want_to_install?('zsh (shell, enhancements))')
+
+      install_from_github('bat',
+                          'https://github.com/sharkdp/bat/releases/download/v0.25.0/bat-v0.25.0-i686-unknown-linux-musl.tar.gz')
+      install_from_github('fzf',
+        'https://github.com/junegunn/fzf/releases/download/v0.61.3/fzf-0.61.3-linux_amd64.tar.gz',
+                          false)
+      install_from_github('nvim',
+                          'https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz')
+      install_from_github('rg',
+                          'https://github.com/BurntSushi/ripgrep/releases/download/14.1.1/ripgrep-14.1.1-x86_64-unknown-linux-musl.tar.gz')
+      install_from_github('delta',
+        'https://github.com/dandavison/delta/releases/download/0.18.2/delta-0.18.2-x86_64-unknown-linux-musl.tar.gz')
     end
-
-    install_zsh if want_to_install?('zsh (shell, enhancements))')
-
-    install_from_github('bat',
-                        'https://github.com/sharkdp/bat/releases/download/v0.24.0/bat-v0.24.0-i686-unknown-linux-musl.tar.gz')
-    install_from_github('fzf',
-                        'https://github.com/junegunn/fzf/releases/download/v0.54.1/fzf-0.54.1-linux_amd64.tar.gz',
-                        false)
-    install_from_github('nvim',
-                        'https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz')
-    install_from_github('rg',
-                        'https://github.com/BurntSushi/ripgrep/releases/download/14.1.0/ripgrep-14.1.0-x86_64-unknown-linux-musl.tar.gz')
-    install_from_github('delta',
-                        'https://github.com/dandavison/delta/releases/download/0.15.0/delta-0.15.0-x86_64-unknown-linux-musl.tar.gz')
   end
 
   install_python_modules
@@ -150,7 +152,7 @@ task :install => [:submodule_init, :submodules] do
     if macos? || (linux? && linux['PLATFORM_FAMILY'] != 'debian')
       run %{which sdk}
       unless $?.success?
-        run %{curl -s "https://get.sdkman.io" | bash}
+        run %{curl -Lks "https://get.sdkman.io" | bash}
       end
 
       run %{which gradle}
@@ -168,7 +170,7 @@ task :install => [:submodule_init, :submodules] do
     unless $?.success?
       run %{which nvm}
       unless $?.success?
-        run %{curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash}
+        run %{curl -Lko- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash}
       end
     end
 
@@ -180,9 +182,9 @@ task :install => [:submodule_init, :submodules] do
 
     Rake::Task['install_vundle'].execute
 
-    # run %{pip3 install tmuxp}
     # For NeoVim plugins
-    if macos?
+    run %( which brew )
+    if $?.success?
       run %{ [[ ! -d $HOME/.virtualenvs/default ]] && python3 -m venv ~/.virtualenvs/default}
       run %{ source $HOME/.virtualenvs/default/bin/activate }
       run %{ pip install neovim }
@@ -272,12 +274,10 @@ task :install_vundle do
   puts '======================================================'
   puts ''
 
-  # vundle_path = File.join(ENV['HOME'], '.yadr', 'vim','bundle', 'vundle')
-  # vundle_path = `cygpath -u "#{vundle_path}"`.strip if windows?
-  vundle_path = osFilePath(File.join(ENV['HOME'], '.yadr', 'vim','bundle', 'vundle'), '-u')
+  vundle_path = osFilePath(File.join(ENV['HOME'], '.yadr', 'vim','bundle', 'vundle'), '-m')
+  puts "vundle_path: #{vundle_path}"
   unless File.exist?(vundle_path)
-    # vundle_path = `cygpath -w "#{vundle_path}"`.strip if windows?
-    vundle_path = osFilePath(File.join(ENV['HOME'], '.yadr', 'vim','bundle', 'vundle', '-w'))
+    vundle_path = osFilePath(File.join(ENV['HOME'], '.yadr', 'vim','bundle', 'vundle'), '-w')
     run %{
       git clone https://github.com/gmarik/vundle.git #{vundle_path}
     }
@@ -298,7 +298,7 @@ task :install_vimplug do
     if File.exist?("C:/tools/neovim/nvim-win64")
       vimplug_path = "C:/tools/neovim/nvim-win64/share/nvim/runtime/autoload/plug.vim"
     else
-      vimplug_path = osFilePath(File.join(ENV["HOME"], "AppData", "Local", "nvim-data", "site", "autoload", "plug.vim"), '-u')
+      vimplug_path = osFilePath(File.join(ENV["HOME"], "AppData", "Local", "nvim-data", "site", "autoload", "plug.vim"), '-m')
     end
   else
     vimplug_path = File.join(ENV['HOME'], '.local', 'share', 'nvim', 'site', 'autoload', 'plug.vim')
@@ -490,7 +490,7 @@ def install_from_github(app_name, download_url, strip_folder = true)
     puts "Installing/Updating '#{app_name}' to '#{install_path}'..."
     puts "======================================================"
     puts "Downloading #{download_url}"
-    run %{ curl -Lo "#{download_path}" "#{download_url}" }
+    run %{ curl -Lko "#{download_path}" "#{download_url}" }
     run %{ rm -rf "#{install_path}" }
     run %{ mkdir -p "#{install_path}" }
 
@@ -551,7 +551,7 @@ def install_homebrew
     puts "======================================================"
 
     if macos?
-      run %{bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"}
+      run %{bash -c "$(curl -kfsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"}
     else
       puts "Running Homebrew 'install.sh' on Linux..."
       if ! File.exist?('/home/linuxbrew')
@@ -559,7 +559,7 @@ def install_homebrew
         run %{sudo chmod 777 /home/linuxbrew}
       end
 
-      run %{yes | bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"}
+      run %{yes | bash -c "$(curl -kfsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"}
 
       puts "Configuring 'brew shellenv' on Linux..."
       ENV['HOMEBREW_PREFIX'] = "/home/linuxbrew/.linuxbrew"
