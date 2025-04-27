@@ -300,7 +300,7 @@ task :install_vimplug do
 
   unless File.exist?(vimplug_path)
     run %{
-      curl -fLo #{vimplug_path} --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+      curl -kfLo #{vimplug_path} --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
     }
   end
 
