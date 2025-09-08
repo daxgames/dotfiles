@@ -19,6 +19,9 @@ task :install => [:submodule_init, :submodules] do
   ENV['PATH'] = "#{File.join(ENV['HOME'], 'bin')}:#{ENV['PATH']}"
   install_homebrew if macos?
 
+  puts linux
+  sleep 5
+
   if linux?
     run %( which brew )
     if $?.success?
@@ -156,15 +159,12 @@ task :install => [:submodule_init, :submodules] do
 
     # run %{pip3 install tmuxp}
     # For NeoVim plugins
-    run %( which brew )
-    if $?.success?
-      run %{ [[ ! -d $HOME/.virtualenvs/default ]] && python3 -m venv ~/.virtualenvs/default}
-      run %{ source $HOME/.virtualenvs/default/bin/activate }
-      run %{ pip install neovim }
-      run %{ pip install pynvim }
-    elsif linux['PLATFORM_FAMILY'] != "arch"
-      run %{ pip3 install --user neovim }
-      run %{ pip3 install --user pynvim }
+    run %{ [[ ! -d $HOME/.virtualenvs/default ]] && python3 -m venv ~/.virtualenvs/default}
+    run %{ source $HOME/.virtualenvs/default/bin/activate }
+    run %{ pip install neovim }
+    run %{ pip install pynvim }
+
+    if linux?
       run %{ gem install neovim --user-install }
     end
 
@@ -320,20 +320,21 @@ end
 
 def linux_variant
   linux = {
-    :PLATFORM => nil,
-    :PLATFORM_FAMILY => nil,
-    :PLATFORM_VERSION => nil,
-    :PACKAGE_MANGER => nil
+    'PLATFORM' => nil,
+    'PLATFORM_FAMILY' => nil,
+    'PLATFORM_VERSION' => nil,
+    'PACKAGE_MANAGER' => nil
   }
 
   if File.exist?('/etc/os-release')
     puts 'Determining Linux OS using /etc/os-release...'
     File.open('/etc/os-release', 'r').read.each_line do |line|
-      puts "-" + line
       key = line.strip.gsub('"', '').split('=')[0].to_s
       value = line.strip.gsub('"', '').split('=')[1].to_s
-      puts "key: #{key}"
-      puts "value: #{value}"
+
+      # puts "- " + line
+      # puts "  key: #{key}"
+      # puts "  value: #{value}"
       case key.downcase
       	when 'id'
       	  linux['PLATFORM'] = value
@@ -346,7 +347,7 @@ def linux_variant
 
     case linux['PLATFORM']
     when 'centos', 'fedora'
-      linux['PLATFORM_FAMILY'] = 'rhel'
+      linux['PLATFORM_FAMILY'] = 'fedora'
     when /debian/
       linux['PLATFORM_FAMILY'] = 'debian'
     end
@@ -358,7 +359,7 @@ def linux_variant
 
   elsif File.exist?('/etc/redhat-release')
     linux['PLATFORM'] = 'redhat'
-    linux['PLATFORM_FAMILY'] = 'rhel'
+    linux['PLATFORM_FAMILY'] = 'fedora'
   end
 
   case linux['PLATFORM_FAMILY']
@@ -366,7 +367,7 @@ def linux_variant
     linux['PACKAGE_MANAGER'] = 'pacman'
   when 'debian'
     linux['PACKAGE_MANAGER'] = 'apt-get'
-  when 'rhel'
+  when 'fedora'
     linux['PACKAGE_MANAGER'] = if linux['PLATFORM_VERSION'].to_i < 8
                                  'yum'
                                else
