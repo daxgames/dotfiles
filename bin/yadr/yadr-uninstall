@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
 cd ~/ || exit
-ls -la | grep yadr | grep -v .yadr.user | awk '{print $9}' | xargs rm -rf
+ls -la | grep yadr | grep -v ".yadr.user\|.yadr4win" | awk '{print $9}' | xargs rm -f
