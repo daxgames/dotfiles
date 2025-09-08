@@ -6,6 +6,8 @@ Plug 'dougireton/vim-chef'
 Plug 'vim-scripts/groovy.vim'
 Plug 'juneedahamed/vc.vim'
 Plug 'github/copilot.vim'
+Plug 'CopilotC-Nvim/CopilotChat.nvim'
 Plug 'vim-scripts/Tango-colour-scheme'
 Plug 'sonph/onehalf', {'rtp': 'vim'}
 Plug 'ku1ik/vim-monokai'
+Plug 'nvim-treesitter/nvim-treesitter'

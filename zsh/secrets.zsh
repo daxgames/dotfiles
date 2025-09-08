@@ -1,7 +1,7 @@
-if [[ $(uname) == Linux ]]; then
+if [[ $(uname) == Linux ]] && [[ -n "$(command -v gnome-keyring-daemon)" ]]; then
     function unlock-keyring () {
-        stty -echo
         printf "Linux Keyring Password: "
+        stty -echo
         read pass
         stty echo
         printf "\n"
@@ -15,7 +15,7 @@ if [[ $(uname) == Linux ]]; then
           exec dbus-run-session -- $SHELL
         fi
 
-        gnome-keyring-daemon --start --components=pkcs11,secrets,ssh
+        gnome-keyring-daemon --start --components=pkcs11,secrets,ssh 2>/dev/null >/dev/null
       fi
     fi
 fi
