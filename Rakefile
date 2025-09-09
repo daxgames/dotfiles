@@ -84,7 +84,7 @@ task :install => [:submodule_init, :submodules] do
                           'https://github.com/junegunn/fzf/releases/download/v0.54.1/fzf-0.54.1-linux_amd64.tar.gz',
                           false)
       install_from_github('nvim',
-                          'https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz')
+                          'https://github.com/neovim/neovim-releases/releases/download/v0.11.4/nvim-linux-x86_64.tar.gz')
       install_from_github('rg',
                           'https://github.com/BurntSushi/ripgrep/releases/download/14.1.0/ripgrep-14.1.0-x86_64-unknown-linux-musl.tar.gz')
       install_from_github('delta',
@@ -431,13 +431,16 @@ def install_from_github(app_name, download_url, strip = true)
     run %{ curl -Lo #{download_path} #{download_url} }
     run %{ rm -rf #{install_path} }
     run %{ mkdir -p #{install_path} }
+    run %{ ls -la #{download_path} }
     if strip
       run %{ tar -C #{install_path} --strip-components=1 -xzf #{download_path} }
     else
       run %{ tar -C #{install_path} -xzf #{download_path} }
     end
+    run %{ ls -la #{install_path} }
     run %{ rm -f #{download_path} }
     run %{ ln -sf $(find #{install_path} -type f -name '#{app_name}') #{link_path} }
+    run %{ ls -la ${link_path} }
   end
 end
 
