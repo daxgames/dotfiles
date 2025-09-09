@@ -18,4 +18,6 @@ for config_file ($HOME/.yadr/zsh/*.zsh) ; do
 
   source $config_file
 done
-. "$HOME/.cargo/env"
+
+[ -f "$HOME/.cargo/env" ] &&
+  . "$HOME/.cargo/env"
