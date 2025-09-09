@@ -161,8 +161,8 @@ task :install => [:submodule_init, :submodules] do
     # For NeoVim plugins
     run %{ [[ ! -d $HOME/.virtualenvs/default ]] && python3 -m venv ~/.virtualenvs/default}
     run %{ source $HOME/.virtualenvs/default/bin/activate }
-    run %{ pip install neovim }
-    run %{ pip install pynvim }
+    run %{ pip install --upgrade neovim }
+    run %{ pip install --upgrade pynvim }
 
     if linux?
       run %{ gem install neovim --user-install }
@@ -462,12 +462,6 @@ def install_python_modules
         run %{ sudo dnf install -y python3-pip }
       end
     end
-  end
-
-  if ENV['PLATFORM_FAMILY'] == 'debian'
-    run %{ pip install pynvim }
-  elsif ENV['PLATFORM_FAMILY'] == 'rhel'
-    run %{ pip3 install pynvim }
   end
 end
 

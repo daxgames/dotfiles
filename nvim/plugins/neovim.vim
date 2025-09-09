@@ -10,5 +10,4 @@ Plug 'nvim-tree/nvim-web-devicons'
 Plug 'MunifTanjim/nui.nvim'
 Plug '3rd/image.nvim'
 Plug 'nvim-neo-tree/neo-tree.nvim'
-
 Plug 'NvChad/nvterm'
