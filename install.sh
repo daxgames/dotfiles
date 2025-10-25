@@ -80,7 +80,7 @@ if [ ! -d "$HOME/.yadr" ]; then
             [ "${PLATFORM_VERSION}" -gt 7 ] && PACKAGE_MANAGER=dnf
             $(command -v sudo) "${PACKAGE_MANAGER}" update -y
             $(command -v sudo) "${PACKAGE_MANAGER}" groups install -y "Development Tools"
-            $(command -v sudo) "${PACKAGE_MANAGER}" install -y rubygem-rake zip
+            $(command -v sudo) "${PACKAGE_MANAGER}" install -y ruby-devel rubygem-rake zip
         fi
     fi
 
