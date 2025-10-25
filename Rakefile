@@ -12,14 +12,14 @@ task :install => [:submodule_init, :submodules] do
   puts '======================================================'
   puts
 
-  linux = linux_variant if linux?
+  $linux = linux_variant if linux?
 
   run %( mkdir -p $HOME/bin ) unless File.exist?("#{ENV['HOME']}/bin")
 
   ENV['PATH'] = "#{File.join(ENV['HOME'], 'bin')}:#{ENV['PATH']}"
   install_homebrew if macos?
 
-  puts linux
+  puts $linux
   sleep 5
 
   if linux?
@@ -27,7 +27,7 @@ task :install => [:submodule_init, :submodules] do
     if $?.success?
       install_homebrew
     else
-      case linux['PLATFORM_FAMILY']
+      case $linux['PLATFORM_FAMILY']
       when 'arch'
         run %(sudo pacman -S --noconfirm bat \
           fzf \
@@ -53,20 +53,22 @@ task :install => [:submodule_init, :submodules] do
           git\
           gradle \
           openjdk-17-jdk \
-          nvim \
-          python3-pip \
+          neovim \
+          python3-pynvim \
+          python3-venv \
           rubocop \
           ruby-dev \
           shellcheck
         )
         run %(sudo ln -sf /bin/batcat /bin/bat)
       when 'rhel'
-        run %{ sudo #{linux['PACKAGE_MANAGER']} update -y}
-        run %{ sudo #{linux['PACKAGE_MANAGER']} groups install -y "Development Tools"}
-        run %{ sudo #{linux['PACKAGE_MANAGER']} install -y bat \
+        run %{ sudo #{$linux['PACKAGE_MANAGER']} update -y}
+        run %{ sudo #{$linux['PACKAGE_MANAGER']} groups install -y "Development Tools"}
+        run %{ sudo #{$linux['PACKAGE_MANAGER']} install -y bat \
           fzf \
           gh \
           neovim \
+          python3 \
           ripgrep \
           vim-enhanced \
           ruby-devel \
@@ -124,7 +126,7 @@ task :install => [:submodule_init, :submodules] do
   if want_to_install?('vim configuration (highly recommended)')
     run %{ ln -nfs "$HOME/.yadr/nvim" "$HOME/.config/nvim" }
 
-    if macos? || (linux? && linux['PLATFORM_FAMILY'] != 'debian')
+    if macos? || (linux? && $linux['PLATFORM_FAMILY'] != 'debian')
       run %{which sdk}
       unless $?.success?
         run %{curl -s "https://get.sdkman.io" | bash}
@@ -159,10 +161,15 @@ task :install => [:submodule_init, :submodules] do
 
     # run %{pip3 install tmuxp}
     # For NeoVim plugins
-    run %{ [[ ! -d $HOME/.virtualenvs/default ]] && python3 -m venv ~/.virtualenvs/default}
-    run %{ source $HOME/.virtualenvs/default/bin/activate }
-    run %{ pip install --upgrade neovim }
-    run %{ pip install --upgrade pynvim }
+    virtualenv_default = File.join(ENV['HOME'],'.virtualenvs', 'default')
+    virtualenv_default_activate = File.join(ENV['HOME'],'.virtualenvs', 'default', 'bin', 'activate')
+    run %( [ ! -d #{virtualenv_default} ] && python3 -m venv #{virtualenv_default} )
+
+    if File.exist?(virtualenv_default_activate)
+      run %( . #{virtualenv_default_activate} )
+    end
+
+    run %{ [ -z "$(pip3 list | grep pynvim)" ] && pip3 install pynvim }
 
     if linux?
       run %{ gem install neovim --user-install }
@@ -319,7 +326,7 @@ end
 
 
 def linux_variant
-  linux = {
+  linux_platform = {
     'PLATFORM' => nil,
     'PLATFORM_FAMILY' => nil,
     'PLATFORM_VERSION' => nil,
@@ -336,50 +343,50 @@ def linux_variant
       # puts "  key: #{key}"
       # puts "  value: #{value}"
       case key.downcase
-      	when 'id'
-      	  linux['PLATFORM'] = value
-      	when 'id_like'
-      	  linux['PLATFORM_FAMILY'] = value
-      	when 'version_id'
-      	  linux['PLATFORM_VERSION'] = value
+      when 'id'
+        linux_platform['PLATFORM'] = value
+      when 'id_like'
+        linux_platform['PLATFORM_FAMILY'] = value
+      when 'version_id'
+        linux_platform['PLATFORM_VERSION'] = value
       end
     end
 
-    case linux['PLATFORM']
+    case linux_platform['PLATFORM']
     when 'centos', 'fedora'
-      linux['PLATFORM_FAMILY'] = 'fedora'
+      linux_platform['PLATFORM_FAMILY'] = 'fedora'
     when /debian/
-      linux['PLATFORM_FAMILY'] = 'debian'
+      linux_platform['PLATFORM_FAMILY'] = 'debian'
     end
 
-    case linux['PLATFORM_FAMILY']
+    case linux_platform['PLATFORM_FAMILY']
     when /debian/, /ubuntu/
-      linux['PLATFORM_FAMILY'] = 'debian'
+      linux_platform['PLATFORM_FAMILY'] = 'debian'
     end
 
   elsif File.exist?('/etc/redhat-release')
-    linux['PLATFORM'] = 'redhat'
-    linux['PLATFORM_FAMILY'] = 'fedora'
+    linux_platform['PLATFORM'] = 'redhat'
+    linux_platform['PLATFORM_FAMILY'] = 'fedora'
   end
 
-  case linux['PLATFORM_FAMILY']
+  case linux_platform['PLATFORM_FAMILY']
   when 'arch'
-    linux['PACKAGE_MANAGER'] = 'pacman'
+    linux_platform['PACKAGE_MANAGER'] = 'pacman'
   when 'debian'
-    linux['PACKAGE_MANAGER'] = 'apt-get'
+    linux_platform['PACKAGE_MANAGER'] = 'apt-get'
   when 'fedora'
-    linux['PACKAGE_MANAGER'] = if linux['PLATFORM_VERSION'].to_i < 8
-                                 'yum'
-                               else
-                                 'dnf'
-                               end
+    linux_platform['PACKAGE_MANAGER'] = if linux_platform['PLATFORM_VERSION'].to_i < 8
+                                          'yum'
+                                        else
+                                          'dnf'
+                                        end
   end
 
-  linux.each do |key, value|
+  linux_platform.each do |key, value|
     puts "#{key}: #{value}"
   end
 
-  return linux
+  return linux_platform
 end
 
 def run_bundle_config
@@ -410,10 +417,10 @@ def install_zsh
     puts "Installing Zsh...If it's already installed, this will do nothing."
     puts "======================================================"
 
-    if linux["PLATFORM_FAMILY"] == "arch"
+    if $linux['PLATFORM_FAMILY'] == "arch"
         run %{sudo pacman -S --noconfirm zsh}
     else
-      run %{ sudo #{linux['PACKAGE_MANAGER']} install -y zsh }
+      run %{ sudo #{$linux['PACKAGE_MANAGER']} install -y zsh }
     end
   end
 end
