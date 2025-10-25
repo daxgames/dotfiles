@@ -170,12 +170,3 @@
 	defaultBranch = main
 [include]
   path = .gitconfig.user
-[user]
-	email = dtgames@kinggeek.org
-	name = Dax T. Games
-[credential "https://github.com"]
-	helper = 
-	helper = !/usr/bin/gh auth git-credential
-[credential "https://gist.github.com"]
-	helper = 
-	helper = !/usr/bin/gh auth git-credential
