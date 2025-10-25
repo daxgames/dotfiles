@@ -23,10 +23,11 @@ task :install => [:submodule_init, :submodules] do
   sleep 5
 
   if linux?
-    run %( which brew )
+    run %( command -v brew )
     if $?.success?
       install_homebrew
     else
+      puts 'No Homebrew install found!'
       case $linux['PLATFORM_FAMILY']
       when 'arch'
         run %(sudo pacman -S --noconfirm bat \
@@ -61,7 +62,7 @@ task :install => [:submodule_init, :submodules] do
           shellcheck
         )
         run %(sudo ln -sf /bin/batcat /bin/bat)
-      when 'rhel'
+      when 'rhel', 'fedora'
         run %{ sudo #{$linux['PACKAGE_MANAGER']} update -y}
         run %{ sudo #{$linux['PACKAGE_MANAGER']} groups install -y "Development Tools"}
         run %{ sudo #{$linux['PACKAGE_MANAGER']} install -y bat \
@@ -71,6 +72,7 @@ task :install => [:submodule_init, :submodules] do
           python3 \
           ripgrep \
           vim-enhanced \
+          ruby \
           ruby-devel \
           rustup \
           shellcheck
@@ -374,7 +376,7 @@ def linux_variant
     linux_platform['PACKAGE_MANAGER'] = 'pacman'
   when 'debian'
     linux_platform['PACKAGE_MANAGER'] = 'apt-get'
-  when 'fedora'
+  when 'fedora', 'rhel'
     linux_platform['PACKAGE_MANAGER'] = if linux_platform['PLATFORM_VERSION'].to_i < 8
                                           'yum'
                                         else
@@ -426,7 +428,7 @@ def install_zsh
 end
 
 def install_from_github(app_name, download_url, strip = true)
-  run %{which #{app_name}}
+  run %{command -v #{app_name}}
   unless $?.success?
     download_path = File.join('/tmp',"#{app_name}.tar.gz")
     install_path = File.join(ENV['HOME'], '.local', app_name)
