@@ -170,3 +170,6 @@
 	defaultBranch = main
 [include]
   path = .gitconfig.user
+[user]
+	email = dtgames@kinggeek.org
+	name = Dax T. Games
