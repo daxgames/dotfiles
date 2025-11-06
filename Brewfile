@@ -22,6 +22,7 @@ if OS.mac?
     cask "qlmarkdown", args: { appdir: "~/Applications" }
     cask "rectangle", args: { appdir: "~/Applications" }
     # cask "steam", args: { appdir: "~/Applications" }
+    cask 'vagrant', args: { appdir: "~/Applications" }
     cask "visual-studio-code", args: { appdir: "~/Applications" }
     cask "vlc", args: { appdir: "~/Applications" }
     cask "windows-app"
@@ -30,7 +31,6 @@ brew "bat"
 brew "coreutils"
 brew "ctags"
 brew "fd"
-brew "lame"
 brew "x264"
 brew "xvid"
 brew "ffmpeg"
@@ -48,6 +48,7 @@ brew "highlight"
 brew "jq"
 brew "jsonlint"
 brew "julia"
+brew 'lame'
 brew "luarocks"
 brew "lynx"
 brew "mcfly"
@@ -59,6 +60,7 @@ brew "podofo"
 brew "prettier"
 brew "python-yq"
 brew "ranger"
+brew "rename"
 brew "readline"
 brew "ripgrep"
 brew "rubyfmt"

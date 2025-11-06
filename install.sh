@@ -108,7 +108,9 @@ if [ ! -d "$HOME/.yadr" ]; then
     until [ -n "$(command -v rake)" ] ; do
         echo "Waiting '5' seconds for rake to be in the path..."
         sleep 5
-    done
+        for var in $(reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /s | grep REG_SZ | awk '{print $1}' | sed 's/\\//g'); do
+            export $var="$(reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v $var | grep REG_SZ | awk '{print $3}')"
+        done
     rake install
 else
     echo "YADR is already installed"

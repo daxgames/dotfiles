@@ -1,4 +1,3 @@
-autoload -U add-zsh-hook
 load-nvmrc() {
   if [ -n "$(command -v nvm)" ] ; then
     local node_version="$(nvm version)"
@@ -18,5 +17,9 @@ load-nvmrc() {
     fi
   fi
 }
-add-zsh-hook chpwd load-nvmrc
-load-nvmrc
+
+if [ -z "$NVM_SKIP_CONFIG_HOOK" ]; then 
+  autoload -U add-zsh-hook
+  add-zsh-hook chpwd load-nvmrc
+  load-nvmrc
+fi
