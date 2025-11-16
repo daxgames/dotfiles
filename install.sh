@@ -41,6 +41,7 @@ if [ ! -d "$HOME/.yadr" ]; then
             PLATFORM_FAMILY=$(grep -i ^id_like= /etc/os-release | cut -d = -f2 | sed 's/"//g')
             PLATFORM_VERSION=$(grep -i ^version_id= /etc/os-release | cut -d = -f2 | sed 's/"//g')
 
+            [ "${PLATFORM}" = "arch" ] && PLATFORM_FAMILY=arch
             [ "${PLATFORM}" = "centos" ] && PLATFORM_FAMILY=rhel
             [ "${PLATFORM}" = "fedora" ] && PLATFORM_FAMILY=rhel
             [ "${PLATFORM}" = "debian" ] && PLATFORM_FAMILY=debian
@@ -68,7 +69,7 @@ if [ ! -d "$HOME/.yadr" ]; then
             fi
 
             echo "Running '${__YADR_INSTALLER_WINDWS_PRE}'..."
-            powershell -File "${__YADR_INSTALLER_WINDWS_PRE}"
+            powershell -NoProfile -NoLogo -Command "& {Start-Process -FilePath powershell -argumentlist '-f ${__YADR_INSTALLER_WINDWS_PRE}' -Wait}"
         elif [ "${PLATFORM_FAMILY}" = "arch" ] ; then
             $(command -v sudo) pacman -Syu
             $(command -v sudo) pacman -S ruby-rake zip
@@ -80,7 +81,7 @@ if [ ! -d "$HOME/.yadr" ]; then
             [ "${PLATFORM_VERSION}" -gt 7 ] && PACKAGE_MANAGER=dnf
             $(command -v sudo) "${PACKAGE_MANAGER}" update -y
             $(command -v sudo) "${PACKAGE_MANAGER}" groups install -y "Development Tools"
-            $(command -v sudo) "${PACKAGE_MANAGER}" install -y rubygem-rake zip
+            $(command -v sudo) "${PACKAGE_MANAGER}" install -y ruby-devel rubygem-rake zip
         fi
     fi
 
@@ -107,13 +108,14 @@ if [ ! -d "$HOME/.yadr" ]; then
     until [ -n "$(command -v rake)" ] ; do
         echo "Waiting '5' seconds for rake to be in the path..."
         sleep 5
-    done
+        for var in $(reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /s | grep REG_SZ | awk '{print $1}' | sed 's/\\//g'); do
+            export $var="$(reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v $var | grep REG_SZ | awk '{print $3}')"
+        done
     rake install
 else
     echo "YADR is already installed"
     current_dir=$(pwd)
     cd "$HOME/.yadr" >>/dev/null 2>&1 || exit 1
-    git pull --rebase
-    rake update
+    git pull --rebase && rake update
     cd "$current_dir" >>/dev/null 2>&1 || exit 1
 fi

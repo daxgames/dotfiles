@@ -1,7 +1,8 @@
 # Aliases in this file are bash and zsh compatible
 
-# Don't change. The following determines where YADR is installed.
+# Don't change. The following determines where YADR and YADR User customizations are installed.
 yadr=$HOME/.yadr
+yadru=$HOME/.yadr.user
 
 # Get operating system
 platform='unknown'
