@@ -63,12 +63,7 @@ if [ ! -d "$HOME/.yadr" ]; then
             fi
 
             echo "Running '${__YADR_INSTALLER_WINDWS_PRE}'..."
-            powershell -File "${__YADR_INSTALLER_WINDWS_PRE}"
-
-            # MSYS use Windows native symlinks
-            MSYS=winsymlinks:nativestict
-            CYGWIN=winsymlinks:nativestrict
-            export MSYS CYGWIN
+            powershell -NoProfile -NoLogo -Command "& {Start-Process -FilePath powershell -argumentlist '-f ${__YADR_INSTALLER_WINDWS_PRE}' -Wait}"
         elif [ "${PLATFORM_FAMILY}" = "arch" ] ; then
             $(command -v sudo) pacman -Syu
             $(command -v sudo) pacman -S ruby-rake zip
