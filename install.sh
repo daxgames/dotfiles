@@ -111,7 +111,6 @@ else
     echo "YADR is already installed"
     current_dir=$(pwd)
     cd "$HOME/.yadr" >>/dev/null 2>&1 || exit 1
-    git pull --rebase
-    rake update
+    git pull --rebase && rake update
     cd "$current_dir" >>/dev/null 2>&1 || exit 1
 fi
