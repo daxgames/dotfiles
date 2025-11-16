@@ -12,19 +12,23 @@ task :install => [:submodule_init, :submodules] do
   puts '======================================================'
   puts
 
-  linux = linux_variant if linux?
+  $linux = linux_variant if linux?
 
   run %( mkdir -p $HOME/bin ) unless File.exist?("#{ENV['HOME']}/bin")
 
   ENV['PATH'] = "#{File.join(ENV['HOME'], 'bin')}:#{ENV['PATH']}"
   install_homebrew if macos?
 
+  puts $linux
+  sleep 5
+
   if linux?
-    run %( which brew )
+    run %( command -v brew )
     if $?.success?
       install_homebrew
     else
-      case linux['PLATFORM_FAMILY']
+      puts 'No Homebrew install found!'
+      case $linux['PLATFORM_FAMILY']
       when 'arch'
         run %(sudo pacman -S --noconfirm bat \
           fzf \
@@ -50,22 +54,25 @@ task :install => [:submodule_init, :submodules] do
           git\
           gradle \
           openjdk-17-jdk \
-          nvim \
-          python3-pip \
+          neovim \
+          python3-pynvim \
+          python3-venv \
           rubocop \
           ruby-dev \
           shellcheck
         )
         run %(sudo ln -sf /bin/batcat /bin/bat)
-      when 'rhel'
-        run %{ sudo #{linux['PACKAGE_MANAGER']} update -y}
-        run %{ sudo #{linux['PACKAGE_MANAGER']} groups install -y "Development Tools"}
-        run %{ sudo #{linux['PACKAGE_MANAGER']} install -y bat \
+      when 'rhel', 'fedora'
+        run %{ sudo #{$linux['PACKAGE_MANAGER']} update -y}
+        run %{ sudo #{$linux['PACKAGE_MANAGER']} groups install -y "Development Tools"}
+        run %{ sudo #{$linux['PACKAGE_MANAGER']} install -y bat \
           fzf \
           gh \
           neovim \
+          python3 \
           ripgrep \
           vim-enhanced \
+          ruby \
           ruby-devel \
           rustup \
           shellcheck
@@ -81,7 +88,7 @@ task :install => [:submodule_init, :submodules] do
                           'https://github.com/junegunn/fzf/releases/download/v0.54.1/fzf-0.54.1-linux_amd64.tar.gz',
                           false)
       install_from_github('nvim',
-                          'https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz')
+                          'https://github.com/neovim/neovim-releases/releases/download/v0.11.4/nvim-linux-x86_64.tar.gz')
       install_from_github('rg',
                           'https://github.com/BurntSushi/ripgrep/releases/download/14.1.0/ripgrep-14.1.0-x86_64-unknown-linux-musl.tar.gz')
       install_from_github('delta',
@@ -121,7 +128,7 @@ task :install => [:submodule_init, :submodules] do
   if want_to_install?('vim configuration (highly recommended)')
     run %{ ln -nfs "$HOME/.yadr/nvim" "$HOME/.config/nvim" }
 
-    if macos? || (linux? && linux['PLATFORM_FAMILY'] != 'debian')
+    if macos? || (linux? && $linux['PLATFORM_FAMILY'] != 'debian')
       run %{which sdk}
       unless $?.success?
         run %{curl -s "https://get.sdkman.io" | bash}
@@ -156,15 +163,17 @@ task :install => [:submodule_init, :submodules] do
 
     # run %{pip3 install tmuxp}
     # For NeoVim plugins
-    run %( which brew )
-    if $?.success?
-      run %{ [[ ! -d $HOME/.virtualenvs/default ]] && python3 -m venv ~/.virtualenvs/default}
-      run %{ source $HOME/.virtualenvs/default/bin/activate }
-      run %{ pip install neovim }
-      run %{ pip install pynvim }
-    elsif linux['PLATFORM_FAMILY'] != "arch"
-      run %{ pip3 install --user neovim }
-      run %{ pip3 install --user pynvim }
+    virtualenv_default = File.join(ENV['HOME'],'.virtualenvs', 'default')
+    virtualenv_default_activate = File.join(ENV['HOME'],'.virtualenvs', 'default', 'bin', 'activate')
+    run %( [ ! -d #{virtualenv_default} ] && python3 -m venv #{virtualenv_default} )
+
+    if File.exist?(virtualenv_default_activate)
+      run %( . #{virtualenv_default_activate} )
+    end
+
+    run %{ [ -z "$(pip3 list | grep pynvim)" ] && pip3 install pynvim }
+
+    if linux?
       run %{ gem install neovim --user-install }
     end
 
@@ -319,66 +328,67 @@ end
 
 
 def linux_variant
-  linux = {
-    :PLATFORM => nil,
-    :PLATFORM_FAMILY => nil,
-    :PLATFORM_VERSION => nil,
-    :PACKAGE_MANGER => nil
+  linux_platform = {
+    'PLATFORM' => nil,
+    'PLATFORM_FAMILY' => nil,
+    'PLATFORM_VERSION' => nil,
+    'PACKAGE_MANAGER' => nil
   }
 
   if File.exist?('/etc/os-release')
     puts 'Determining Linux OS using /etc/os-release...'
     File.open('/etc/os-release', 'r').read.each_line do |line|
-      puts "-" + line
       key = line.strip.gsub('"', '').split('=')[0].to_s
       value = line.strip.gsub('"', '').split('=')[1].to_s
-      puts "key: #{key}"
-      puts "value: #{value}"
+
+      # puts "- " + line
+      # puts "  key: #{key}"
+      # puts "  value: #{value}"
       case key.downcase
-      	when 'id'
-      	  linux['PLATFORM'] = value
-      	when 'id_like'
-      	  linux['PLATFORM_FAMILY'] = value
-      	when 'version_id'
-      	  linux['PLATFORM_VERSION'] = value
+      when 'id'
+        linux_platform['PLATFORM'] = value
+      when 'id_like'
+        linux_platform['PLATFORM_FAMILY'] = value
+      when 'version_id'
+        linux_platform['PLATFORM_VERSION'] = value
       end
     end
 
-    case linux['PLATFORM']
+    case linux_platform['PLATFORM']
     when 'centos', 'fedora'
-      linux['PLATFORM_FAMILY'] = 'rhel'
+      linux_platform['PLATFORM_FAMILY'] = 'fedora'
     when /debian/
-      linux['PLATFORM_FAMILY'] = 'debian'
+      linux_platform['PLATFORM_FAMILY'] = 'debian'
     end
 
-    case linux['PLATFORM_FAMILY']
+    case linux_platform['PLATFORM_FAMILY']
     when /debian/, /ubuntu/
-      linux['PLATFORM_FAMILY'] = 'debian'
+      linux_platform['PLATFORM_FAMILY'] = 'debian'
     end
 
   elsif File.exist?('/etc/redhat-release')
-    linux['PLATFORM'] = 'redhat'
-    linux['PLATFORM_FAMILY'] = 'rhel'
+    linux_platform['PLATFORM'] = 'redhat'
+    linux_platform['PLATFORM_FAMILY'] = 'fedora'
   end
 
-  case linux['PLATFORM_FAMILY']
+  case linux_platform['PLATFORM_FAMILY']
   when 'arch'
-    linux['PACKAGE_MANAGER'] = 'pacman'
+    linux_platform['PACKAGE_MANAGER'] = 'pacman'
   when 'debian'
-    linux['PACKAGE_MANAGER'] = 'apt-get'
-  when 'rhel'
-    linux['PACKAGE_MANAGER'] = if linux['PLATFORM_VERSION'].to_i < 8
-                                 'yum'
-                               else
-                                 'dnf'
-                               end
+    linux_platform['PACKAGE_MANAGER'] = 'apt-get'
+  when 'fedora', 'rhel'
+    linux_platform['PACKAGE_MANAGER'] = if linux_platform['PLATFORM_VERSION'].to_i < 8
+                                          'yum'
+                                        else
+                                          'dnf'
+                                        end
   end
 
-  linux.each do |key, value|
+  linux_platform.each do |key, value|
     puts "#{key}: #{value}"
   end
 
-  return linux
+  return linux_platform
 end
 
 def run_bundle_config
@@ -409,16 +419,16 @@ def install_zsh
     puts "Installing Zsh...If it's already installed, this will do nothing."
     puts "======================================================"
 
-    if linux["PLATFORM_FAMILY"] == "arch"
+    if $linux['PLATFORM_FAMILY'] == "arch"
         run %{sudo pacman -S --noconfirm zsh}
     else
-      run %{ sudo #{linux['PACKAGE_MANAGER']} install -y zsh }
+      run %{ sudo #{$linux['PACKAGE_MANAGER']} install -y zsh }
     end
   end
 end
 
 def install_from_github(app_name, download_url, strip = true)
-  run %{which #{app_name}}
+  run %{command -v #{app_name}}
   unless $?.success?
     download_path = File.join('/tmp',"#{app_name}.tar.gz")
     install_path = File.join(ENV['HOME'], '.local', app_name)
@@ -430,13 +440,16 @@ def install_from_github(app_name, download_url, strip = true)
     run %{ curl -Lo #{download_path} #{download_url} }
     run %{ rm -rf #{install_path} }
     run %{ mkdir -p #{install_path} }
+    run %{ ls -la #{download_path} }
     if strip
       run %{ tar -C #{install_path} --strip-components=1 -xzf #{download_path} }
     else
       run %{ tar -C #{install_path} -xzf #{download_path} }
     end
+    run %{ ls -la #{install_path} }
     run %{ rm -f #{download_path} }
     run %{ ln -sf $(find #{install_path} -type f -name '#{app_name}') #{link_path} }
+    run %{ ls -la ${link_path} }
   end
 end
 
@@ -461,12 +474,6 @@ def install_python_modules
         run %{ sudo dnf install -y python3-pip }
       end
     end
-  end
-
-  if ENV['PLATFORM_FAMILY'] == 'debian'
-    run %{ pip install pynvim }
-  elsif ENV['PLATFORM_FAMILY'] == 'rhel'
-    run %{ pip3 install pynvim }
   end
 end
 

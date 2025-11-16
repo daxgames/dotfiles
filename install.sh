@@ -36,6 +36,7 @@ if [ ! -d "$HOME/.yadr" ]; then
             PLATFORM_FAMILY=$(grep -i ^id_like= /etc/os-release | cut -d = -f2 | sed 's/"//g')
             PLATFORM_VERSION=$(grep -i ^version_id= /etc/os-release | cut -d = -f2 | sed 's/"//g')
 
+            [ "${PLATFORM}" = "arch" ] && PLATFORM_FAMILY=arch
             [ "${PLATFORM}" = "centos" ] && PLATFORM_FAMILY=rhel
             [ "${PLATFORM}" = "fedora" ] && PLATFORM_FAMILY=rhel
             [ "${PLATFORM}" = "debian" ] && PLATFORM_FAMILY=debian
@@ -75,7 +76,7 @@ if [ ! -d "$HOME/.yadr" ]; then
             [ "${PLATFORM_VERSION}" -gt 7 ] && PACKAGE_MANAGER=dnf
             $(command -v sudo) "${PACKAGE_MANAGER}" update -y
             $(command -v sudo) "${PACKAGE_MANAGER}" groups install -y "Development Tools"
-            $(command -v sudo) "${PACKAGE_MANAGER}" install -y rubygem-rake zip
+            $(command -v sudo) "${PACKAGE_MANAGER}" install -y ruby-devel rubygem-rake zip
         fi
     fi
 
@@ -102,7 +103,9 @@ if [ ! -d "$HOME/.yadr" ]; then
     until [ -n "$(command -v rake)" ] ; do
         echo "Waiting '5' seconds for rake to be in the path..."
         sleep 5
-    done
+        for var in $(reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /s | grep REG_SZ | awk '{print $1}' | sed 's/\\//g'); do
+            export $var="$(reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v $var | grep REG_SZ | awk '{print $3}')"
+        done
     rake install
 else
     echo "YADR is already installed"
