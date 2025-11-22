@@ -111,6 +111,7 @@ if [ ! -d "$HOME/.yadr" ]; then
         for var in $(reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /s | grep REG_SZ | awk '{print $1}' | sed 's/\\//g'); do
             export $var="$(reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v $var | grep REG_SZ | awk '{print $3}')"
         done
+    done
     rake install
 else
     echo "YADR is already installed"
