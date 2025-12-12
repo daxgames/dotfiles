@@ -26,6 +26,7 @@ if OS.mac?
     cask "visual-studio-code", args: { appdir: "~/Applications" }
     cask "vlc", args: { appdir: "~/Applications" }
     cask "windows-app"
+end
 brew "automake"
 brew "bat"
 brew "coreutils"
