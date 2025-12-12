@@ -11,9 +11,6 @@ $myWindowsPrincipal=new-object System.Security.Principal.WindowsPrincipal($myWin
 # Get the security principal for the Administrator role
 $adminRole=[System.Security.Principal.WindowsBuiltInRole]::Administrator
 
-setx MSYS winsymlinks:nativestict
-setx CYGWIN winsymlinks:nativestrict
-
 if ($myWindowsPrincipal.IsInRole($adminRole))
 {
     $RegistryKeyPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock"
@@ -39,16 +36,17 @@ if ($myWindowsPrincipal.IsInRole($adminRole))
         Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
     }
 
-    # Install Ruby using Cohocolatey
-    if (!(Get-Command ruby -ErrorAction SilentlyContinue))
+    $packages = @('ruby','neovim','bat','delta', 'fzf', 'ripgrep', 'mingw')
+    foreach($package in $packages)
     {
-        choco install ruby -y
-    }
-
-    # Install NVM using Chocolatey
-    if (!(Get-Command nvm -ErrorAction SilentlyContinue))
-    {
-        choco install nvm -y
+        if (!(Get-Command $package  -ErrorAction SilentlyContinue))
+        {
+            choco install $package  -y
+        }
+	else
+	{
+	    choco upgrade $package -y
+	}
     }
 }
 else
