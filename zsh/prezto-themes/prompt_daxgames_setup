@@ -25,7 +25,7 @@ function prompt_daxgames_precmd {
     ruby-info
   fi
 
-  __YADR_DEBUG=1
+  # __YADR_DEBUG=1
   if [[ -d "./.git" ]] || [[ -f "./.git" ]]; then
     # Get worktree-aware directory name
     [[ -n "${__YADR_DEBUG}" ]] && echo "(daxgames prompt)PWD: ${PWD}"
