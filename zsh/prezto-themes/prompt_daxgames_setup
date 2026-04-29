@@ -25,9 +25,29 @@ function prompt_daxgames_precmd {
     ruby-info
   fi
 
+  # __YADR_DEBUG=1
   # Get worktree-aware directory name
-  prompt_dir=$(git remote -v| head -n1 | awk '{print$2}' | awk -F'/' '{print $NF}' 2>/dev/null)
-  prompt_dir=$(pwd | grep -o "/${prompt_dir}[.A-Za-z]*/*" | sed 's/\///;s/\/$//')
+  [[ -n "${__YADR_DEBUG}" ]] && echo "(daxgames prompt)PWD: ${PWD}"
+  repo_name=$(git remote -v| head -n1 | awk '{print$2}' | awk -F'/' '{print $NF}' 2>/dev/null)
+  [[ -n "${__YADR_DEBUG}" ]] && echo "(daxgames prompt)repo_name: $repo_name"
+
+  branch_name=$(git branch --show-current 2>/dev/null)
+  [[ -n "${__YADR_DEBUG}" ]] && echo "(daxgames prompt)branch_name: $branch_name"
+
+  if [[ ${PWD} =~ (/${repo_name}[\.A-Za-z]*/${branch_name}$) ]]; then
+    [[ -n "${__YADR_DEBUG}" ]] && echo "(daxgames prompt)matched repo and branch"
+    prompt_dir="$(basename $(pwd | sed "s/${branch_name}//;s/\///;s/\/$//"))"
+  elif [[ -f "${PWD}/.git" ]]; then
+    [[ -n "${__YADR_DEBUG}" ]] && echo "(daxgames prompt)matched .git file, extracting worktree name"
+    # prompt_dir="$(basename $(cat .git | sed 's/gitdir: //;s/\/worktrees\/.*//'))"
+    prompt_dir="$(basename $(dirname $(git worktree list | grep /Users/daxgames/.yadr-maximus/main | awk '{print $1}')))"
+  else
+    [[ -n "${__YADR_DEBUG}" ]] && echo "(daxgames prompt)no match, using current directory"
+    prompt_dir="%c"
+  fi
+
+  # prompt_dir=$(pwd | grep -o "/${repo_name}[\/.A-Za-z]*?/*" | sed 's/\///;s/\/$//')
+  [[ -n "${__YADR_DEBUG}" ]] && echo "(daxgames prompt)prompt_dir: $prompt_dir"
 }
 
 function prompt_daxgames_setup {
