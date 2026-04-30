@@ -70,8 +70,8 @@ function prompt_cmder_setup {
 
   # Set editor-info parameters.
   zstyle ':prezto:module:editor:info:completing' format '%B%F{red}...%f%b'
-  zstyle ':prezto:module:editor:info:keymap:primary' format "%B%F{green}❯%f%b"
-  zstyle ':prezto:module:editor:info:keymap:alternate' format "%B%F{magenta}❮%f%b"
+  zstyle ':prezto:module:editor:info:keymap:primary' format "%B%F{green} ❯%f%b"
+  zstyle ':prezto:module:editor:info:keymap:alternate' format "%B%F{magenta} ❮%f%b"
 
   # Set git-info parameters.
   zstyle ':prezto:module:git:info' verbose 'no'
@@ -86,7 +86,7 @@ function prompt_cmder_setup {
   zstyle ':prezto:module:ruby:info:version' format '%F{blue}[%v]%f'
 
   # Define prompts.
-  PROMPT='%F{$prefix_color}${prefix}%f %c/%F{$vcs_color}${repo_name}${git_info[prompt]}${editor_info[keymap]}%f '
+  PROMPT='%F{$prefix_color}${prefix}%f %c/%F{$vcs_color}${repo_name}${git_info[prompt]}${editor_info[keymap]}%f'
   RPROMPT='${ruby_info[version]}'
 }
 
