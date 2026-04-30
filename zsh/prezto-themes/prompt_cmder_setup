@@ -86,7 +86,7 @@ function prompt_cmder_setup {
   zstyle ':prezto:module:ruby:info:version' format '%F{blue}[%v]%f'
 
   # Define prompts.
-  PROMPT='%F{$prefix_color}${prefix}%f%c%F{$vcs_color}[${repo_name}${git_info[prompt]}${editor_info[keymap]}%f '
+  PROMPT='%F{$prefix_color}${prefix}%f %c%F{$vcs_color}[${repo_name}${git_info[prompt]}${editor_info[keymap]}%f '
   RPROMPT='${ruby_info[version]}'
 }
 
