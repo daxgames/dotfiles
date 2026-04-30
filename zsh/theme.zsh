@@ -1,1 +1,1 @@
-prompt daxgames
+prompt cmder 'λ' '102'

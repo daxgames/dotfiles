@@ -9,7 +9,7 @@
 #   Sorin Ionescu <sorin.ionescu@gmail.com>
 #   Kyle West <kswest@gmail.com>
 
-function prompt_kylewest_precmd {
+function prompt_kylewestcustom_precmd {
   setopt LOCAL_OPTIONS
   unsetopt XTRACE KSH_ARRAYS
 
@@ -25,7 +25,7 @@ function prompt_kylewest_precmd {
   fi
 }
 
-function prompt_kylewest_setup {
+function prompt_kylewestcustom_setup {
   setopt LOCAL_OPTIONS
   unsetopt XTRACE KSH_ARRAYS
   prompt_opts=(cr percent subst)
@@ -34,7 +34,7 @@ function prompt_kylewest_setup {
   autoload -Uz add-zsh-hook
 
   # Add hook for calling git-info before each command.
-  add-zsh-hook precmd prompt_kylewest_precmd
+  add-zsh-hook precmd prompt_kylewestcustom_precmd
 
   # editor
   zstyle ':prezto:module:editor:info:completing' format '%B%F{red}...%f%b'
@@ -54,4 +54,4 @@ function prompt_kylewest_setup {
   RPROMPT='%F{blue}${ruby_info[version]}'
 }
 
-prompt_kylewest_setup "$@"
+prompt_kylewestcustom_setup "$@"
