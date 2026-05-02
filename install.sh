@@ -38,6 +38,7 @@ if [ ! -d "$HOME/.yadr" ]; then
     fi
 
     echo "Installing YADR Pre-Reqs in '${PLATFORM_FAMILY}'..."
+    sleep 5
     if [ "${PLATFORM_FAMILY}" == "windows" ] ; then
         if [ ! -f "${__YADR_SCRIPT_DIR}/bin/install-windows-pre.ps1" ]; then
             echo "ERROR: '${__YADR_SCRIPT_DIR}/bin/install-windows-pre.ps1' not found!"
@@ -53,12 +54,16 @@ if [ ! -d "$HOME/.yadr" ]; then
         # $(command -v sudo) pacman -Syu --noconfirm
         $(command -v sudo) pacman -S ruby-rake zip git which --noconfirm
     elif [ "${PLATFORM_FAMILY}" = "debian" ]; then
+        printf "Installing in Debian...\n"
+        sleep 5
+
         $(command -v sudo) apt-get update -y
-        $(command -v sudo) apt-get install -y rake ruby-dev zip git which
+        $(command -v sudo) apt-get install -y rake ruby-dev zip git
     elif [ "${PLATFORM_FAMILY}" == "rhel" ] ; then
         [ "${PLATFORM_VERSION}" -lt 8 ] && PACKAGE_MANAGER=yum
         [ "${PLATFORM_VERSION}" -gt 7 ] && PACKAGE_MANAGER=dnf
         # $(command -v sudo) "${PACKAGE_MANAGER}" update -y
+        printf "Installing in RHEL...\n"
         $(command -v sudo) "${PACKAGE_MANAGER}" groups install -y "Development Tools"
         $(command -v sudo) "${PACKAGE_MANAGER}" install -y ruby-devel rubygem-rake zip git which
     fi
