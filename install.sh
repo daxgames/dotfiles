@@ -11,7 +11,7 @@ if [ ! -d "$HOME/.yadr" ]; then
 
     set -x
     OS=$(uname)
-    if [[ "${OS}" =~ (MSYS) ]] || [[ "${OS}" =~ (MINGW) ]]; then
+    if [ "${OS}" =~ (MSYS) ] || [ "${OS}" =~ (MINGW) ]; then
         PLATFORM=windows
         PLATFORM_FAMILY=windows
         export PLATFORM PLATFORM_FAMILY
