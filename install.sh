@@ -38,20 +38,6 @@ if [ ! -d "$HOME/.yadr" ]; then
         PLATFORM_FAMILY="$(echo "${PLATFORM}" | tr  '[:upper:]' '[:lower:]')"
     fi
 
-    if [ -n "${__YADR_DEBUG}" ] ; then
-      git_repo=$(git ls-remote --get-url 2>/dev/null)
-      git_branch=$(git branch --show-current)
-    fi
-
-    [ -n "${__YADR_DEBUG}" ] && env | grep "__YADR_"
-    echo "git_repo: ${git_repo}"
-    echo "git_branch: ${git_branch}"
-
-    echo git clone -b "${git_branch}" --depth=1 "${git_repo}" "$HOME/.yadr"
-    git clone -b "${git_branch}" --depth=1 "${git_repo}" "$HOME/.yadr"
-    cd "$HOME/.yadr" || exit 1
-    [ "$1" = "ask" ] && export ASK="true"
-
     if [ -z "$(command -v rake)" ] ; then
         echo "Installing YADR Pre-Reqs in '${PLATFORM_FAMILY}'..."
         if [ "${PLATFORM_FAMILY}" = "windows" ] ; then
@@ -79,6 +65,21 @@ if [ ! -d "$HOME/.yadr" ]; then
             $(command -v sudo) "${PACKAGE_MANAGER}" install -y ruby-devel rubygem-rake zip git
         fi
     fi
+
+    if [ -n "${__YADR_DEBUG}" ] ; then
+      git_repo=$(git ls-remote --get-url 2>/dev/null)
+      git_branch=$(git branch --show-current)
+    fi
+
+    [ -n "${__YADR_DEBUG}" ] && env | grep "__YADR_"
+    echo "git_repo: ${git_repo}"
+    echo "git_branch: ${git_branch}"
+
+    echo git clone -b "${git_branch}" --depth=1 "${git_repo}" "$HOME/.yadr"
+    git clone -b "${git_branch}" --depth=1 "${git_repo}" "$HOME/.yadr"
+    cd "$HOME/.yadr" || exit 1
+    [ "$1" = "ask" ] && export ASK="true"
+
 
     # Enable vim/nvim persistent undo
     if [[ -d "$HOME/.vim" ]]; then
