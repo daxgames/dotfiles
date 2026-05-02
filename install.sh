@@ -14,15 +14,6 @@ if [ ! -d "$HOME/.yadr" ]; then
       git_branch=$(git branch --show-current)
     fi
 
-    [ -n "${__YADR_DEBUG}" ] && env | grep "__YADR_"
-    echo "git_repo: ${git_repo}"
-    echo "git_branch: ${git_branch}"
-
-    echo git clone -b "${git_branch}" --depth=1 "${git_repo}" "$HOME/.yadr"
-    git clone -b "${git_branch}" --depth=1 "${git_repo}" "$HOME/.yadr"
-    cd "$HOME/.yadr" || exit 1
-    [ "$1" = "ask" ] && export ASK="true"
-
     OS=$(uname)
     if [[ "${OS}" =~ (MSYS) ]] || [[ "${OS}" =~ (MINGW) ]]; then
         PLATFORM=windows
@@ -51,6 +42,15 @@ if [ ! -d "$HOME/.yadr" ]; then
     elif [ "${OS}" = "Darwin" ] ; then
         PLATFORM_FAMILY="$(echo "${PLATFORM}" | tr  '[:upper:]' '[:lower:]')"
     fi
+
+    [ -n "${__YADR_DEBUG}" ] && env | grep "__YADR_"
+    echo "git_repo: ${git_repo}"
+    echo "git_branch: ${git_branch}"
+
+    echo git clone -b "${git_branch}" --depth=1 "${git_repo}" "$HOME/.yadr"
+    git clone -b "${git_branch}" --depth=1 "${git_repo}" "$HOME/.yadr"
+    cd "$HOME/.yadr" || exit 1
+    [ "$1" = "ask" ] && export ASK="true"
 
     if [ -z "$(command -v rake)" ] ; then
         echo "Installing YADR Pre-Reqs in '${PLATFORM_FAMILY}'..."
