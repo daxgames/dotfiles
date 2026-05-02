@@ -53,7 +53,7 @@ if [ ! -d "$HOME/.yadr" ]; then
             echo "Running '${__YADR_INSTALLER_WINDWS_PRE}'..."
             powershell -NoProfile -NoLogo -Command "& {Start-Process -FilePath powershell -argumentlist '-f ${__YADR_INSTALLER_WINDWS_PRE}' -Wait}"
         elif [ "${PLATFORM_FAMILY}" = "arch" ] ; then
-            # $(command -v sudo) pacman -Syu
+            $(command -v sudo) pacman -Syu
             $(command -v sudo) pacman -S ruby-rake zip git zsh --noconfirm
         elif [ "${PLATFORM_FAMILY}" = "debian" ]; then
             $(command -v sudo) apt-get update -y
