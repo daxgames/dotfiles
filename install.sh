@@ -37,8 +37,6 @@ if [ ! -d "$HOME/.yadr" ]; then
         PLATFORM_FAMILY="$(echo "${PLATFORM}" | tr  '[:upper:]' '[:lower:]')"
     fi
 
-    echo "Installing YADR Pre-Reqs in '${PLATFORM_FAMILY}'..."
-    sleep 5
     if [ "${PLATFORM_FAMILY}" == "windows" ] ; then
         if [ ! -f "${__YADR_SCRIPT_DIR}/bin/install-windows-pre.ps1" ]; then
             echo "ERROR: '${__YADR_SCRIPT_DIR}/bin/install-windows-pre.ps1' not found!"
@@ -54,9 +52,6 @@ if [ ! -d "$HOME/.yadr" ]; then
         # $(command -v sudo) pacman -Syu --noconfirm
         $(command -v sudo) pacman -S ruby-rake zip git which --noconfirm
     elif [ "${PLATFORM_FAMILY}" = "debian" ]; then
-        printf "Installing in Debian...\n"
-        sleep 5
-
         $(command -v sudo) apt-get update -y
         $(command -v sudo) apt-get install -y rake ruby-dev zip git
     elif [ "${PLATFORM_FAMILY}" == "rhel" ] ; then
