@@ -6,12 +6,8 @@ export __YADR_SCRIPT_DIR
 if [ ! -d "$HOME/.yadr" ]; then
     echo "Installing daxgames's YADR for the first time"
 
-    git_repo="${__YADR_REPO_URL:-https://github.com/daxgames/dotfiles.git}"
-    git_branch="${__YADR_REPO_BRANCH:-main}"
-
-    set -x
     OS=$(uname)
-    if [[ "${OS}" =~ (MSYS) ]] || [[ "${OS}" =~ (MINGW) ]]; then
+    if [[ "${OS}" =~ (MSYS) ]] || [[ "${OS}" =~ (MINGW) ]] ; then
         PLATFORM=windows
         PLATFORM_FAMILY=windows
         export PLATFORM PLATFORM_FAMILY
@@ -67,6 +63,8 @@ if [ ! -d "$HOME/.yadr" ]; then
         fi
     fi
 
+    git_repo="${__YADR_REPO_URL:-https://github.com/daxgames/dotfiles.git}"
+    git_branch="${__YADR_REPO_BRANCH:-main}"
     if [ -n "${__YADR_DEBUG}" ] ; then
       git_repo=$(git ls-remote --get-url 2>/dev/null)
       git_branch=$(git branch --show-current)
