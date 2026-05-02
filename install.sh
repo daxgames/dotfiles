@@ -9,6 +9,7 @@ if [ ! -d "$HOME/.yadr" ]; then
     git_repo="${__YADR_REPO_URL:-https://github.com/daxgames/dotfiles.git}"
     git_branch="${__YADR_REPO_BRANCH:-main}"
 
+    set -x
     OS=$(uname)
     if [[ "${OS}" =~ (MSYS) ]] || [[ "${OS}" =~ (MINGW) ]]; then
         PLATFORM=windows
