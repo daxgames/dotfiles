@@ -23,10 +23,10 @@ task :install => [:submodule_init, :submodules] do
   sleep 5
 
   if linux?
-    run %( command -v brew )
-    if $?.success?
-      install_homebrew
-    else
+    # run %( command -v brew )
+    # if $?.success?
+    #   install_homebrew
+    # else
       puts 'No Homebrew install found!'
       case $linux['PLATFORM_FAMILY']
       when 'arch'
@@ -93,7 +93,7 @@ task :install => [:submodule_init, :submodules] do
                           'https://github.com/BurntSushi/ripgrep/releases/download/14.1.0/ripgrep-14.1.0-x86_64-unknown-linux-musl.tar.gz')
       install_from_github('delta',
                           'https://github.com/dandavison/delta/releases/download/0.15.0/delta-0.15.0-x86_64-unknown-linux-musl.tar.gz')
-    end
+    # end
   end
 
   install_python_modules
