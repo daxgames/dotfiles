@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-set +e
-
 __YADR_SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
 export __YADR_SCRIPT_DIR
 
