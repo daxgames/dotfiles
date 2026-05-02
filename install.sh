@@ -39,7 +39,7 @@ if [ ! -d "$HOME/.yadr" ]; then
         PLATFORM_FAMILY="$(echo "${PLATFORM}" | tr  '[:upper:]' '[:lower:]')"
     fi
 
-    if [ -z "$(command -v rake)" ] || [ -z "$(command -v zip)" ] || [ -z "$(command -v git)" ] ; then
+    if [ -z "$(command -v rake)" ] || [ -z "$(command -v zip)" ] || [ -z "$(command -v git)" ] || [ -z "$(command -v zsh)" ] ; then
         echo "Installing YADR Pre-Reqs in '${PLATFORM_FAMILY}'..."
         if [ "${PLATFORM_FAMILY}" = "windows" ] ; then
             if [ ! -f "${__YADR_SCRIPT_DIR}/bin/install-windows-pre.ps1" ]; then
