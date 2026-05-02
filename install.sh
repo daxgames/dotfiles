@@ -7,23 +7,23 @@ if [ ! -d "$HOME/.yadr" ]; then
     echo "Installing daxgames's YADR for the first time"
 
     OS=$(uname)
-    if [ "${OS}" =~ (MSYS) ] || [ "${OS}" =~ (MINGW) ] ; then
+    if [[ "${OS}" =~ (MSYS) ]] || [[ "${OS}" =~ (MINGW) ]] ; then
         PLATFORM=windows
         PLATFORM_FAMILY=windows
         export PLATFORM PLATFORM_FAMILY
-        [ -z "${__YADR_DEBUG}" ] && env | grep PLATFORM | sort
-    elif [ "${OS}" = "Linux" ] ; then
-        if [ -f /etc/os-release ] ; then
+        [[ -z "${__YADR_DEBUG}" ]] && env | grep PLATFORM | sort
+    elif [[ "${OS}" == "Linux" ]] ; then
+        if [[ -f /etc/os-release ]] ; then
             echo "Determining Linux OS using '/etc/os-release'..."
             PLATFORM=$(grep -i "^id=" /etc/os-release | cut -d = -f2 | sed 's/"//g')
             PLATFORM_FAMILY=$(grep -i "^id_like=" /etc/os-release | cut -d = -f2 | sed 's/"//g')
             PLATFORM_VERSION=$(grep -i "^version_id=" /etc/os-release | cut -d = -f2 | sed 's/"//g')
 
-            [ "${PLATFORM}" = "arch" ] && PLATFORM_FAMILY=arch
-            [ "${PLATFORM}" = "centos" ] && PLATFORM_FAMILY=rhel
-            [ "${PLATFORM}" = "fedora" ] && PLATFORM_FAMILY=rhel
-            [ "${PLATFORM}" = "debian" ] && PLATFORM_FAMILY=debian
-        elif [ -f /etc/redhat-release ] ; then
+            [[ "${PLATFORM}" == "arch" ]] && PLATFORM_FAMILY=arch
+            [[ "${PLATFORM}" == "centos" ]] && PLATFORM_FAMILY=rhel
+            [[ "${PLATFORM}" == "fedora" ]] && PLATFORM_FAMILY=rhel
+            [[ "${PLATFORM}" == "debian" ]] && PLATFORM_FAMILY=debian
+        elif [[ -f /etc/redhat-release ]] ; then
             PLATFORM=redhat
             PLATFORM_FAMILY=rhel
         fi
@@ -31,36 +31,34 @@ if [ ! -d "$HOME/.yadr" ]; then
         export PLATFORM PLATFORM_FAMILY PLATFORM_VERSION
         [ -z "${__YADR_DEBUG}" ] && env | grep PLATFORM | sort
 
-    elif [ "${OS}" = "Darwin" ] ; then
+    elif [[ "${OS}" == "Darwin" ]] ; then
         PLATFORM_FAMILY="$(echo "${PLATFORM}" | tr  '[:upper:]' '[:lower:]')"
     fi
 
-    if [ -z "$(command -v rake)" ] || [ -z "$(command -v zip)" ] || [ -z "$(command -v git)" ] || [ -z "$(command -v zsh)" ] ; then
-        echo "Installing YADR Pre-Reqs in '${PLATFORM_FAMILY}'..."
-        if [ "${PLATFORM_FAMILY}" = "windows" ] ; then
-            if [ ! -f "${__YADR_SCRIPT_DIR}/bin/install-windows-pre.ps1" ]; then
-                echo "ERROR: '${__YADR_SCRIPT_DIR}/bin/install-windows-pre.ps1' not found!"
-                curl -o "${TEMP}/install-windows-pre.ps1" https://raw.githubusercontent.com/daxgames/dotfiles/main/bin/install-windows-pre.ps1
-                __YADR_INSTALLER_WINDWS_PRE="${TEMP}/install-windows-pre.ps1"
-            else
-                __YADR_INSTALLER_WINDWS_PRE="${__YADR_SCRIPT_DIR}/bin/install-windows-pre.ps1"
-            fi
-
-            echo "Running '${__YADR_INSTALLER_WINDWS_PRE}'..."
-            powershell -NoProfile -NoLogo -Command "& {Start-Process -FilePath powershell -argumentlist '-f ${__YADR_INSTALLER_WINDWS_PRE}' -Wait}"
-        elif [ "${PLATFORM_FAMILY}" = "arch" ] ; then
-            $(command -v sudo) pacman -Syu
-            $(command -v sudo) pacman -S ruby-rake zip git zsh --noconfirm
-        elif [ "${PLATFORM_FAMILY}" = "debian" ]; then
-            $(command -v sudo) apt-get update -y
-            $(command -v sudo) apt-get install -y rake ruby-dev zip git zsh
-        elif [ "${PLATFORM_FAMILY}" = "rhel" ] ; then
-            [ "${PLATFORM_VERSION}" -lt 8 ] && PACKAGE_MANAGER=yum
-            [ "${PLATFORM_VERSION}" -gt 7 ] && PACKAGE_MANAGER=dnf
-            # $(command -v sudo) "${PACKAGE_MANAGER}" update -y
-            $(command -v sudo) "${PACKAGE_MANAGER}" groups install -y "Development Tools"
-            $(command -v sudo) "${PACKAGE_MANAGER}" install -y ruby-devel rubygem-rake zip git
+    echo "Installing YADR Pre-Reqs in '${PLATFORM_FAMILY}'..."
+    if [ "${PLATFORM_FAMILY}" == "windows" ] ; then
+        if [ ! -f "${__YADR_SCRIPT_DIR}/bin/install-windows-pre.ps1" ]; then
+            echo "ERROR: '${__YADR_SCRIPT_DIR}/bin/install-windows-pre.ps1' not found!"
+            curl -o "${TEMP}/install-windows-pre.ps1" https://raw.githubusercontent.com/daxgames/dotfiles/main/bin/install-windows-pre.ps1
+            __YADR_INSTALLER_WINDWS_PRE="${TEMP}/install-windows-pre.ps1"
+        else
+            __YADR_INSTALLER_WINDWS_PRE="${__YADR_SCRIPT_DIR}/bin/install-windows-pre.ps1"
         fi
+
+        echo "Running '${__YADR_INSTALLER_WINDWS_PRE}'..."
+        powershell -NoProfile -NoLogo -Command "& {Start-Process -FilePath powershell -argumentlist '-f ${__YADR_INSTALLER_WINDWS_PRE}' -Wait}"
+    elif [ "${PLATFORM_FAMILY}" == "arch" ] ; then
+        $(command -v sudo) pacman -Syu
+        $(command -v sudo) pacman -S ruby-rake zip git zsh --noconfirm
+    elif [ "${PLATFORM_FAMILY}" = "debian" ]; then
+        $(command -v sudo) apt-get update -y
+        $(command -v sudo) apt-get install -y rake ruby-dev zip git zsh
+    elif [ "${PLATFORM_FAMILY}" == "rhel" ] ; then
+        [ "${PLATFORM_VERSION}" -lt 8 ] && PACKAGE_MANAGER=yum
+        [ "${PLATFORM_VERSION}" -gt 7 ] && PACKAGE_MANAGER=dnf
+        # $(command -v sudo) "${PACKAGE_MANAGER}" update -y
+        $(command -v sudo) "${PACKAGE_MANAGER}" groups install -y "Development Tools"
+        $(command -v sudo) "${PACKAGE_MANAGER}" install -y ruby-devel rubygem-rake zip git
     fi
 
     git_repo="${__YADR_REPO_URL:-https://github.com/daxgames/dotfiles.git}"
@@ -88,7 +86,7 @@ if [ ! -d "$HOME/.yadr" ]; then
         mkdir -p "$HOME/.config/nvim/backups" > /dev/null 2>&1
     fi
 
-    if [ "${OS}" = "Linux" ] ; then
+    if [ "${OS}" == "Linux" ] ; then
         if [ -z "$(command -v nvm)" ] && [ -z "$(command -v npm)" ] ; then
             echo "Installing 'Node Version Manager and Node'..."
             curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
