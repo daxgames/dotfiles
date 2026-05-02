@@ -23,8 +23,7 @@ task :install => [:submodule_init, :submodules] do
   sleep 5
 
   if linux?
-    run %( command -v brew )
-    if $?.success?
+    if executable_on_path?('brew')
       install_homebrew
     else
       puts 'No Homebrew install found!'
@@ -131,26 +130,21 @@ task :install => [:submodule_init, :submodules] do
     run %{ ln -nfs "$HOME/.yadr/nvim" "$HOME/.config/nvim" }
 
     if macos? || (linux? && $linux['PLATFORM_FAMILY'] != 'debian')
-      run %{which sdk}
-      unless $?.success?
+      unless executable_on_path?('sdk')
         run %{curl -s "https://get.sdkman.io" | bash}
       end
 
-      run %{which gradle}
-      unless $?.success?
+      unless executable_on_path?('gradle')
         run %{source "${HOME}/.yadr/zsh/sdkman.zsh" ; sdk install gradle}
       end
 
-      run %{which java}
-      unless $?.success?
+      unless executable_on_path?('java')
         run %{source "${HOME}/.yadr/zsh/sdkman.zsh" ; sdk install java 17.0.11-amzn}
       end
     end
 
-    run %{which node}
-    unless $?.success?
-      run %{which nvm}
-      unless $?.success?
+    unless executable_on_path?('node')
+      unless executable_on_path?('nvm')
         run %{curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash}
       end
     end
@@ -297,6 +291,21 @@ def macos?
   RUBY_PLATFORM.downcase.include?('darwin')
 end
 
+def executable_on_path?(command)
+  return false if command.nil? || command.empty?
+
+  if command.include?(File::SEPARATOR)
+    return File.file?(command) && File.executable?(command)
+  end
+
+  ENV.fetch('PATH', '').split(File::PATH_SEPARATOR).any? do |path|
+    next false if path.nil? || path.empty?
+
+    executable = File.join(path, command)
+    File.file?(executable) && File.executable?(executable)
+  end
+end
+
 def run(cmd)
   puts "[Running] #{cmd}"
   if RUBY_PLATFORM.downcase.include?("cygwin")
@@ -395,7 +404,7 @@ def linux_variant
 end
 
 def run_bundle_config
-  return unless system('which bundle')
+  return unless executable_on_path?('bundle')
 
   bundler_jobs = number_of_cores - 1
   puts '======================================================'
@@ -416,8 +425,7 @@ def install_rvm_binstubs
 end
 
 def install_zsh
-  run %{which zsh}
-  unless $?.success?
+  unless executable_on_path?('zsh')
     puts "======================================================"
     puts "Installing Zsh...If it's already installed, this will do nothing."
     puts "======================================================"
@@ -431,8 +439,7 @@ def install_zsh
 end
 
 def install_from_github(app_name, download_url, strip = true)
-  run %{command -v #{app_name}}
-  unless $?.success?
+  unless executable_on_path?(app_name)
     download_path = File.join('/tmp',"#{app_name}.tar.gz")
     install_path = File.join(ENV['HOME'], '.local', app_name)
     link_path = File.join(ENV['HOME'], 'bin', app_name)
@@ -462,8 +469,7 @@ def install_python_modules
     run %{ source $HOME/.virtualenvs/default/bin/activate }
   end
 
-  run %{which pip}
-  unless $?.success?
+  unless executable_on_path?('pip')
     puts "======================================================"
     puts "Installing Python Pip...If it's already"
     puts "installed, this will do nothing."
@@ -481,8 +487,7 @@ def install_python_modules
 end
 
 def install_homebrew
-  run %{which brew}
-  unless $?.success?
+  unless executable_on_path?('brew')
     puts "======================================================"
     puts "Installing Homebrew, the OSX package manager...If it's"
     puts "already installed, this will do nothing."
@@ -507,8 +512,7 @@ def install_homebrew
       ENV['MANPATH'] = "/home/linuxbrew/.linuxbrew/share/man:" + ENV['MANPATH'].to_s
       ENV['INFOPATH'] ="/home/linuxbrew/.linuxbrew/share/info:" + ENV['INFOPATH'].to_s
 
-      run %{which brew}
-      unless $?.success?
+      unless executable_on_path?('brew')
         puts "'brew' is NOT in the path!"
         exit 0
       end
