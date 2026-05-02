@@ -19,9 +19,9 @@ if [ ! -d "$HOME/.yadr" ]; then
     elif [ "${OS}" = "Linux" ] ; then
         if [ -f /etc/os-release ] ; then
             echo "Determining Linux OS using '/etc/os-release'..."
-            PLATFORM=$(grep -i "^id= /etc/os-release" | cut -d = -f2 | sed 's/"//g')
-            PLATFORM_FAMILY=$(grep -i "^id_like= /etc/os-release" | cut -d = -f2 | sed 's/"//g')
-            PLATFORM_VERSION=$(grep -i "^version_id= /etc/os-release" | cut -d = -f2 | sed 's/"//g')
+            PLATFORM=$(grep -i "^id=" /etc/os-release | cut -d = -f2 | sed 's/"//g')
+            PLATFORM_FAMILY=$(grep -i "^id_like=" /etc/os-release | cut -d = -f2 | sed 's/"//g')
+            PLATFORM_VERSION=$(grep -i "^version_id=" /etc/os-release | cut -d = -f2 | sed 's/"//g')
 
             [ "${PLATFORM}" = "arch" ] && PLATFORM_FAMILY=arch
             [ "${PLATFORM}" = "centos" ] && PLATFORM_FAMILY=rhel
