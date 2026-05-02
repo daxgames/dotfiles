@@ -48,17 +48,17 @@ if [ ! -d "$HOME/.yadr" ]; then
         echo "Running '${__YADR_INSTALLER_WINDWS_PRE}'..."
         powershell -NoProfile -NoLogo -Command "& {Start-Process -FilePath powershell -argumentlist '-f ${__YADR_INSTALLER_WINDWS_PRE}' -Wait}"
     elif [ "${PLATFORM_FAMILY}" == "arch" ] ; then
-        $(command -v sudo) pacman -Syu
-        $(command -v sudo) pacman -S ruby-rake zip git zsh --noconfirm
+        # $(command -v sudo) pacman -Syu --noconfirm
+        $(command -v sudo) pacman -S ruby-rake zip git which --noconfirm
     elif [ "${PLATFORM_FAMILY}" = "debian" ]; then
         $(command -v sudo) apt-get update -y
-        $(command -v sudo) apt-get install -y rake ruby-dev zip git zsh
+        $(command -v sudo) apt-get install -y rake ruby-dev zip git which
     elif [ "${PLATFORM_FAMILY}" == "rhel" ] ; then
         [ "${PLATFORM_VERSION}" -lt 8 ] && PACKAGE_MANAGER=yum
         [ "${PLATFORM_VERSION}" -gt 7 ] && PACKAGE_MANAGER=dnf
         # $(command -v sudo) "${PACKAGE_MANAGER}" update -y
         $(command -v sudo) "${PACKAGE_MANAGER}" groups install -y "Development Tools"
-        $(command -v sudo) "${PACKAGE_MANAGER}" install -y ruby-devel rubygem-rake zip git
+        $(command -v sudo) "${PACKAGE_MANAGER}" install -y ruby-devel rubygem-rake zip git which
     fi
 
     git_repo="${__YADR_REPO_URL:-https://github.com/daxgames/dotfiles.git}"
