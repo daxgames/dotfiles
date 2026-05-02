@@ -54,10 +54,10 @@ if [ ! -d "$HOME/.yadr" ]; then
             powershell -NoProfile -NoLogo -Command "& {Start-Process -FilePath powershell -argumentlist '-f ${__YADR_INSTALLER_WINDWS_PRE}' -Wait}"
         elif [ "${PLATFORM_FAMILY}" = "arch" ] ; then
             # $(command -v sudo) pacman -Syu
-            $(command -v sudo) pacman -S ruby-rake zip git --noconfirm
+            $(command -v sudo) pacman -S ruby-rake zip git zsh --noconfirm
         elif [ "${PLATFORM_FAMILY}" = "debian" ]; then
             $(command -v sudo) apt-get update -y
-            $(command -v sudo) apt-get install -y rake ruby-dev zip git
+            $(command -v sudo) apt-get install -y rake ruby-dev zip git zsh
         elif [ "${PLATFORM_FAMILY}" = "rhel" ] ; then
             [ "${PLATFORM_VERSION}" -lt 8 ] && PACKAGE_MANAGER=yum
             [ "${PLATFORM_VERSION}" -gt 7 ] && PACKAGE_MANAGER=dnf
