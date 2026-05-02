@@ -100,7 +100,7 @@ if [ ! -d "$HOME/.yadr" ]; then
         fi
     fi
 
-    # until rake is in the path loop and wait
+    # # until rake is in the path loop and wait
     # until [ -n "$(command -v rake)" ] ; do
     #     echo "Waiting '5' seconds for rake to be in the path..."
     #     sleep 5
