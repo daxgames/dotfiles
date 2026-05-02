@@ -9,11 +9,6 @@ if [ ! -d "$HOME/.yadr" ]; then
     git_repo="${__YADR_REPO_URL:-https://github.com/daxgames/dotfiles.git}"
     git_branch="${__YADR_REPO_BRANCH:-main}"
 
-    if [ -n "${__YADR_DEBUG}" ] ; then
-      git_repo=$(git ls-remote --get-url 2>/dev/null)
-      git_branch=$(git branch --show-current)
-    fi
-
     OS=$(uname)
     if [[ "${OS}" =~ (MSYS) ]] || [[ "${OS}" =~ (MINGW) ]]; then
         PLATFORM=windows
@@ -23,9 +18,9 @@ if [ ! -d "$HOME/.yadr" ]; then
     elif [ "${OS}" = "Linux" ] ; then
         if [ -f /etc/os-release ] ; then
             echo "Determining Linux OS using '/etc/os-release'..."
-            PLATFORM=$(grep -i "^id= /etc/os-release" | cut -d = -f2 | sed 's/\"//g')
-            PLATFORM_FAMILY=$(grep -i "^id_like= /etc/os-release" | cut -d = -f2 | sed 's/\"//g')
-            PLATFORM_VERSION=$(grep -i "^version_id= /etc/os-release" | cut -d = -f2 | sed 's/\"//g')
+            PLATFORM=$(grep -i "^id= /etc/os-release" | cut -d = -f2 | sed 's/"//g')
+            PLATFORM_FAMILY=$(grep -i "^id_like= /etc/os-release" | cut -d = -f2 | sed 's/"//g')
+            PLATFORM_VERSION=$(grep -i "^version_id= /etc/os-release" | cut -d = -f2 | sed 's/"//g')
 
             [ "${PLATFORM}" = "arch" ] && PLATFORM_FAMILY=arch
             [ "${PLATFORM}" = "centos" ] && PLATFORM_FAMILY=rhel
@@ -41,6 +36,11 @@ if [ ! -d "$HOME/.yadr" ]; then
 
     elif [ "${OS}" = "Darwin" ] ; then
         PLATFORM_FAMILY="$(echo "${PLATFORM}" | tr  '[:upper:]' '[:lower:]')"
+    fi
+
+    if [ -n "${__YADR_DEBUG}" ] ; then
+      git_repo=$(git ls-remote --get-url 2>/dev/null)
+      git_branch=$(git branch --show-current)
     fi
 
     [ -n "${__YADR_DEBUG}" ] && env | grep "__YADR_"
