@@ -66,17 +66,17 @@ if [ ! -d "$HOME/.yadr" ]; then
             echo "Running '${__YADR_INSTALLER_WINDWS_PRE}'..."
             powershell -NoProfile -NoLogo -Command "& {Start-Process -FilePath powershell -argumentlist '-f ${__YADR_INSTALLER_WINDWS_PRE}' -Wait}"
         elif [ "${PLATFORM_FAMILY}" = "arch" ] ; then
-            $(command -v sudo) pacman -Syu
-            $(command -v sudo) pacman -S ruby-rake zip
+            # $(command -v sudo) pacman -Syu
+            $(command -v sudo) pacman -S ruby-rake zip git --noconfirm
         elif [ "${PLATFORM_FAMILY}" = "debian" ]; then
-            $(command -v sudo) apt-get update -y
-            $(command -v sudo) apt-get install -y rake ruby-dev zip
+            # $(command -v sudo) apt-get update -y
+            $(command -v sudo) apt-get install -y rake ruby-dev zip git
         elif [ "${PLATFORM_FAMILY}" = "rhel" ] ; then
             [ "${PLATFORM_VERSION}" -lt 8 ] && PACKAGE_MANAGER=yum
             [ "${PLATFORM_VERSION}" -gt 7 ] && PACKAGE_MANAGER=dnf
-            $(command -v sudo) "${PACKAGE_MANAGER}" update -y
+            # $(command -v sudo) "${PACKAGE_MANAGER}" update -y
             $(command -v sudo) "${PACKAGE_MANAGER}" groups install -y "Development Tools"
-            $(command -v sudo) "${PACKAGE_MANAGER}" install -y ruby-devel rubygem-rake zip
+            $(command -v sudo) "${PACKAGE_MANAGER}" install -y ruby-devel rubygem-rake zip git
         fi
     fi
 
@@ -107,6 +107,7 @@ if [ ! -d "$HOME/.yadr" ]; then
             export $var="$(reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v $var | grep REG_SZ | awk '{print $3}')"
         done
     done
+
     rake install
 else
     echo "YADR is already installed"
