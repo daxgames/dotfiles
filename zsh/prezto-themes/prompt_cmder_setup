@@ -53,7 +53,7 @@ function prompt_cmder_setup {
   if [[ -n "$2" ]]; then
     prefix_color="$2"
   else
-    prefix_color='cyan'
+    prefix_color='102' # Gray
   fi
 
   if [[ -n "$3" ]]; then
