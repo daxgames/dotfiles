@@ -42,7 +42,7 @@ function prompt_cmder_setup {
 
   # Set the theme prefix to a cloud or to the user's given characters.
   if [[ -n "$1" ]]; then
-    prefix="$1"
+    prefix="$1 "
   else
     # prefix='☁' Cloud
     # prefix='λ' Cmder Lambda prefix_color '102' recommended.
@@ -57,11 +57,16 @@ function prompt_cmder_setup {
   fi
 
   if [[ -n "$3" ]]; then
-    vcs_color="$3"
+    folder_color="$3"
+  else
+    folder_color='cyan'
+  fi
+
+  if [[ -n "$4" ]]; then
+    vcs_color="$4"
   else
     vcs_color='yellow'
   fi
-
   # Load required functions.
   autoload -Uz add-zsh-hook
 
@@ -86,7 +91,7 @@ function prompt_cmder_setup {
   zstyle ':prezto:module:ruby:info:version' format '%F{blue}[%v]%f'
 
   # Define prompts.
-  PROMPT='%F{$prefix_color}${prefix}%f %c/ %F{$vcs_color}${repo_name}${git_info[prompt]}${editor_info[keymap]}%f'
+  PROMPT='%F{$prefix_color}${prefix}%f%F{$folder_color}%c/%f %F{$vcs_color}${repo_name}${git_info[prompt]}${editor_info[keymap]}%f'
   RPROMPT='${ruby_info[version]}'
 }
 
