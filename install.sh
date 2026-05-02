@@ -7,7 +7,7 @@ if [ ! -d "$HOME/.yadr" ]; then
     echo "Installing daxgames's YADR for the first time"
 
     OS=$(uname)
-    if [[ "${OS}" =~ (MSYS) ]] || [[ "${OS}" =~ (MINGW) ]] ; then
+    if [ "${OS}" =~ (MSYS) ] || [ "${OS}" =~ (MINGW) ] ; then
         PLATFORM=windows
         PLATFORM_FAMILY=windows
         export PLATFORM PLATFORM_FAMILY
