@@ -39,7 +39,7 @@ if [ ! -d "$HOME/.yadr" ]; then
         PLATFORM_FAMILY="$(echo "${PLATFORM}" | tr  '[:upper:]' '[:lower:]')"
     fi
 
-    if [ -z "$(command -v rake)" ] ; then
+    if [ -z "$(command -v rake)" ] || [ -z "$(command -v zip)" ] | | [ -z "$(command -v git)" ] ; then
         echo "Installing YADR Pre-Reqs in '${PLATFORM_FAMILY}'..."
         if [ "${PLATFORM_FAMILY}" = "windows" ] ; then
             if [ ! -f "${__YADR_SCRIPT_DIR}/bin/install-windows-pre.ps1" ]; then
@@ -81,7 +81,6 @@ if [ ! -d "$HOME/.yadr" ]; then
     cd "$HOME/.yadr" || exit 1
     [ "$1" = "ask" ] && export ASK="true"
 
-
     # Enable vim/nvim persistent undo
     if [[ -d "$HOME/.vim" ]]; then
         mkdir -p "$HOME/.vim/backups" > /dev/null 2>&1
@@ -102,14 +101,15 @@ if [ ! -d "$HOME/.yadr" ]; then
     fi
 
     # until rake is in the path loop and wait
-    until [ -n "$(command -v rake)" ] ; do
+    # until [ -n "$(command -v rake)" ] ; do
         echo "Waiting '5' seconds for rake to be in the path..."
         sleep 5
         for var in $(reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /s | grep REG_SZ | awk '{print $1}' | sed 's/\\//g'); do
             export $var="$(reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v $var | grep REG_SZ | awk '{print $3}')"
         done
-    done
+    # done
 
+    cd "$HOME/.yadr" || exit 1
     rake install
 else
     echo "YADR is already installed"
