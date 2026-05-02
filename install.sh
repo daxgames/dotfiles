@@ -102,11 +102,11 @@ if [ ! -d "$HOME/.yadr" ]; then
 
     # until rake is in the path loop and wait
     # until [ -n "$(command -v rake)" ] ; do
-        echo "Waiting '5' seconds for rake to be in the path..."
-        sleep 5
-        for var in $(reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /s | grep REG_SZ | awk '{print $1}' | sed 's/\\//g'); do
-            export $var="$(reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v $var | grep REG_SZ | awk '{print $3}')"
-        done
+    #     echo "Waiting '5' seconds for rake to be in the path..."
+    #     sleep 5
+    #     for var in $(reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /s | grep REG_SZ | awk '{print $1}' | sed 's/\\//g'); do
+    #         export $var="$(reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v $var | grep REG_SZ | awk '{print $3}')"
+    #     done
     # done
 
     cd "$HOME/.yadr" || exit 1
