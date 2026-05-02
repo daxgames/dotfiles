@@ -30,7 +30,9 @@ task :install => [:submodule_init, :submodules] do
       puts 'No Homebrew install found!'
       case $linux['PLATFORM_FAMILY']
       when 'arch'
-        run %(sudo pacman -S --noconfirm bat \
+        run %(sudo pacman -S --noconfirm base-devel \
+          bat \
+          git-delta \
           fzf \
           git \
           github-cli \
@@ -82,17 +84,17 @@ task :install => [:submodule_init, :submodules] do
 
       install_zsh if want_to_install?('zsh (shell, enhancements))')
 
-      install_from_github('bat',
-                          'https://github.com/sharkdp/bat/releases/download/v0.24.0/bat-v0.24.0-i686-unknown-linux-musl.tar.gz')
-      install_from_github('fzf',
-                          'https://github.com/junegunn/fzf/releases/download/v0.54.1/fzf-0.54.1-linux_amd64.tar.gz',
-                          false)
-      install_from_github('nvim',
-                          'https://github.com/neovim/neovim-releases/releases/download/v0.11.4/nvim-linux-x86_64.tar.gz')
-      install_from_github('rg',
-                          'https://github.com/BurntSushi/ripgrep/releases/download/14.1.0/ripgrep-14.1.0-x86_64-unknown-linux-musl.tar.gz')
-      install_from_github('delta',
-                          'https://github.com/dandavison/delta/releases/download/0.15.0/delta-0.15.0-x86_64-unknown-linux-musl.tar.gz')
+      # install_from_github('bat',
+      #                     'https://github.com/sharkdp/bat/releases/download/v0.24.0/bat-v0.24.0-i686-unknown-linux-musl.tar.gz')
+      # install_from_github('fzf',
+      #                     'https://github.com/junegunn/fzf/releases/download/v0.54.1/fzf-0.54.1-linux_amd64.tar.gz',
+      #                     false)
+      # install_from_github('nvim',
+      #                     'https://github.com/neovim/neovim-releases/releases/download/v0.11.4/nvim-linux-x86_64.tar.gz')
+      # install_from_github('rg',
+      #                     'https://github.com/BurntSushi/ripgrep/releases/download/14.1.0/ripgrep-14.1.0-x86_64-unknown-linux-musl.tar.gz')
+      # install_from_github('delta',
+      #                     'https://github.com/dandavison/delta/releases/download/0.15.0/delta-0.15.0-x86_64-unknown-linux-musl.tar.gz')
     # end
   end
 
@@ -347,6 +349,7 @@ def linux_variant
       case key.downcase
       when 'id'
         linux_platform['PLATFORM'] = value
+        linux_platform['PLATFORM_FAMILY'] = value
       when 'id_like'
         linux_platform['PLATFORM_FAMILY'] = value
       when 'version_id'
