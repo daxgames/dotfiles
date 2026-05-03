@@ -29,8 +29,7 @@ task :install => [:submodule_init, :submodules] do
       puts 'No Homebrew install found!'
       case $linux['PLATFORM_FAMILY']
       when 'arch'
-        run %(sudo pacman -S --noconfirm base-devel \
-          bat \
+        run %(sudo pacman -S --noconfirm bat \
           git-delta \
           fzf \
           git \
@@ -44,6 +43,7 @@ task :install => [:submodule_init, :submodules] do
           shellcheck \
           vim
         )
+        run %(sudo pacman -S --noconfirm base-devel)
         run %{[[ -n "$(command -v rustup)" ]] && rustup default stable}
       when 'debian'
         run %(sudo apt-get update -y)
