@@ -37,6 +37,7 @@ task :install => [:submodule_init, :submodules] do
           neovim \
           python3 \
           python-neovim \
+          python-pip \
           ripgrep \
           rubocop \
           rustup \
@@ -420,6 +421,9 @@ def install_rvm_binstubs
   puts 'bundle exec again! Please use bundle --binstubs and RVM'
   puts 'will automatically use those bins after changing into dir.'
   puts '======================================================'
+  # run %{gpg --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB}
+  # run %{curl -sSL https://get.rvm.io | bash -s stable}
+  # run %{ source ~/.rvm/scripts/rvm && type rvm | head -1}
   run %{ chmod +x $rvm_path/hooks/after_cd_bundler }
   puts
 end
