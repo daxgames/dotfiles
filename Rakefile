@@ -100,7 +100,22 @@ task :install => [:submodule_init, :submodules] do
 
   install_python_modules
 
-  install_rvm_binstubs
+  # If rbenv is installed, we assume the user has their ruby version manager of choice and skip installing rvm since it can be a bit invasive.
+  # If rbenv is not installed, we install rvm.
+  # If rvm is already installed, this will do nothing. If rvm is not installed, it will be installed as the default ruby version manager.
+  if !executable_on_path?('rbenv') && !executable_on_path?('rvm')
+    puts "======================================================"
+    puts "Rbenv not found. RVM will be installed as your Ruby version manager."
+    puts "======================================================"
+
+    if want_to_install?('rvm (ruby version manager)')
+      install_rvm
+    end
+
+    # RVM's binstubs are a great way to speed up bundler execution and avoid having to type bundle exec all the time.
+    # If rbenv is installed, we skip this since rbenv has shims that accomplish the same thing.
+    install_rvm_binstubs
+  end
 
   # this has all the runcoms from this directory.
   install_files(Dir.glob('git/*')) if want_to_install?('git configs (color, aliases)')
@@ -415,16 +430,23 @@ def run_bundle_config
   puts
 end
 
+def install_rvm
+  unless executable_on_path?('rvm')
+    run %{gpg --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB}
+    run %{curl -sSL https://get.rvm.io | bash -s stable}
+    run %{ source ~/.rvm/scripts/rvm && type rvm | head -1}
+  end
+end
+
 def install_rvm_binstubs
   puts '======================================================'
   puts 'Installing RVM Bundler support. Never have to type'
   puts 'bundle exec again! Please use bundle --binstubs and RVM'
   puts 'will automatically use those bins after changing into dir.'
   puts '======================================================'
-  # run %{gpg --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB}
-  # run %{curl -sSL https://get.rvm.io | bash -s stable}
-  # run %{ source ~/.rvm/scripts/rvm && type rvm | head -1}
-  run %{ chmod +x $rvm_path/hooks/after_cd_bundler }
+  unless executable_on_path?('rvm')
+    run %{ chmod +x $rvm_path/hooks/after_cd_bundler }
+  end
   puts
 end
 
