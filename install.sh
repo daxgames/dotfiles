@@ -63,6 +63,7 @@ if [ ! -d "$HOME/.yadr" ]; then
 
     git_repo="${__YADR_REPO_URL:-https://github.com/daxgames/dotfiles.git}"
     git_branch="${__YADR_REPO_BRANCH:-main}"
+
     if [ -n "${__YADR_DEBUG}" ] ; then
       git_repo=$(git ls-remote --get-url 2>/dev/null)
       git_branch=$(git branch --show-current)

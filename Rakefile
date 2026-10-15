@@ -767,9 +767,16 @@ def install_files(files, method = :symlink)
     puts "Source: #{source}"
     puts "Target: #{target}"
 
+    backup_ext = "backup"
     if File.exist?(target) && (!File.symlink?(target) || (File.symlink?(target) && File.readlink(target) != source))
-      puts "[Overwriting] #{target}...leaving original at #{target}.backup..."
-      run %{ mv "$HOME/.#{file}" "$HOME/.#{file}.backup" }
+      if (target =~/\/\.gitconfig$/ || target =~/\/\.tmux.conf$/) && !File.exist?(target + ".user")
+        backup_ext = "user"
+      elsif (target =~/\/\.vimrc$/) && !File.exist?(target + ".after")
+        backup_ext = "after"
+      end
+
+      puts "[Overwriting] #{target}...leaving original at #{target}.#{backup_ext}..."
+      run %{ mv "$HOME/.#{file}" "$HOME/.#{file}.#{backup_ext}" }
     end
 
     if method == :symlink
