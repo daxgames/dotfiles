@@ -67,6 +67,7 @@ function prompt_cmder_setup {
   else
     vcs_color='yellow'
   fi
+
   # Load required functions.
   autoload -Uz add-zsh-hook
 

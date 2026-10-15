@@ -1,3 +1,84 @@
+## 2026-05-03 — Present
+
+### Installation & Platform Support
+- **Arch Linux**: Added `base-devel` (separate install), `python-pip`, and `pacman`-based pre-requisite handling (`bin/install_pacman.sh`)
+- **Windows**: Added `bin/install-windows-pre.ps1` pre-install PowerShell script; removed `install.cmd`
+- **Debian/Ubuntu**: Multiple `install.sh` cleanup passes for Ubuntu/Debian compatibility
+- **Homebrew**: Added `Brewfile` with full tool list; support for `~/Applications` on macOS; Python venv creation when Homebrew is used; fallback to native Linux package manager when Homebrew is absent
+- **`install.sh`**: Major overhaul — added update path, Brew/non-Brew detection via `uname`, CI/smoke test infra (`test/` directory), self-update support
+- **Travis CI**: Added `.travis.yml` and `test/travis-*.sh` scripts for CI smoke testing
+
+### Neovim (`nvim/`)
+- Full Neovim config added as a first-class citizen alongside Vim:
+  - `nvim/init.vim`, `nvim/lua/settings/` Lua config modules
+  - Plugin configs: `neotree`, `nvterm`, `telescope`, `treesitter`, `nvim-completions`, `lsp-config`
+  - Switched from `coc.nvim` to native LSP (`nvim-lsp-config`); `coc-settings.json` retained but `plugin-coc.vim` marked `.unused`
+  - Added `gitgutter` plugin
+  - Added `NvChad/nvterm` terminal plugin
+  - Added `nvim/settings/` mirror of all vim settings for Neovim: keymaps, appearance, windows, wrapping, search, quickfix, tags, etc.
+  - Treesitter: pinned to `master` branch; parser fixes (2024-01-12, 2025-12-16)
+  - `nvim/dict/javascript.dict` — JavaScript word dictionary for completions
+  - `.luarc.json` added for Lua LSP
+
+### Vim (`vim/`)
+- Added `NERDtree.vim` settings (tree on right side)
+- Added `surround.vim`, `splitjoin.vim`, `vim-gotofile.vim`, `vim-sudo-write.vim` settings
+- Removed `syntastic.vim`; Syntastic fully removed
+- `yadr-appearance.vim`: OneHalfDark colorscheme support
+- `yadr-keymap.vim` / `yadr-keymap-linux.vim`: Various keymap cleanups and additions
+- `vundles/appearance.vundle`, `extras.vundle`: Added new plugins including `onehalf` colorscheme, NERDtree, gitgutter, etc.
+- `vimrc`: Minor updates; disabled `vim→mvim` alias
+- Removed `gruvbox` colorscheme; added `onehalf` dark/light
+
+### iTerm2
+- Added full iTerm2 profile: `com.googlecode.iterm2.plist`, `OneHalfDark/Light.itermcolors`, `bootstrap-iterm2.sh`, `xterm-256color.terminfo`
+- iTerm2 settings moved to `~/.yadr.user/iTerm2`
+- Fixed window/tab styles; window type set to 15
+
+### ZSH / Prezto
+- **New prompt themes**: `prompt_cmder_setup` (two-line Cmder-style), `prompt_lfilho_setup`, `prompt_kylewestcustom_setup`
+- **Default prompt**: Changed to `daxgames` custom prompt with **git worktree awareness**
+- `zpreztorc`: Significant updates to module list and options
+- New ZSH modules: `fzf.zsh`, `git.zsh`, `kubectl.zsh`, `mcfly.zsh`, `nvm.zsh`, `cargo.zsh`, `sdkman.zsh`, `vagrant.zsh`, `secrets.zsh`, `key-bindings.zsh`
+- `aliases.zsh`: Added `kubectl` and git aliases; `fzf` aliases with preview
+- `0_path.zsh`: `pathDeDup` function; `~/bin` prepended at end of path setup
+- `zsh-aliases.zsh`: Cleanup; `cat → bat` alias
+- `zzzz_after.zsh` / `0000_before.zsh`: Sourcing order fixes
+
+### Bash
+- `bash/002_path.sh`: New path setup module
+- `bash/cargo.sh`, `bash/sdkman.sh`: New shell integrations
+- `bash/vi-mode`: Added vi-mode config (replacing `vi-mode.sh`)
+- `bash/000_before.sh` / `bash/zzzz_after.sh`: Sourcing/ordering fixes
+
+### Git
+- `gitconfig`: Added `delta` as pager with OneHalfDark theme; credential helper made OS-aware; new aliases
+- Added `git/README.md`, `git/gitattributes`
+- `zsh/git.zsh` / `zsh/kubectl.zsh`: Extensive new git and kubectl aliases
+
+### Tmux
+- `tmux.conf`: Major rewrite — added TPM (Tmux Plugin Manager), new keybindings, status bar improvements
+- Added `tmux/README.md`
+
+### Ranger
+- Full Ranger file manager config added: `rc.conf`, `rifle.conf`, `scope.sh`, `commands.py`, `commands_full.py`
+- Ranger devicons plugin added (`ranger/plugins/devicons*.py`)
+
+### Fonts
+- Added **FiraCode Nerd Font** variants (Bold, Light, Medium, Regular, Retina `.otf`)
+- Added `base16-lfilho.dark.sh` base16 color scheme
+
+### Miscellaneous
+- `bin/vimplug.rb`: Auto vim-plug installer
+- `bin/yadr-extras-install` / `yadr-extras-install_linux`: Extras install scripts
+- `bin/yadr-set-branch.sh` → `bin/yadr/yadr-set-branch.sh` (moved)
+- `bin/fix-cedilla-in-linux.sh`: New utility
+- `bin/macos`: macOS system defaults script expanded
+- Removed Chrome extension (`chrome/`)
+- `doc/screenshot-iterm-onehalfdark.png`: New screenshot
+- `README.md`: Complete rewrite with updated screenshots and feature list
+
+
 2024-01-15
 ==================
 * `yadr-uninstall` script
