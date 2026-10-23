@@ -48,7 +48,7 @@ local this_file = debug.getinfo(1, 'S').source:sub(2)
 ---------------------------------------------------------------------------
 
 local GIT_READ_ONLY = {
-  status = true, diff = true, log = true, show = true, fetch = true,
+  status = true, diff = true, difftool = true, log = true, show = true, fetch = true,
   blame = true, ['rev-parse'] = true, ['ls-files'] = true, shortlog = true,
   describe = true, grep = true, add = true,
 }
