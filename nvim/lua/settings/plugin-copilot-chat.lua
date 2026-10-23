@@ -182,7 +182,10 @@ end
 
 local function display_argv(argv)
   return table.concat(vim.tbl_map(function(a)
-    return a:match('[%s\'"]') and vim.fn.shellescape(a) or a
+    if a:match('[%s\'"]') then
+      return "'" .. a:gsub("'", [['\'']]) .. "'"
+    end
+    return a
   end, argv), ' ')
 end
 
