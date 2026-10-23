@@ -4,6 +4,11 @@ require 'fileutils'
 require File.join(File.dirname(__FILE__), 'bin', 'yadr', 'vundle')
 require File.join(File.dirname(__FILE__), 'bin', 'yadr', 'vimplug')
 
+# Shared installation configuration (replaces global variables).
+CONFIG = {
+  linux: nil
+}
+
 desc 'Hook our dotfiles into system-standard positions.'
 task :install => [:submodule_init, :submodules] do
   puts
@@ -12,14 +17,14 @@ task :install => [:submodule_init, :submodules] do
   puts '======================================================'
   puts
 
-  $linux = linux_variant if linux?
+  CONFIG[:linux] = linux_variant if linux?
 
   run %( mkdir -p $HOME/bin ) unless File.exist?("#{ENV['HOME']}/bin")
 
   ENV['PATH'] = "#{File.join(ENV['HOME'], 'bin')}:#{ENV['PATH']}"
   install_homebrew if macos?
 
-  puts $linux
+  puts CONFIG[:linux]
   sleep 5
 
   if linux?
@@ -27,7 +32,7 @@ task :install => [:submodule_init, :submodules] do
       install_homebrew
     else
       puts 'No Homebrew install found!'
-      case $linux['PLATFORM_FAMILY']
+      case CONFIG[:linux]['PLATFORM_FAMILY']
       when 'arch'
         run %(sudo pacman -S --noconfirm bat \
           git-delta \
@@ -65,11 +70,13 @@ task :install => [:submodule_init, :submodules] do
         )
         run %(sudo ln -sf /bin/batcat /bin/bat)
       when 'rhel', 'fedora'
-        run %{ sudo #{$linux['PACKAGE_MANAGER']} update -y}
-        run %{ sudo #{$linux['PACKAGE_MANAGER']} groups install -y "Development Tools"}
-        run %{ sudo #{$linux['PACKAGE_MANAGER']} install -y bat \
+        run %{ sudo #{CONFIG[:linux]['PACKAGE_MANAGER']} update -y}
+        run %{ sudo #{CONFIG[:linux]['PACKAGE_MANAGER']} groups install -y "Development Tools"}
+        run %{ sudo #{CONFIG[:linux]['PACKAGE_MANAGER']} install -y bat \
+          cargo \
           fzf \
           gh \
+          lynx \
           neovim \
           python3 \
           ripgrep \
@@ -145,7 +152,7 @@ task :install => [:submodule_init, :submodules] do
   if want_to_install?('vim configuration (highly recommended)')
     run %{ ln -nfs "$HOME/.yadr/nvim" "$HOME/.config/nvim" }
 
-    if macos? || (linux? && $linux['PLATFORM_FAMILY'] != 'debian')
+    if macos? || (linux? && CONFIG[:linux]['PLATFORM_FAMILY'] != 'debian')
       unless executable_on_path?('sdk')
         run %{curl -s "https://get.sdkman.io" | bash}
       end
@@ -298,6 +305,11 @@ end
 task :default => 'install'
 
 private
+
+def hasSudo?
+  # Check if the user has sudo privileges with or without a password prompt
+  system("sudo -n true 2>/dev/null") || system("sudo -v 2>/dev/null")
+end
 
 def linux?
   RUBY_PLATFORM.downcase.include?('linux')
@@ -456,10 +468,10 @@ def install_zsh
     puts "Installing Zsh...If it's already installed, this will do nothing."
     puts "======================================================"
 
-    if $linux['PLATFORM_FAMILY'] == "arch"
+    if CONFIG[:linux]['PLATFORM_FAMILY'] == "arch"
         run %{sudo pacman -S --noconfirm zsh}
     else
-      run %{ sudo #{$linux['PACKAGE_MANAGER']} install -y zsh }
+      run %{ sudo #{CONFIG[:linux]['PACKAGE_MANAGER']} install -y zsh }
     end
   end
 end
