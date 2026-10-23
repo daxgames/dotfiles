@@ -111,6 +111,8 @@ The prompt shows the question (with answer guidance) and offers Approve / Reject
 
 Every exchange is logged as JSONL to `<history_path>/ask_user.log` (browse with <kbd>,</kbd><kbd>a</kbd><kbd>A</kbd>).
 
+Reload the chat config after editing it with `:CopilotChatReloadConfig` — it re-sources the Lua file and re-runs `setup()`, so changes take effect without restarting Neovim.
+
 ## Vim Dev
 
  * <kbd>,</kbd><kbd>v</kbd><kbd>c</kbd> - (Vim Command) copies the command under your cursor and executes it in vim. Great for testing single line changes to vimrc.
