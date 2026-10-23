@@ -92,9 +92,24 @@ Accurate token counting uses `tiktoken_core`. It is installed automatically by t
  * <kbd>,</kbd><kbd>a</kbd><kbd>e</kbd>, <kbd>f</kbd>, <kbd>r</kbd>, <kbd>o</kbd>, <kbd>d</kbd>, <kbd>t</kbd>, <kbd>c</kbd> - Explain, Fix, Review, Optimize, Docs, Tests, Commit (normal or visual)
  * <kbd>,</kbd><kbd>a</kbd><kbd>g</kbd> - chat with the GitAssistant prompt and `git_exec` tool
  * <kbd>,</kbd><kbd>a</kbd><kbd>A</kbd> - browse the `ask_user` question log
- * In the chat: <kbd>Enter</kbd> inserts a newline (write multi-line prompts), press <kbd>Esc</kbd> then <kbd>Enter</kbd> in normal mode to submit, <kbd>Ctrl</kbd>-<kbd>c</kbd> stops a running request (otherwise closes), <kbd>,</kbd><kbd>a</kbd><kbd>s</kbd> stops and sends extra guidance, <kbd>,</kbd><kbd>a</kbd><kbd>v</kbd> shows tool calls in full, <kbd>Ctrl</kbd>-<kbd>y</kbd> / <kbd>g</kbd><kbd>R</kbd> accepts / rejects a diff
+ * In chat insert mode:
+   * <kbd>Tab</kbd> accepts the Copilot inline suggestion.
+   * <kbd>Enter</kbd> inserts a newline (write multi-line prompts).
+   * <kbd>Esc</kbd> then <kbd>Enter</kbd> in normal mode to submit.
+   * <kbd>Ctrl</kbd>-<kbd>c</kbd> stops a running request (otherwise closes).
+   * <kbd>,</kbd><kbd>a</kbd><kbd>s</kbd> stops and sends extra guidance.
+   * <kbd>,</kbd><kbd>a</kbd><kbd>v</kbd> shows tool calls in full.
+   * <kbd>Ctrl</kbd>-<kbd>y</kbd> / <kbd>g</kbd><kbd>R</kbd> accepts / rejects a diff.
 
-When Copilot needs a decision it calls the trusted `ask_user` tool: a prompt shows the question (with any answer guidance) and offers Approve / Reject / Dismiss. Approving lets you type an answer; rejecting lets you give feedback on why. Every exchange is logged as JSONL to `<history_path>/ask_user.log` (browse with <kbd>,</kbd><kbd>a</kbd><kbd>A</kbd>).
+When Copilot needs a decision it calls the trusted `ask_user` tool.
+
+The prompt shows the question (with answer guidance) and offers Approve / Reject / Suggest.
+
+- Approve proceeds without asking for a separate answer.
+- Reject declines without asking for one.
+- Suggest prompts for a single answer with the suggested changes.
+
+Every exchange is logged as JSONL to `<history_path>/ask_user.log` (browse with <kbd>,</kbd><kbd>a</kbd><kbd>A</kbd>).
 
 ## Vim Dev
 
