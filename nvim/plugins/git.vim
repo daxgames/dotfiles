@@ -3,4 +3,4 @@ Plug 'tpope/vim-fugitive' " Git commands and workflow for vim
 Plug 'tpope/vim-git' " syntax, indent, and filetype plugin files for git related buffers
 Plug 'airblade/vim-gitgutter' " A Vim plugin which shows a git diff in the gutter (sign column) and stages/undoes hunks.
 Plug 'github/copilot.vim'
-Plug 'CopilotC-Nvim/CopilotChat.nvim'
+Plug 'CopilotC-Nvim/CopilotChat.nvim', { 'branch': 'main', 'do': 'make tiktoken' } " Copilot Chat (needs plenary.nvim, see neovim.vim)
