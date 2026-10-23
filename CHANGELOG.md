@@ -5,6 +5,8 @@
 - Enabled accurate token counting: pinned `CopilotChat.nvim` to `main` and added the `make tiktoken` post-update hook in `nvim/plugins/git.vim`.
 - Added `render-markdown.nvim` (`nvim/plugins/neovim.vim`) to render the `copilot-chat` and `copilot-tool-view` filetypes.
 - Documented the Copilot Chat keymaps, `ask_user` workflow, personal overrides (`~/.copilotchat.user.lua`) and `tiktoken_core` setup in `nvim/README.md`.
+- Added `:CopilotChatReloadConfig` to re-source the config and re-run `setup()` without restarting Neovim.
+- Trusted the `git_exec` tool (it still prompts internally for destructive verbs) and let `git difftool` run without prompting.
 
 ### Documentation
 - Added `.github/copilot-instructions.md` and `AGENTS.md` describing the repository layout, user-plugin workflow and CopilotChat design/maintenance notes for AI coding agents.
