@@ -79,6 +79,23 @@ If you think something could benefit everybody, feel free to open a Pull Request
  * <kbd>Cmd</kbd>-<kbd>/</kbd> - toggle comments (usually gcc from tComment) (`Alt` in Linux)
  * <kbd>g</kbd><kbd>c</kbd><kbd>p</kbd> (comment a paragraph)
 
+## Copilot Chat
+
+Configured in `lua/settings/plugin-copilot-chat.lua` to behave like VS Code Copilot Chat. Override settings such as the model or window width in `~/.copilotchat.user.lua`, which works like `~/.gitconfig.user`. See [`../.github/copilot-instructions.md`](../.github/copilot-instructions.md) and [`../AGENTS.md`](../AGENTS.md) for details and maintenance notes.
+
+Accurate token counting uses `tiktoken_core`. It is installed automatically by the plugin's `make tiktoken` post-update hook (declared via `'do'` in `plugins/git.vim`), which downloads the prebuilt binary for your OS/arch into the plugin's `build/` directory on `PlugInstall`/`PlugUpdate`. Requires `make` and `curl`. Verify with `:checkhealth CopilotChat` (`tiktoken_core: installed`).
+
+ * <kbd>,</kbd><kbd>a</kbd><kbd>a</kbd> - toggle the chat sidebar
+ * <kbd>,</kbd><kbd>a</kbd><kbd>i</kbd> - inline edit of the selection or buffer (like Cmd-I)
+ * <kbd>,</kbd><kbd>a</kbd><kbd>q</kbd> - quick chat in a float
+ * <kbd>,</kbd><kbd>a</kbd><kbd>m</kbd> / <kbd>,</kbd><kbd>a</kbd><kbd>p</kbd> / <kbd>,</kbd><kbd>a</kbd><kbd>h</kbd> - pick model / prompt / chat history
+ * <kbd>,</kbd><kbd>a</kbd><kbd>e</kbd>, <kbd>f</kbd>, <kbd>r</kbd>, <kbd>o</kbd>, <kbd>d</kbd>, <kbd>t</kbd>, <kbd>c</kbd> - Explain, Fix, Review, Optimize, Docs, Tests, Commit (normal or visual)
+ * <kbd>,</kbd><kbd>a</kbd><kbd>g</kbd> - chat with the GitAssistant prompt and `git_exec` tool
+ * <kbd>,</kbd><kbd>a</kbd><kbd>A</kbd> - browse the `ask_user` question log
+ * In the chat: <kbd>Enter</kbd> inserts a newline (write multi-line prompts), press <kbd>Esc</kbd> then <kbd>Enter</kbd> in normal mode to submit, <kbd>Ctrl</kbd>-<kbd>c</kbd> stops a running request (otherwise closes), <kbd>,</kbd><kbd>a</kbd><kbd>s</kbd> stops and sends extra guidance, <kbd>,</kbd><kbd>a</kbd><kbd>v</kbd> shows tool calls in full, <kbd>Ctrl</kbd>-<kbd>y</kbd> / <kbd>g</kbd><kbd>R</kbd> accepts / rejects a diff
+
+When Copilot needs a decision it calls the trusted `ask_user` tool: a prompt shows the question (with any answer guidance) and offers Approve / Reject / Dismiss. Approving lets you type an answer; rejecting lets you give feedback on why. Every exchange is logged as JSONL to `<history_path>/ask_user.log` (browse with <kbd>,</kbd><kbd>a</kbd><kbd>A</kbd>).
+
 ## Vim Dev
 
  * <kbd>,</kbd><kbd>v</kbd><kbd>c</kbd> - (Vim Command) copies the command under your cursor and executes it in vim. Great for testing single line changes to vimrc.
