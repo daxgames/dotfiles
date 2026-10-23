@@ -21,7 +21,9 @@
 --   <leader>ae/af/ar/ao/ad/at/ac   Explain/Fix/Review/Optimize/Docs/Tests/Commit (n/v)
 --   <leader>ag             open chat with the GitAssistant system prompt
 -- Inside the chat buffer:
---   <CR> (insert)          newline; <Esc> then <CR> (normal) submits the prompt
+--   <Tab> (insert)         accept the Copilot inline suggestion (copilot.vim)
+--   <CR> (insert)          newline (accept cmp popup if open)
+--   <Esc> then <CR> (n)    submit the prompt (the current buffer contents)
 --   <C-c>                  stop the running request, otherwise close
 --   <leader>as             stop and steer (send extra guidance)
 --   <leader>av             view tool calls in a scrollable markdown float
@@ -534,9 +536,10 @@ end
 ---------------------------------------------------------------------------
 -- ask_user: trusted tool that relays a question from Copilot to the user
 ---------------------------------------------------------------------------
--- Copilot calls this when it needs clarification. The user approves and
--- answers, or rejects with feedback. Every exchange is appended to a JSONL
--- log under <history_path>/ask_user.log for later reference.
+-- Copilot calls this when it needs clarification. The user can Approve (go
+-- ahead, no answer needed), Reject (do not do it, no answer needed), or
+-- Suggest (provide a single answer with suggested changes). Every exchange is
+-- appended to a JSONL log under <history_path>/ask_user.log for later reference.
 
 local function ask_user_log_path()
   return history_dir() .. '/ask_user.log'
@@ -570,39 +573,32 @@ local function safe_ask_user(input, _source)
   if guidance ~= '' then
     prompt = prompt .. '\n\nGuidance on how to answer:\n\n  ' .. guidance:gsub('\n', '\n  ')
   end
-  prompt = prompt .. '\n\nApprove and answer, or reject with feedback?'
+  prompt = prompt
+    .. '\n\nApprove (proceed), Reject (do not proceed), or Suggest (answer with changes)?'
+    .. '\n(Suggest then prompts for one line: type your answer and press <Enter> to submit, <Esc> to cancel.)'
 
   local timestamp = os.date('%Y-%m-%dT%H:%M:%S')
-  local pick = vim.fn.confirm(prompt, '&Approve\n&Reject\n&Dismiss', 1, 'Question')
+  local pick = vim.fn.confirm(prompt, '&Approve\n&Reject\n&Suggest', 1, 'Question')
 
-  if pick == 0 or pick == 3 then
-    log_ask_user({ time = timestamp, question = question, guidance = guidance, approved = false, response = '', note = 'dismissed' })
-    return ask_user_result('dismissed', 'Dismissed by user: no answer was provided.')
+  -- Approve: proceed, no separate answer requested.
+  if pick == 1 then
+    log_ask_user({ time = timestamp, question = question, guidance = guidance, approved = true, response = '', note = 'approved' })
+    return ask_user_result('approved/' .. tostring(vim.uv.hrtime()), 'User approved: proceed.')
   end
 
-  local approved = pick == 1
-  local label = approved and 'Your answer: ' or 'Why are you rejecting this question? '
-  local reply = vim.trim(vim.fn.input({ prompt = label, cancelreturn = '' }) or '')
-
-  log_ask_user({
-    time = timestamp,
-    question = question,
-    guidance = guidance,
-    approved = approved,
-    response = reply,
-    note = approved and 'approved' or 'rejected',
-  })
-
-  if approved then
-    if reply == '' then
-      return ask_user_result('approved/empty', 'Approved, but the user did not provide an answer.')
-    end
-    return ask_user_result('approved/' .. tostring(vim.uv.hrtime()), 'User answer: ' .. reply)
+  -- Reject (or cancel/Esc): do not proceed, no separate answer requested.
+  if pick == 0 or pick == 2 then
+    log_ask_user({ time = timestamp, question = question, guidance = guidance, approved = false, response = '', note = 'rejected' })
+    return ask_user_result('rejected/' .. tostring(vim.uv.hrtime()), 'User rejected: do not proceed.')
   end
 
-  local feedback = reply ~= '' and reply or '(no reason given)'
-  return ask_user_result('rejected/' .. tostring(vim.uv.hrtime()),
-    'User rejected the question. Feedback: ' .. feedback)
+  -- Suggest: ask for a single answer with the suggested changes.
+  local reply = vim.trim(vim.fn.input({ prompt = 'Your suggestion (<Enter> submit, <Esc> cancel): ', cancelreturn = '' }) or '')
+  log_ask_user({ time = timestamp, question = question, guidance = guidance, approved = true, response = reply, note = 'suggested' })
+  if reply == '' then
+    return ask_user_result('suggested/empty', 'User chose Suggest but did not provide any changes.')
+  end
+  return ask_user_result('suggested/' .. tostring(vim.uv.hrtime()), 'User suggestion: ' .. reply)
 end
 
 local function pick_ask_user_log()
@@ -810,8 +806,9 @@ local opts = {
       resolve = safe_git_exec,
     },
     ask_user = {
-      description = 'Ask the user a clarifying question and wait for their answer. The user approves and answers, '
-        .. 'or rejects with feedback. Use this when you need a decision or missing information before continuing.',
+      description = 'Ask the user a clarifying question and wait for their decision. The user can Approve (proceed), '
+        .. 'Reject (do not proceed), or Suggest (proceed with the changes they provide). Use this when you need a '
+        .. 'decision or missing information before continuing.',
       trusted = true,
       schema = {
         type = 'object',
