@@ -36,9 +36,9 @@ The configuration lives in `nvim/lua/settings/plugin-copilot-chat.lua`, loaded b
 - **Layout:** `window` gives a narrow right-hand vertical sidebar (`width = 0.3`). `auto_insert_mode` and `insert_at_end` put the cursor in the prompt.
 - **Model:** `model` (change with `,am` at runtime).
 - **Context:** `resources = { 'selection', 'buffer:active' }`. Repository instructions come from the plugin's default `instruction_files` (`.github/copilot-instructions.md`, `AGENTS.md`) in the current working directory.
-- **Tools:** `tools = { 'copilot', 'git_exec', 'ask_user' }`. `trusted_tools` lists read-only tools that run without approval. `edit`, `bash` and other tools still ask. Never set `trusted_tools = true`.
+- **Tools:** `tools = { 'copilot', 'git_exec', 'ask_user' }`. `trusted_tools` lists tools that run without approval (`git_exec`, `file`, `glob`, `grep`, `gitdiff`, `ask_user`); `git_exec` still prompts internally for destructive verbs. `edit`, `bash` and other tools still ask. Never set `trusted_tools = true`.
 - **`git_exec`:** a custom trusted tool. It classifies each git command into three tiers:
-  - `GIT_READ_ONLY` and read-only forms of `branch`/`tag`/`remote`/`stash` run immediately.
+  - `GIT_READ_ONLY` (including `difftool`) and read-only forms of `branch`/`tag`/`remote`/`stash` run immediately.
   - `GIT_PROMPT` verbs (commit, checkout, push, reset, rebase, ...) show a `confirm()` prompt.
   - Everything else is denied, including force pushes, `--upload-pack`/`--exec`/`--output` options, `rebase -x`, and unknown verbs.
 
@@ -48,6 +48,7 @@ The configuration lives in `nvim/lua/settings/plugin-copilot-chat.lua`, loaded b
 - **History:** every response is autosaved as JSON under `history_path`. `,ah` browses and resumes sessions. `ask_user` logs to `<history_path>/ask_user.log` (`,aA` to browse).
 - **Markdown:** `render-markdown.nvim` renders the `copilot-chat` and `copilot-tool-view` filetypes.
 - **Keymaps:** they use the `,a` prefix (`,c*` is taken by existing mappings). The header comment of the Lua file lists them all. VS Code chords (`<C-M-i>`, `<D-i>`, `<C-S-M-l>`) are mapped too, but most terminals cannot send them. In the chat prompt (insert mode), `<Tab>` accepts the Copilot inline suggestion (from `copilot.vim`) and `<CR>` inserts a newline (or accepts the nvim-cmp popup if open); press `<Esc>` then `<CR>` in normal mode to submit the prompt.
+- **Reload:** `:CopilotChatReloadConfig` re-sources the Lua file (via a load-time absolute path so `dofile` does not read stdin) and re-runs `setup()` to apply edits without restarting Neovim. Autocmds and keymaps re-register idempotently.
 
 Plugin defaults are in `~/.local/share/nvim/site/plugged/CopilotChat.nvim/lua/CopilotChat/config.lua` and `config/{mappings,functions,prompts}.lua`. Only override what differs from the defaults.
 
