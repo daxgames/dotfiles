@@ -1,3 +1,15 @@
+## Unreleased — CopilotChat optimization
+
+### Neovim (`nvim/`)
+- Added a VS Code-like CopilotChat.nvim configuration (`nvim/lua/settings/plugin-copilot-chat.lua`, loaded by `nvim/settings/plugin-copilot-chat.vim`): right-hand sidebar layout, auto-insert prompt, model/prompt/history pickers, `git_exec` and `ask_user` trusted tools, readable tool-call rendering, and history autosave under the `,a` keymap prefix.
+- Enabled accurate token counting: pinned `CopilotChat.nvim` to `main` and added the `make tiktoken` post-update hook in `nvim/plugins/git.vim`.
+- Added `render-markdown.nvim` (`nvim/plugins/neovim.vim`) to render the `copilot-chat` and `copilot-tool-view` filetypes.
+- Documented the Copilot Chat keymaps, `ask_user` workflow, personal overrides (`~/.copilotchat.user.lua`) and `tiktoken_core` setup in `nvim/README.md`.
+
+### Documentation
+- Added `.github/copilot-instructions.md` and `AGENTS.md` describing the repository layout, user-plugin workflow and CopilotChat design/maintenance notes for AI coding agents.
+
+
 ## 2026-05-03 — Present
 
 ### Installation & Platform Support
