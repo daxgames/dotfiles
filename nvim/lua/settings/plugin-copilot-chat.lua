@@ -38,6 +38,11 @@ local utils = require('CopilotChat.utils')
 local constants = require('CopilotChat.constants')
 local default_mappings = require('CopilotChat.config.mappings')
 
+-- Absolute path to this file, captured at load time so CopilotChatReloadConfig
+-- can re-source it. Without this, dofile(nil) reads from stdin and fails with
+-- "cannot read stdin: Resource temporarily unavailable".
+local this_file = debug.getinfo(1, 'S').source:sub(2)
+
 ---------------------------------------------------------------------------
 -- git_exec: trusted git tool that prompts for destructive commands
 ---------------------------------------------------------------------------
@@ -760,7 +765,7 @@ local opts = {
   model = 'claude-opus-4.8',
   tools = { 'copilot', 'git_exec', 'ask_user' },
   -- edit/bash/url/etc. from the "copilot" group still require approval.
-  trusted_tools = { 'file', 'glob', 'grep', 'gitdiff', 'ask_user' },
+  trusted_tools = { 'git_exec', 'file', 'glob', 'grep', 'gitdiff', 'ask_user' },
   -- Like VS Code: include the selection and the active editor as context.
   resources = { 'selection', 'buffer:active' },
   auto_insert_mode = true,
@@ -991,3 +996,20 @@ if ok_rm then
     },
   })
 end
+
+---------------------------------------------------------------------------
+-- Reload command
+---------------------------------------------------------------------------
+-- Re-source this file to pick up edits without restarting Neovim. setup()
+-- merges the rebuilt options (including functions.git_exec.resolve) into the
+-- live config, so tool changes take effect immediately. Autocmds and keymaps
+-- are re-registered idempotently (the augroup is cleared and the render hook
+-- is guarded), so re-running is safe.
+vim.api.nvim_create_user_command('CopilotChatReloadConfig', function()
+  local ok, err = pcall(dofile, this_file)
+  if ok then
+    vim.notify('CopilotChat: config reloaded', vim.log.levels.INFO)
+  else
+    vim.notify('CopilotChat: reload failed: ' .. tostring(err), vim.log.levels.ERROR)
+  end
+end, { desc = 'Reload the CopilotChat configuration without restarting' })
